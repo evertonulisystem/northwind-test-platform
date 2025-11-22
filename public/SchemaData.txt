@@ -1,0 +1,526 @@
+-- ============================================
+-- SCHEMA SIMPLIFICADO: E-commerce QA Platform
+-- Apenas tabelas e relacionamentos básicos
+-- SEM triggers, functions ou procedures
+-- ============================================
+
+-- Extensões necessárias
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+CREATE EXTENSION IF NOT EXISTS "pgcrypto";
+
+-- ============================================
+-- TABELA 1: users
+-- ============================================
+CREATE TABLE users (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  email VARCHAR(255) UNIQUE NOT NULL,
+  password_hash VARCHAR(255) NOT NULL,
+  full_name VARCHAR(255) NOT NULL,
+  birth_date DATE,
+  phone VARCHAR(20),
+  cpf VARCHAR(14) UNIQUE,
+  gender VARCHAR(20),
+  is_active BOOLEAN DEFAULT true,
+  role VARCHAR(20) DEFAULT 'customer' CHECK (role IN ('customer', 'admin')),
+  access_code VARCHAR(50),
+  last_login TIMESTAMP WITH TIME ZONE,
+  email_verified BOOLEAN DEFAULT false,
+  avatar_url VARCHAR(500),
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+CREATE INDEX idx_users_email ON users(email);
+CREATE INDEX idx_users_cpf ON users(cpf);
+
+-- ============================================
+-- TABELA 2: employees
+-- ============================================
+CREATE TABLE employees (
+  id SERIAL PRIMARY KEY,
+  user_id UUID REFERENCES users(id) ON DELETE CASCADE,
+  employee_code VARCHAR(20) UNIQUE NOT NULL,
+  department VARCHAR(100),
+  position VARCHAR(100),
+  salary DECIMAL(10, 2),
+  hire_date DATE NOT NULL,
+  reports_to INTEGER REFERENCES employees(id),
+  is_active BOOLEAN DEFAULT true,
+  notes TEXT,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+CREATE INDEX idx_employees_user ON employees(user_id);
+
+-- ============================================
+-- TABELA 3: addresses
+-- ============================================
+CREATE TABLE addresses (
+  id SERIAL PRIMARY KEY,
+  user_id UUID REFERENCES users(id) ON DELETE CASCADE,
+  address_type VARCHAR(20) DEFAULT 'shipping' CHECK (address_type IN ('shipping', 'billing', 'both')),
+  label VARCHAR(100),
+  street TEXT NOT NULL,
+  number VARCHAR(20),
+  complement VARCHAR(100),
+  neighborhood VARCHAR(100),
+  city VARCHAR(100) NOT NULL,
+  state VARCHAR(2) NOT NULL,
+  zip_code VARCHAR(10) NOT NULL,
+  country VARCHAR(100) DEFAULT 'Brazil',
+  is_default BOOLEAN DEFAULT false,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+CREATE INDEX idx_addresses_user ON addresses(user_id);
+
+-- ============================================
+-- TABELA 4: categories (SEM parent_id)
+-- ============================================
+CREATE TABLE categories (
+  id SERIAL PRIMARY KEY,
+  name VARCHAR(100) NOT NULL,
+  slug VARCHAR(100) UNIQUE NOT NULL,
+  description TEXT,
+  image_url VARCHAR(500),
+  icon VARCHAR(50),
+  display_order INTEGER DEFAULT 0,
+  is_active BOOLEAN DEFAULT true,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+CREATE INDEX idx_categories_slug ON categories(slug);
+
+-- ============================================
+-- TABELA 5: suppliers
+-- ============================================
+CREATE TABLE suppliers (
+  id SERIAL PRIMARY KEY,
+  company_name VARCHAR(255) NOT NULL,
+  contact_name VARCHAR(255),
+  contact_title VARCHAR(100),
+  email VARCHAR(255),
+  phone VARCHAR(20),
+  cnpj VARCHAR(18) UNIQUE,
+  street TEXT,
+  city VARCHAR(100),
+  state VARCHAR(2),
+  zip_code VARCHAR(10),
+  country VARCHAR(100) DEFAULT 'Brazil',
+  website VARCHAR(500),
+  rating DECIMAL(3, 2) DEFAULT 0,
+  is_active BOOLEAN DEFAULT true,
+  notes TEXT,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+CREATE INDEX idx_suppliers_cnpj ON suppliers(cnpj);
+
+-- ============================================
+-- TABELA 6: products
+-- ============================================
+CREATE TABLE products (
+  id SERIAL PRIMARY KEY,
+  category_id INTEGER REFERENCES categories(id) ON DELETE SET NULL,
+  supplier_id INTEGER REFERENCES suppliers(id) ON DELETE SET NULL,
+  name VARCHAR(255) NOT NULL,
+  slug VARCHAR(255) UNIQUE NOT NULL,
+  description TEXT,
+  short_description VARCHAR(500),
+  price DECIMAL(10, 2) NOT NULL CHECK (price >= 0),
+  cost_price DECIMAL(10, 2),
+  stock_quantity INTEGER DEFAULT 0 CHECK (stock_quantity >= 0),
+  reorder_level INTEGER DEFAULT 10,
+  image_url VARCHAR(500),
+  sku VARCHAR(50) UNIQUE NOT NULL,
+  barcode VARCHAR(50),
+  weight DECIMAL(10, 3),
+  is_active BOOLEAN DEFAULT true,
+  is_featured BOOLEAN DEFAULT false,
+  discount_percentage DECIMAL(5, 2) DEFAULT 0 CHECK (discount_percentage BETWEEN 0 AND 100),
+  rating DECIMAL(3, 2) DEFAULT 0 CHECK (rating BETWEEN 0 AND 5),
+  reviews_count INTEGER DEFAULT 0,
+  views_count INTEGER DEFAULT 0,
+  sales_count INTEGER DEFAULT 0,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+CREATE INDEX idx_products_category ON products(category_id);
+CREATE INDEX idx_products_supplier ON products(supplier_id);
+CREATE INDEX idx_products_sku ON products(sku);
+CREATE INDEX idx_products_slug ON products(slug);
+
+-- ============================================
+-- TABELA 7: shippers
+-- ============================================
+CREATE TABLE shippers (
+  id SERIAL PRIMARY KEY,
+  company_name VARCHAR(255) NOT NULL,
+  phone VARCHAR(20),
+  email VARCHAR(255),
+  website VARCHAR(500),
+  delivery_time_days INTEGER,
+  tracking_url VARCHAR(500),
+  is_active BOOLEAN DEFAULT true,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- ============================================
+-- TABELA 8: coupons
+-- ============================================
+CREATE TABLE coupons (
+  id SERIAL PRIMARY KEY,
+  code VARCHAR(50) UNIQUE NOT NULL,
+  description TEXT,
+  discount_type VARCHAR(20) CHECK (discount_type IN ('percentage', 'fixed')),
+  discount_value DECIMAL(10, 2) NOT NULL,
+  min_purchase_amount DECIMAL(10, 2),
+  max_discount_amount DECIMAL(10, 2),
+  usage_limit INTEGER,
+  used_count INTEGER DEFAULT 0,
+  valid_from TIMESTAMP WITH TIME ZONE,
+  valid_until TIMESTAMP WITH TIME ZONE,
+  is_active BOOLEAN DEFAULT true,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+CREATE INDEX idx_coupons_code ON coupons(code);
+
+-- ============================================
+-- TABELA 9: orders
+-- ============================================
+CREATE TABLE orders (
+  id SERIAL PRIMARY KEY,
+  user_id UUID REFERENCES users(id) ON DELETE CASCADE,
+  order_number VARCHAR(50) UNIQUE NOT NULL,
+  status VARCHAR(20) DEFAULT 'pending' CHECK (status IN ('pending', 'confirmed', 'processing', 'shipped', 'delivered', 'cancelled', 'refunded')),
+  subtotal DECIMAL(10, 2) NOT NULL,
+  discount_amount DECIMAL(10, 2) DEFAULT 0,
+  shipping_cost DECIMAL(10, 2) DEFAULT 0,
+  tax_amount DECIMAL(10, 2) DEFAULT 0,
+  total_amount DECIMAL(10, 2) NOT NULL,
+  coupon_id INTEGER REFERENCES coupons(id),
+  shipper_id INTEGER REFERENCES shippers(id),
+  shipping_address_id INTEGER REFERENCES addresses(id),
+  billing_address_id INTEGER REFERENCES addresses(id),
+  tracking_number VARCHAR(100),
+  estimated_delivery DATE,
+  delivered_at TIMESTAMP WITH TIME ZONE,
+  notes TEXT,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+CREATE INDEX idx_orders_user ON orders(user_id);
+CREATE INDEX idx_orders_status ON orders(status);
+CREATE INDEX idx_orders_number ON orders(order_number);
+
+-- ============================================
+-- TABELA 10: order_items
+-- ============================================
+CREATE TABLE order_items (
+  id SERIAL PRIMARY KEY,
+  order_id INTEGER REFERENCES orders(id) ON DELETE CASCADE,
+  product_id INTEGER REFERENCES products(id) ON DELETE CASCADE,
+  quantity INTEGER NOT NULL CHECK (quantity > 0),
+  unit_price DECIMAL(10, 2) NOT NULL,
+  discount DECIMAL(10, 2) DEFAULT 0,
+  subtotal DECIMAL(10, 2) NOT NULL,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+CREATE INDEX idx_order_items_order ON order_items(order_id);
+CREATE INDEX idx_order_items_product ON order_items(product_id);
+
+-- ============================================
+-- TABELA 11: order_history
+-- ============================================
+CREATE TABLE order_history (
+  id SERIAL PRIMARY KEY,
+  order_id INTEGER REFERENCES orders(id) ON DELETE CASCADE,
+  status VARCHAR(20) NOT NULL,
+  notes TEXT,
+  changed_by UUID REFERENCES users(id),
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+CREATE INDEX idx_order_history_order ON order_history(order_id);
+
+-- ============================================
+-- TABELA 12: payments
+-- ============================================
+CREATE TABLE payments (
+  id SERIAL PRIMARY KEY,
+  order_id INTEGER REFERENCES orders(id) ON DELETE CASCADE,
+  payment_method VARCHAR(50) NOT NULL CHECK (payment_method IN ('credit_card', 'debit_card', 'pix', 'boleto', 'paypal')),
+  payment_status VARCHAR(20) DEFAULT 'pending' CHECK (payment_status IN ('pending', 'processing', 'paid', 'failed', 'refunded', 'cancelled')),
+  amount DECIMAL(10, 2) NOT NULL,
+  transaction_id VARCHAR(255),
+  payment_date TIMESTAMP WITH TIME ZONE,
+  card_last_digits VARCHAR(4),
+  installments INTEGER DEFAULT 1,
+  notes TEXT,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+CREATE INDEX idx_payments_order ON payments(order_id);
+
+-- ============================================
+-- TABELA 13: reviews
+-- ============================================
+CREATE TABLE reviews (
+  id SERIAL PRIMARY KEY,
+  product_id INTEGER REFERENCES products(id) ON DELETE CASCADE,
+  user_id UUID REFERENCES users(id) ON DELETE CASCADE,
+  order_id INTEGER REFERENCES orders(id) ON DELETE SET NULL,
+  rating INTEGER NOT NULL CHECK (rating BETWEEN 1 AND 5),
+  title VARCHAR(255),
+  comment TEXT,
+  is_verified_purchase BOOLEAN DEFAULT false,
+  is_approved BOOLEAN DEFAULT false,
+  helpful_count INTEGER DEFAULT 0,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+CREATE INDEX idx_reviews_product ON reviews(product_id);
+CREATE INDEX idx_reviews_user ON reviews(user_id);
+
+-- ============================================
+-- TABELA 14: wishlists
+-- ============================================
+CREATE TABLE wishlists (
+  id SERIAL PRIMARY KEY,
+  user_id UUID REFERENCES users(id) ON DELETE CASCADE,
+  product_id INTEGER REFERENCES products(id) ON DELETE CASCADE,
+  notes TEXT,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  UNIQUE(user_id, product_id)
+);
+
+CREATE INDEX idx_wishlists_user ON wishlists(user_id);
+
+-- ============================================
+-- TABELA 15: cart_items
+-- ============================================
+CREATE TABLE cart_items (
+  id SERIAL PRIMARY KEY,
+  user_id UUID REFERENCES users(id) ON DELETE CASCADE,
+  product_id INTEGER REFERENCES products(id) ON DELETE CASCADE,
+  quantity INTEGER NOT NULL CHECK (quantity > 0),
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  UNIQUE(user_id, product_id)
+);
+
+CREATE INDEX idx_cart_items_user ON cart_items(user_id);
+CREATE INDEX idx_cart_items_product ON cart_items(product_id);
+
+
+---------- RODE ESTE DEPOIS
+-- ============================================
+-- SEED DATA SIMPLIFICADO - 3 registros cada
+-- ============================================
+
+-- ============================================
+-- 1. CATEGORIES
+-- ============================================
+INSERT INTO categories (name, slug, description, icon, display_order) VALUES
+('Eletrônicos', 'eletronicos', 'Smartphones e notebooks', 'laptop', 1),
+('Livros', 'livros', 'Literatura e técnicos', 'menu_book', 2),
+('Roupas', 'roupas', 'Moda em geral', 'checkroom', 3);
+
+-- ============================================
+-- 2. SUPPLIERS
+-- ============================================
+INSERT INTO suppliers (company_name, contact_name, email, phone, city, state, rating) VALUES
+('TechSupply Brasil', 'João Silva', 'joao@techsupply.com.br', '(11) 3456-7890', 'São Paulo', 'SP', 4.8),
+('Livros & Cia', 'Maria Santos', 'maria@livros.com.br', '(21) 2345-6789', 'Rio de Janeiro', 'RJ', 4.5),
+('Fashion Import', 'Carlos Mendes', 'carlos@fashion.com', '(11) 4567-8901', 'São Paulo', 'SP', 4.7);
+
+-- ============================================
+-- 3. PRODUCTS
+-- ============================================
+INSERT INTO products (category_id, supplier_id, name, slug, description, price, stock_quantity, sku, rating) VALUES
+(1, 1, 'Smartphone Galaxy X', 'smartphone-galaxy-x', 'Tela AMOLED 6.5", 128GB', 2499.00, 50, 'PHONE-001', 4.5),
+(1, 1, 'Notebook Pro 15"', 'notebook-pro-15', 'Intel i7, 16GB RAM, SSD 512GB', 4999.00, 25, 'NOTE-001', 4.8),
+(2, 2, 'Clean Code', 'clean-code', 'Livro sobre código limpo', 89.90, 200, 'BOOK-001', 4.9);
+
+-- ============================================
+-- 4. SHIPPERS
+-- ============================================
+INSERT INTO shippers (company_name, phone, delivery_time_days) VALUES
+('Correios', '0800-570-0100', 7),
+('Jadlog', '0800-0256-527', 5),
+('Total Express', '0800-0800-744', 4);
+
+-- ============================================
+-- 5. COUPONS
+-- ============================================
+INSERT INTO coupons (code, description, discount_type, discount_value, min_purchase_amount, valid_from, valid_until) VALUES
+('BEMVINDO10', '10% desconto', 'percentage', 10.00, 100.00, NOW(), NOW() + INTERVAL '60 days'),
+('FRETEGRATIS', 'Frete grátis', 'fixed', 0.00, 300.00, NOW(), NOW() + INTERVAL '90 days'),
+('BLACK25', '25% OFF', 'percentage', 25.00, 150.00, NOW(), NOW() + INTERVAL '30 days');
+
+-- ============================================
+-- 6. USERS (senha: Teste@123)
+-- ============================================
+INSERT INTO users (email, password_hash, full_name, phone, role, access_code, email_verified) VALUES
+('admin@qatest.com', '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'Admin QA', '(11) 98765-4321', 'admin', 'QATEST2025', true),
+('joao.silva@email.com', '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'João Silva', '(11) 99876-5432', 'customer', 'QATEST2025', true),
+('maria.santos@email.com', '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'Maria Santos', '(21) 98765-4321', 'customer', 'QATEST2025', true);
+
+-- ============================================
+-- 7. ADDRESSES
+-- ============================================
+INSERT INTO addresses (user_id, address_type, street, number, city, state, zip_code, is_default)
+SELECT id, 'both', 'Rua das Flores', '123', 'São Paulo', 'SP', '01310-100', true
+FROM users WHERE email = 'joao.silva@email.com';
+
+INSERT INTO addresses (user_id, address_type, street, number, city, state, zip_code, is_default)
+SELECT id, 'both', 'Rua Copacabana', '567', 'Rio de Janeiro', 'RJ', '22020-010', true
+FROM users WHERE email = 'maria.santos@email.com';
+
+INSERT INTO addresses (user_id, address_type, street, number, city, state, zip_code, is_default)
+SELECT id, 'both', 'Av Paulista', '1000', 'São Paulo', 'SP', '01310-200', true
+FROM users WHERE email = 'admin@qatest.com';
+
+-- ============================================
+-- 8. ORDERS
+-- ============================================
+INSERT INTO orders (user_id, order_number, status, subtotal, shipping_cost, total_amount, shipper_id, shipping_address_id, billing_address_id, created_at)
+SELECT 
+  u.id, 
+  'ORD-20241120-000001', 
+  'delivered', 
+  2499.00, 
+  0.00, 
+  2499.00, 
+  1,
+  a.id,
+  a.id,
+  NOW() - INTERVAL '10 days'
+FROM users u
+JOIN addresses a ON a.user_id = u.id
+WHERE u.email = 'joao.silva@email.com' AND a.is_default = true;
+
+INSERT INTO orders (user_id, order_number, status, subtotal, shipping_cost, total_amount, shipper_id, shipping_address_id, billing_address_id, created_at)
+SELECT 
+  u.id, 
+  'ORD-20241119-000002', 
+  'shipped', 
+  4999.00, 
+  50.00, 
+  5049.00, 
+  2,
+  a.id,
+  a.id,
+  NOW() - INTERVAL '3 days'
+FROM users u
+JOIN addresses a ON a.user_id = u.id
+WHERE u.email = 'maria.santos@email.com' AND a.is_default = true;
+
+INSERT INTO orders (user_id, order_number, status, subtotal, shipping_cost, total_amount, shipper_id, shipping_address_id, billing_address_id, created_at)
+SELECT 
+  u.id, 
+  'ORD-20241118-000003', 
+  'pending', 
+  89.90, 
+  15.00, 
+  104.90, 
+  1,
+  a.id,
+  a.id,
+  NOW() - INTERVAL '1 day'
+FROM users u
+JOIN addresses a ON a.user_id = u.id
+WHERE u.email = 'admin@qatest.com' AND a.is_default = true;
+
+-- ============================================
+-- 9. ORDER_ITEMS
+-- ============================================
+INSERT INTO order_items (order_id, product_id, quantity, unit_price, discount, subtotal)
+SELECT o.id, 1, 1, 2499.00, 0.00, 2499.00
+FROM orders o
+JOIN users u ON u.id = o.user_id
+WHERE u.email = 'joao.silva@email.com';
+
+INSERT INTO order_items (order_id, product_id, quantity, unit_price, discount, subtotal)
+SELECT o.id, 2, 1, 4999.00, 0.00, 4999.00
+FROM orders o
+JOIN users u ON u.id = o.user_id
+WHERE u.email = 'maria.santos@email.com';
+
+INSERT INTO order_items (order_id, product_id, quantity, unit_price, discount, subtotal)
+SELECT o.id, 3, 1, 89.90, 0.00, 89.90
+FROM orders o
+JOIN users u ON u.id = o.user_id
+WHERE u.email = 'admin@qatest.com';
+
+-- ============================================
+-- 10. PAYMENTS
+-- ============================================
+INSERT INTO payments (order_id, payment_method, payment_status, amount, transaction_id, payment_date, installments)
+SELECT o.id, 'credit_card', 'paid', 2499.00, 'TXN-001', NOW() - INTERVAL '10 days', 3
+FROM orders o
+JOIN users u ON u.id = o.user_id
+WHERE u.email = 'joao.silva@email.com';
+
+INSERT INTO payments (order_id, payment_method, payment_status, amount, transaction_id, payment_date, installments)
+SELECT o.id, 'pix', 'paid', 5049.00, 'PIX-002', NOW() - INTERVAL '3 days', 1
+FROM orders o
+JOIN users u ON u.id = o.user_id
+WHERE u.email = 'maria.santos@email.com';
+
+INSERT INTO payments (order_id, payment_method, payment_status, amount)
+SELECT o.id, 'boleto', 'pending', 104.90
+FROM orders o
+JOIN users u ON u.id = o.user_id
+WHERE u.email = 'admin@qatest.com';
+
+-- ============================================
+-- 11. REVIEWS
+-- ============================================
+INSERT INTO reviews (product_id, user_id, rating, title, comment, is_approved, helpful_count)
+SELECT 1, id, 5, 'Excelente!', 'Produto top, super recomendo!', true, 45
+FROM users WHERE email = 'joao.silva@email.com';
+
+INSERT INTO reviews (product_id, user_id, rating, title, comment, is_approved, helpful_count)
+SELECT 2, id, 5, 'Perfeito', 'Notebook incrível para trabalhar.', true, 23
+FROM users WHERE email = 'maria.santos@email.com';
+
+INSERT INTO reviews (product_id, user_id, rating, title, comment, is_approved, helpful_count)
+SELECT 3, id, 5, 'Leitura obrigatória', 'Todo dev deveria ler!', true, 67
+FROM users WHERE email = 'admin@qatest.com';
+
+-- ============================================
+-- 12. WISHLISTS
+-- ============================================
+INSERT INTO wishlists (user_id, product_id, notes)
+SELECT id, 2, 'Quero comprar próximo mês'
+FROM users WHERE email = 'joao.silva@email.com';
+
+INSERT INTO wishlists (user_id, product_id)
+SELECT id, 1
+FROM users WHERE email = 'maria.santos@email.com';
+
+INSERT INTO wishlists (user_id, product_id)
+SELECT id, 3
+FROM users WHERE email = 'admin@qatest.com';
+
+-- ============================================
+-- 13. CART_ITEMS
+-- ============================================
+INSERT INTO cart_items (user_id, product_id, quantity)
+SELECT id, 1, 1
+FROM users WHERE email = 'joao.silva@email.com';
+
+INSERT INTO cart_items (user_id, product_id, quantity)
+SELECT id, 3, 2
+FROM users WHERE email = 'maria.santos@email.com';
+
+-- ============================================
+-- ESTATÍSTICAS
+-- ============================================
+SELECT 'DADOS INSERIDOS COM SUCESSO!' as status;
+SELECT COUNT(*) as categorias FROM categories;
+SELECT COUNT(*) as produtos FROM products;
+SELECT COUNT(*) as usuarios FROM users;
+SELECT COUNT(*) as pedidos FROM orders;
