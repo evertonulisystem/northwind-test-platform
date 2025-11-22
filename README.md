@@ -37,3 +37,9 @@ Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/bui
 
 # northwind-test-platform
 Plataforma de testes para automação QA com Northwind Database - Next.js + PostgreSQL
+
+
+5️⃣ Instala dependências do Supabase:
+bashnpm install @supabase/supabase-js
+npm install bcryptjs jsonwebtoken
+npm install -D @types/bcryptjs @types/jsonwebtoken
