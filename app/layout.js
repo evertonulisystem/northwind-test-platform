@@ -1,3 +1,5 @@
+import './globals.css';
+
 export const metadata = {
   title: 'QA Automation Shop',
   description: 'Plataforma de testes para automação QA',
