@@ -2,6 +2,8 @@ import { supabase } from '@/lib/supabase';
 import { generateToken } from '@/lib/jwt';
 import bcrypt from 'bcryptjs';
 
+export const dynamic = "force-dynamic";
+
 export async function POST(request) {
   try {
     const body = await request.json();
