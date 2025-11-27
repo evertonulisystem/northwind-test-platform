@@ -1,15 +1,17 @@
 // app/api/categories/route.js
 import { supabase } from '@/lib/supabase';
-
-export const dynamic = "force-dynamic";
+import { NextResponse } from 'next/server';
 
 export async function GET() {
-  const { data: categories, error } = await supabase
-    .from('categories')
-    .select('id, name, description')
-    .order('name');
+  try {
+    const { data, error } = await supabase
+      .from('categories')
+      .select('id, name')
+      .order('name');
 
-  if (error) return Response.json({ error: error.message }, { status: 500 });
-
-  return Response.json({ categories });
+    if (error) throw error;
+    return NextResponse.json({ categories: data }, { status: 200 });
+  } catch (error) {
+    return NextResponse.json({ error: 'Erro ao buscar categorias' }, { status: 500 });
+  }
 }
