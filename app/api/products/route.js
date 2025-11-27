@@ -1,55 +1,66 @@
+// app/api/products/route.js
 import { supabase } from '@/lib/supabase';
-export const dynamic = "force-dynamic";
+import { NextResponse } from 'next/server';
 
-export async function GET(request) {
+// GET → Listar todos
+export async function GET() {
   try {
-    const { searchParams } = new URL(request.url);
-    const category_id = searchParams.get('category_id');
-    const search = searchParams.get('search');
-    const limit = parseInt(searchParams.get('limit')) || 20;
-    const offset = parseInt(searchParams.get('offset')) || 0;
-
-    let query = supabase
+    const { data: products, error } = await supabase
       .from('products')
       .select(`
-        *,
-        categories (id, name, slug),
-        suppliers (id, company_name)
+        id, name, price, stock_quantity, sku, image_url, created_at,
+        category_id, supplier_id,
+        categories (name), suppliers (company_name)
       `)
-      .eq('is_active', true)
-      .order('created_at', { ascending: false })
-      .range(offset, offset + limit - 1);
+      .order('id');
 
-    if (category_id) {
-      query = query.eq('category_id', category_id);
-    }
+    if (error) throw error;
 
-    if (search) {
-      query = query.ilike('name', `%${search}%`);
-    }
+    return NextResponse.json({ products }, { status: 200 });
+  } catch (error) {
+    console.error('GET Error:', error);
+    return NextResponse.json({ error: 'Erro ao buscar' }, { status: 500 });
+  }
+}
 
-    const { data: products, error, count } = await query;
+// POST → Adicionar novoexport async function POST(request) {
+  export async function POST(request) {
+  try {
+    const data = await request.json();
 
-    if (error) {
-      console.error('Erro ao buscar produtos:', error);
-      return Response.json(
-        { error: 'Erro ao buscar produtos' },
-        { status: 500 }
+    // Validação
+    if (!data.name || !data.price || !data.stock_quantity) {
+      return NextResponse.json(
+        { error: 'Nome, preço e estoque são obrigatórios' },
+        { status: 400 }
       );
     }
 
-    return Response.json({
-      products,
-      total: count,
-      limit,
-      offset
-    });
+    // GERAR SLUG AUTOMATICAMENTE
+    const slug = data.name
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/(^-|-$)/g, '');
 
+    const { error } = await supabase
+      .from('products')
+      .insert({
+        name: data.name,
+        slug: slug,
+        price: parseFloat(data.price),
+        stock_quantity: parseInt(data.stock_quantity, 10),
+        sku: data.sku || null,
+        category_id: data.category_id || 1,
+        supplier_id: data.supplier_id || 1,
+        created_at: new Date().toISOString(),
+      });
+
+    if (error) throw error;
+
+    return NextResponse.json({ success: true }, { status: 201 });
   } catch (error) {
-    console.error('Erro:', error);
-    return Response.json(
-      { error: 'Erro interno do servidor' },
-      { status: 500 }
-    );
+    console.error('POST Error:', error);
+    return NextResponse.json({ error: 'Erro ao criar produto' }, { status: 500 });
   }
 }
+
