@@ -1,28 +1,18 @@
+// app/api/auth/register/route.js
 import { supabase } from '@/lib/supabase';
-import { generateToken } from '@/lib/jwt';
 import bcrypt from 'bcryptjs';
+import { generateToken } from '@/lib/jwt';
+
 export const dynamic = "force-dynamic";
 
 export async function POST(request) {
   try {
     const body = await request.json();
-    const { email, password, full_name, phone, birth_date, access_code } = body;
+    const { full_name, email, password, phone, address, birth_date } = body;
 
-    // Validações básicas
-    if (!email || !password || !full_name || !access_code) {
-      return Response.json(
-        { error: 'Email, senha, nome completo e código de acesso são obrigatórios' },
-        { status: 400 }
-      );
-    }
-
-    // Verifica código de acesso
-    const validAccessCode = process.env.ACCESS_CODE || 'QATEST2025';
-    if (access_code !== validAccessCode) {
-      return Response.json(
-        { error: 'Código de acesso inválido' },
-        { status: 403 }
-      );
+    // Validação
+    if (!full_name || !email || !password) {
+      return Response.json({ error: 'Nome, email e senha obrigatórios' }, { status: 400 });
     }
 
     // Verifica se email já existe
@@ -30,13 +20,10 @@ export async function POST(request) {
       .from('users')
       .select('id')
       .eq('email', email)
-      .single();
+      .maybeSingle();
 
     if (existingUser) {
-      return Response.json(
-        { error: 'Email já cadastrado' },
-        { status: 409 }
-      );
+      return Response.json({ error: 'Email já cadastrado' }, { status: 409 });
     }
 
     // Hash da senha
@@ -46,46 +33,40 @@ export async function POST(request) {
     const { data: user, error } = await supabase
       .from('users')
       .insert({
+        full_name,
         email,
         password_hash,
-        full_name,
-        phone,
-        birth_date,
-        access_code,
-        role: 'customer',
-        email_verified: false,
+        phone: phone || null,
+        address: address || null,
+        birth_date: birth_date || null,
+        role: 'customer', // default
         is_active: true
       })
       .select('id, email, full_name, role')
       .single();
 
-    if (error) {
-      console.error('Erro ao criar usuário:', error);
-      return Response.json(
-        { error: 'Erro ao criar usuário' },
-        { status: 500 }
-      );
-    }
+    if (error) throw error;
 
-    // Gera token JWT
     const token = generateToken(user);
 
-    return Response.json({
-      message: 'Usuário criado com sucesso',
-      token,
-      user: {
-        id: user.id,
-        email: user.email,
-        full_name: user.full_name,
-        role: user.role
-      }
-    }, { status: 201 });
+    const response = Response.json({
+      message: 'Cadastro realizado com sucesso',
+      user: { id: user.id, email: user.email, full_name: user.full_name, role: user.role }
+    });
+
+    response.cookies.set({
+      name: 'auth-token',
+      value: token,
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
+      maxAge: 7 * 24 * 60 * 60,
+      path: '/',
+    });
+
+    return response;
 
   } catch (error) {
-    console.error('Erro no register:', error);
-    return Response.json(
-      { error: 'Erro interno do servidor' },
-      { status: 500 }
-    );
+    return Response.json({ error: 'Erro interno' }, { status: 500 });
   }
 }
