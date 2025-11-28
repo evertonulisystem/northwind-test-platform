@@ -27,6 +27,11 @@ export default function ProductsPage() {
     fetchProducts();
   };
 
+  const handleAdd = async () => {
+  await fetchProducts(); // recarrega com dados completos
+  setShowAddModal(false);
+};
+
   return (
     <>
       {/* CONTAINER GRANDE E DOMINANTE */}
@@ -104,10 +109,8 @@ export default function ProductsPage() {
 
       {/* MODAIS */}
       {showAddModal && (
-        <AddProductModal
-          onClose={() => setShowAddModal(false)}
-          onAdd={fetchProducts}
-        />
+        // no modal
+<AddProductModal onClose={() => setShowAddModal(false)} onAdd={handleAdd} />
       )}
       {showEditModal && editingProduct && (
         <EditProductModal

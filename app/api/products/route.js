@@ -10,7 +10,8 @@ export async function GET() {
       .select(`
         id, name, price, stock_quantity, sku, image_url, created_at,
         category_id, supplier_id,
-        categories (name), suppliers (company_name)
+        categories (name),
+        suppliers (company_name)
       `)
       .order('id');
 
@@ -23,8 +24,8 @@ export async function GET() {
   }
 }
 
-// POST → Adicionar novoexport async function POST(request) {
-  export async function POST(request) {
+// POST → Adicionar novo
+export async function POST(request) {
   try {
     const data = await request.json();
 
@@ -36,13 +37,14 @@ export async function GET() {
       );
     }
 
-    // GERAR SLUG AUTOMATICAMENTE
+    // GERAR SLUG
     const slug = data.name
       .toLowerCase()
       .replace(/[^a-z0-9]+/g, '-')
       .replace(/(^-|-$)/g, '');
 
-    const { error } = await supabase
+    // INSERIR
+    const { data: inserted, error: insertError } = await supabase
       .from('products')
       .insert({
         name: data.name,
@@ -50,17 +52,24 @@ export async function GET() {
         price: parseFloat(data.price),
         stock_quantity: parseInt(data.stock_quantity, 10),
         sku: data.sku || null,
-        category_id: data.category_id || 1,
-        supplier_id: data.supplier_id || 1,
+        category_id: data.category_id || null,
+        supplier_id: data.supplier_id || null,
         created_at: new Date().toISOString(),
-      });
+      })
+      .select(`
+        id, name, price, stock_quantity, sku, image_url, created_at,
+        category_id, supplier_id,
+        categories (name),
+        suppliers (company_name)
+      `)
+      .single();
 
-    if (error) throw error;
+    if (insertError) throw insertError;
 
-    return NextResponse.json({ success: true }, { status: 201 });
+    // RETORNA O PRODUTO COMPLETO
+    return NextResponse.json({ product: inserted }, { status: 201 });
   } catch (error) {
     console.error('POST Error:', error);
     return NextResponse.json({ error: 'Erro ao criar produto' }, { status: 500 });
   }
 }
-

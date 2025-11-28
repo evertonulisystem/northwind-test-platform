@@ -1,54 +1,33 @@
 // app/api/products/[id]/route.js
-import { supabase } from '@/lib/supabase';
-import { NextResponse } from 'next/server';
-
 export async function PUT(request, { params }) {
-  const { id } = params;
-  const data = await request.json();
-
   try {
-    // Gerar slug se name mudou
-    const updates = {
-      name: data.name,
-      price: parseFloat(data.price),
-      stock_quantity: parseInt(data.stock_quantity, 10),
-      sku: data.sku,
-    };
+    const data = await request.json();
+    const id = params.id;
 
-    if (data.name) {
-      updates.slug = data.name
-        .toLowerCase()
-        .replace(/[^a-z0-9]+/g, '-')
-        .replace(/(^-|-$)/g, '');
-    }
-
-    const { error } = await supabase
+    const { data: updated, error } = await supabase
       .from('products')
-      .update(updates)
-      .eq('id', id);
+      .update({
+        name: data.name,
+        price: parseFloat(data.price),
+        stock_quantity: parseInt(data.stock_quantity, 10),
+        sku: data.sku || null,
+        category_id: data.category_id || null,
+        supplier_id: data.supplier_id || null,
+      })
+      .eq('id', id)
+      .select(`
+        id, name, price, stock_quantity, sku, image_url, created_at,
+        category_id, supplier_id,
+        categories (name),
+        suppliers (company_name)
+      `)
+      .single();
 
     if (error) throw error;
 
-    return NextResponse.json({ success: true }, { status: 200 });
+    return NextResponse.json({ product: updated });
   } catch (error) {
-    console.error('Erro ao editar:', error);
-    return NextResponse.json({ error: 'Erro ao salvar' }, { status: 500 });
-  }
-}
-
-export async function DELETE(request, { params }) {
-  const { id } = params;
-
-  try {
-    const { error } = await supabase
-      .from('products')
-      .delete()
-      .eq('id', id);
-
-    if (error) throw error;
-
-    return NextResponse.json({ success: true }, { status: 200 });
-  } catch (error) {
-    return NextResponse.json({ error: 'Erro ao excluir' }, { status: 500 });
+    console.error('PUT Error:', error);
+    return NextResponse.json({ error: 'Erro ao atualizar' }, { status: 500 });
   }
 }
