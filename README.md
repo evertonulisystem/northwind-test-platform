@@ -43,3 +43,5 @@ Plataforma de testes para automação QA com Northwind Database - Next.js + Post
 bashnpm install @supabase/supabase-js
 npm install bcryptjs jsonwebtoken
 npm install -D @types/bcryptjs @types/jsonwebtoken
+
+# simulação ultimo commit
