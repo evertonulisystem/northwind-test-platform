@@ -1,8 +1,6 @@
 // components/RulesModal.jsx
 'use client';
 
-import { useState } from 'react';
-
 export default function RulesModal({ isOpen, onClose }) {
   if (!isOpen) return null;
 

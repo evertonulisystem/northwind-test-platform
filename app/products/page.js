@@ -4,8 +4,10 @@
 import { useState, useEffect } from 'react';
 import toast from 'react-hot-toast';
 import RulesModal from '@/components/RulesModal';
+import ConfirmModal from '@/components/ConfirmModal';
 import AddProductModal from '@/components/AddProductModal';
 import EditProductModal from '@/components/EditProductModal';
+import { AlertTriangle } from 'lucide-react';
 
 export default function ProductsPage() {
   const [products, setProducts] = useState([]);
@@ -14,80 +16,94 @@ export default function ProductsPage() {
   const [editingProduct, setEditingProduct] = useState(null);
   const [loading, setLoading] = useState(true);
   const [showRules, setShowRules] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
+  const [deleteId, setDeleteId] = useState(null);
 
- const fetchProducts = async () => {
-  try {
-    setLoading(true);
-    const res = await fetch('/api/products', { cache: 'no-store' });
-    const result = await res.json(); // ← agora é { data, message }
-
-    if (!res.ok) {
-      throw new Error(result.message || 'Erro ao carregar');
+  const fetchProducts = async () => {
+    try {
+      setLoading(true);
+      const res = await fetch('/api/products', { cache: 'no-store' });
+      const result = await res.json();
+      if (!res.ok) throw new Error(result.message || 'Erro ao carregar');
+      setProducts(result.data || []);
+    } catch (error) {
+      toast.error(error.message || 'Falha ao carregar produtos');
+    } finally {
+      setLoading(false);
     }
+  };
 
-    setProducts(result.data || []); // ← CORRETO
-  } catch (error) {
-    toast.error(error.message || 'Falha ao carregar produtos');
-  } finally {
-    setLoading(false);
-  }
-};
   useEffect(() => {
     fetchProducts();
   }, []);
 
-  // DELETE COM REMOÇÃO IMEDIATA + TOAST
-  const handleDelete = async (id) => {
-  if (!confirm('Tem certeza que deseja excluir este produto?')) return;
+  // === ABRE MODAL DE CONFIRMAÇÃO ===
+  const openConfirm = (id) => {
+    setDeleteId(id);
+    setShowConfirm(true);
+  };
 
-  // Guarda o produto antes de remover
-  const deletedProduct = products.find(p => p.id === id);
-  if (!deletedProduct) return;
+  // === CONFIRMA EXCLUSÃO ===
+  const confirmDelete = async () => {
+    if (!deleteId) return;
 
-  // Remove da UI
-  setProducts(prev => prev.filter(p => p.id !== id));
+    const deletedProduct = products.find(p => p.id === deleteId);
+    if (!deletedProduct) return;
 
-  try {
-    const res = await fetch(`/api/products/${id}`, {
-      method: 'DELETE',
-      cache: 'no-store',
-    });
-    const result = await res.json();
+    setProducts(prev => prev.filter(p => p.id !== deleteId));
 
-    if (!res.ok) {
-      // Reverte
+    try {
+      const res = await fetch(`/api/products/${deleteId}`, {
+        method: 'DELETE',
+        cache: 'no-store',
+      });
+      const result = await res.json();
+
+      if (!res.ok) {
+        setProducts(prev => [...prev, deletedProduct]);
+        toast.error(result.message);
+      } else {
+        toast.success(result.message);
+      }
+    } catch (error) {
       setProducts(prev => [...prev, deletedProduct]);
-      toast.error(result.message);
-      return;
+      toast.error('Erro ao excluir');
+    } finally {
+      setShowConfirm(false);
+      setDeleteId(null);
     }
-
-    toast.success(result.message); // ← mensagem da API
-  } catch (error) {
-    setProducts(prev => [...prev, deletedProduct]);
-    toast.error('Erro ao excluir');
-  }
-};
+  };
 
   const handleAdd = async () => {
-  await fetchProducts();
-  setShowAddModal(false);
-  toast.success('Produto adicionado com sucesso!');
-};
+    await fetchProducts();
+    setShowAddModal(false);
+    toast.success('Produto adicionado com sucesso!');
+  };
 
-const handleUpdate = async () => {
-  await fetchProducts();
-  setShowEditModal(false);
-  setEditingProduct(null);
-  toast.success('Produto atualizado com sucesso!');
-};
+  const handleUpdate = async () => {
+    await fetchProducts();
+    setShowEditModal(false);
+    setEditingProduct(null);
+    toast.success('Produto atualizado com sucesso!');
+  };
 
   return (
     <>
       <div className="min-h-screen bg-gradient-to-br from-purple-900 via-pink-800 to-orange-700 p-6">
         <div className="max-w-7xl mx-auto">
+          {/* === TÍTULO + BOTÃO REGRAS ABAIXO === */}
           <div className="mb-8 text-center">
-            <h1 className="text-5xl font-extrabold text-white mb-2">QA Automation Shop</h1>
-            <p className="text-xl text-pink-100">Lista de Produtos (Admin View)</p>
+            <h1 className="text-5xl font-extrabold text-white mb-3">QA Automation Shop</h1>
+            <p className="text-xl text-pink-100 mb-4">Lista de Produtos (Admin View)</p>
+
+            {/* BOTÃO REGRAS ABAIXO DO TÍTULO */}
+            <button
+              onClick={() => setShowRules(true)}
+              className="bg-yellow-500 hover:bg-yellow-600 text-purple-900 font-bold px-6 py-3 rounded-xl shadow-lg flex items-center gap-2 mx-auto transition transform hover:scale-105"
+            >
+              <AlertTriangle className="w-6 h-6" />
+              Regras do Playground
+            </button>
           </div>
 
           <div className="flex justify-end mb-6">
@@ -119,11 +135,7 @@ const handleUpdate = async () => {
                   </thead>
                   <tbody>
                     {products.map((p) => (
-                      <tr
-                        key={p.id}
-                        className="border-b border-slate-700 hover:bg-slate-700/30 transition opacity-100"
-                        style={{ transition: 'opacity 0.3s' }}
-                      >
+                      <tr key={p.id} className="border-b border-slate-700 hover:bg-slate-700/30 transition">
                         <td className="px-4 py-2 text-slate-300 font-mono text-sm">{p.id}</td>
                         <td className="px-4 py-2 text-white font-medium text-sm">{p.name}</td>
                         <td className="px-4 py-2 text-green-400 font-semibold text-sm">
@@ -138,13 +150,13 @@ const handleUpdate = async () => {
                                 setEditingProduct(p);
                                 setShowEditModal(true);
                               }}
-                              className="bg-blue-600 text-white px-2 py-1 rounded text Xs hover:bg-blue-700 transition"
+                              className="bg-blue-600 text-white px-2 py-1 rounded text-xs hover:bg-blue-700 transition"
                               title="Editar"
                             >
                               Edit
                             </button>
                             <button
-                              onClick={() => handleDelete(p.id)}
+                              onClick={() => openConfirm(p.id)}
                               className="bg-red-600 text-white px-2 py-1 rounded text-xs hover:bg-red-700 transition"
                               title="Excluir"
                             >
@@ -162,6 +174,7 @@ const handleUpdate = async () => {
         </div>
       </div>
 
+      {/* === MODAIS === */}
       {showAddModal && (
         <AddProductModal onClose={() => setShowAddModal(false)} onAdd={handleAdd} />
       )}
@@ -175,6 +188,16 @@ const handleUpdate = async () => {
           onUpdate={handleUpdate}
         />
       )}
+      <RulesModal isOpen={showRules} onClose={() => setShowRules(false)} />
+      <ConfirmModal
+        isOpen={showConfirm}
+        message="Tem certeza que deseja excluir este produto?"
+        onConfirm={confirmDelete}
+        onCancel={() => {
+          setShowConfirm(false);
+          setDeleteId(null);
+        }}
+      />
     </>
   );
 }
