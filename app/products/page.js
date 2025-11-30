@@ -13,68 +13,71 @@ export default function ProductsPage() {
   const [editingProduct, setEditingProduct] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  const fetchProducts = async () => {
-    try {
-      setLoading(true);
-      const res = await fetch('/api/products', { cache: 'no-store' });
-      const data = await res.json();
+ const fetchProducts = async () => {
+  try {
+    setLoading(true);
+    const res = await fetch('/api/products', { cache: 'no-store' });
+    const result = await res.json(); // ← agora é { data, message }
 
-      if (!res.ok) throw new Error(data.error || 'Erro ao carregar');
-
-      setProducts(data.products || []);
-    } catch (error) {
-      toast.error('Falha ao carregar produtos');
-    } finally {
-      setLoading(false);
+    if (!res.ok) {
+      throw new Error(result.message || 'Erro ao carregar');
     }
-  };
 
+    setProducts(result.data || []); // ← CORRETO
+  } catch (error) {
+    toast.error(error.message || 'Falha ao carregar produtos');
+  } finally {
+    setLoading(false);
+  }
+};
   useEffect(() => {
     fetchProducts();
   }, []);
 
   // DELETE COM REMOÇÃO IMEDIATA + TOAST
   const handleDelete = async (id) => {
-    if (!confirm('Tem certeza que deseja excluir este produto?')) return;
+  if (!confirm('Tem certeza que deseja excluir este produto?')) return;
 
-    // Remove da UI imediatamente (otimismo)
-    setProducts(prev => prev.filter(p => p.id !== id));
+  // Guarda o produto antes de remover
+  const deletedProduct = products.find(p => p.id === id);
+  if (!deletedProduct) return;
 
-    try {
-      const res = await fetch(`/api/products/${id}`, {
-        method: 'DELETE',
-        cache: 'no-store',
-      });
+  // Remove da UI
+  setProducts(prev => prev.filter(p => p.id !== id));
 
-      if (!res.ok) {
-        const errorData = await res.json().catch(() => ({}));
-        throw new Error(errorData.error || 'Erro ao excluir');
-      }
+  try {
+    const res = await fetch(`/api/products/${id}`, {
+      method: 'DELETE',
+      cache: 'no-store',
+    });
+    const result = await res.json();
 
-      // Sucesso! Mostra toast
-      toast.success('Produto excluído com sucesso!', {
-        icon: 'Trash2',
-      });
-
-    } catch (error) {
-      // Reverte a remoção se falhou
-      await fetchProducts();
-      toast.error(error.message || 'Erro ao excluir');
+    if (!res.ok) {
+      // Reverte
+      setProducts(prev => [...prev, deletedProduct]);
+      toast.error(result.message);
+      return;
     }
-  };
+
+    toast.success(result.message); // ← mensagem da API
+  } catch (error) {
+    setProducts(prev => [...prev, deletedProduct]);
+    toast.error('Erro ao excluir');
+  }
+};
 
   const handleAdd = async () => {
-    await fetchProducts();
-    setShowAddModal(false);
-    toast.success('Produto adicionado com sucesso!');
-  };
+  await fetchProducts();
+  setShowAddModal(false);
+  toast.success('Produto adicionado com sucesso!');
+};
 
-  const handleUpdate = async () => {
-    await fetchProducts();
-    setShowEditModal(false);
-    setEditingProduct(null);
-    toast.success('Produto atualizado com sucesso!');
-  };
+const handleUpdate = async () => {
+  await fetchProducts();
+  setShowEditModal(false);
+  setEditingProduct(null);
+  toast.success('Produto atualizado com sucesso!');
+};
 
   return (
     <>
