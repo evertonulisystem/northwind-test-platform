@@ -83,28 +83,69 @@ export async function PUT(request, { params }) {
   }
 }
 
-// DELETE
+// DELETE → Excluir produto (QA FINAL - 100% FUNCIONAL)
 export async function DELETE(request, { params }) {
+  console.log('=== DELETE REQUEST START ===');
+  console.log('params:', params);
+
   try {
     const { id } = params;
 
-    const { data: existing, error: checkError } = await supabase
-      .from('products')
-      .select('id')
-      .eq('id', id)
-      .single();
+    if (!id || id === 'null' || id === 'undefined' || id.trim() === '') {
+      console.log('ID inválido (vazio/null):', id);
+      return badRequest('ID do produto é obrigatório');
+    }
 
-    if (checkError || !existing) {
+    const idNum = parseInt(id, 10);
+    if (isNaN(idNum) || idNum <= 0) {
+      console.log('ID não é número positivo:', id);
+      return badRequest('ID do produto deve ser um número inteiro positivo');
+    }
+
+    console.log('ID válido, convertendo para número:', idNum);
+
+    // VERIFICA SE EXISTE
+    console.log('Fazendo SELECT para verificar existência...');
+    const { data: existing, error: checkError, count: checkCount } = await supabase
+      .from('products')
+      .select('id', { count: 'exact' })
+      .eq('id', idNum);
+
+    console.log('SELECT result:', { existing, checkError, checkCount });
+
+    if (checkError) {
+      console.error('Erro no SELECT:', checkError);
+      return serverError('Erro ao verificar produto');
+    }
+
+    if (!existing || existing.length === 0 || checkCount === 0) {
+      console.log('Produto NÃO encontrado. Retornando 404.');
       return notFound('Produto não encontrado');
     }
 
-    const { error } = await supabase.from('products').delete().eq('id', id);
+    console.log('Produto encontrado. ID:', existing[0].id);
 
-    if (error) return serverError(error.message);
+    // DELETA
+    console.log('Executando DELETE...');
+    const { error: deleteError } = await supabase
+      .from('products')
+      .delete()
+      .eq('id', idNum);
+
+    console.log('DELETE result:', { deleteError });
+
+    if (deleteError) {
+      console.error('Erro no DELETE:', deleteError);
+      return serverError(deleteError.message);
+    }
+
+    console.log('DELETE executado com sucesso (sem count).');
+    console.log('=== DELETE REQUEST END ===');
 
     return ok(null, 'Produto excluído com sucesso');
+
   } catch (error) {
-    console.error('DELETE Error:', error);
-    return serverError('Erro ao excluir produto');
+    console.error('ERRO INESPERADO:', error);
+    return serverError('Erro inesperado ao excluir produto');
   }
 }

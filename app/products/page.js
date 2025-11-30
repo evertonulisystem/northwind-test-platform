@@ -3,6 +3,7 @@
 
 import { useState, useEffect } from 'react';
 import toast from 'react-hot-toast';
+import RulesModal from '@/components/RulesModal';
 import AddProductModal from '@/components/AddProductModal';
 import EditProductModal from '@/components/EditProductModal';
 
@@ -12,6 +13,7 @@ export default function ProductsPage() {
   const [showEditModal, setShowEditModal] = useState(false);
   const [editingProduct, setEditingProduct] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [showRules, setShowRules] = useState(false);
 
  const fetchProducts = async () => {
   try {
