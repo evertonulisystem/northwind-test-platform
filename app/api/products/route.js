@@ -2,7 +2,22 @@
 import { supabase } from '@/lib/supabase';
 import { NextResponse } from 'next/server';
 
-// GET → Listar todos
+const ok = (data, message = 'Sucesso') =>
+  NextResponse.json({ data, message }, { status: 200 });
+
+const created = (data, message = 'Criado com sucesso') =>
+  NextResponse.json({ data, message }, { status: 201 });
+
+const badRequest = (message) =>
+  NextResponse.json({ data: null, message }, { status: 400 });
+
+const notFound = (message = 'Recurso não encontrado') =>
+  NextResponse.json({ data: null, message }, { status: 404 });
+
+const serverError = (message = 'Erro interno do servidor') =>
+  NextResponse.json({ data: null, message }, { status: 500 });
+
+// GET
 export async function GET() {
   try {
     const { data: products, error } = await supabase
@@ -15,47 +30,42 @@ export async function GET() {
       `)
       .order('id');
 
-    if (error) throw error;
+    if (error) return serverError(error.message);
 
-    return NextResponse.json({ products }, { status: 200 });
+    return ok(products, 'Produtos carregados com sucesso');
   } catch (error) {
     console.error('GET Error:', error);
-    return NextResponse.json({ error: 'Erro ao buscar produtos' }, { status: 500 });
+    return serverError('Falha ao buscar produtos');
   }
 }
 
-// POST → Adicionar novo
+// POST
 export async function POST(request) {
   try {
-    const data = await request.json();
+    const body = await request.json();
 
-    // Validação
-    if (!data.name || !data.price || !data.stock_quantity) {
-      return NextResponse.json(
-        { error: 'Nome, preço e estoque são obrigatórios' },
-        { status: 400 }
-      );
+    if (!body.name || !body.price || !body.stock_quantity) {
+      return badRequest('Nome, preço e estoque são obrigatórios');
     }
 
-    // GERAR SLUG
-    const slug = data.name
+    const slug = body.name
       .toLowerCase()
       .normalize('NFD')
       .replace(/[\u0300-\u036f]/g, '')
       .replace(/[^a-z0-9]+/g, '-')
       .replace(/(^-|-$)/g, '');
 
-    // INSERIR
-    const { data: inserted, error: insertError } = await supabase
+    const { data: inserted, error } = await supabase
       .from('products')
       .insert({
-        name: data.name,
-        slug: slug,
-        price: parseFloat(data.price),
-        stock_quantity: parseInt(data.stock_quantity, 10),
-        sku: data.sku || `SKU-${Date.now()}`,
-        category_id: data.category_id || null,
-        supplier_id: data.supplier_id || null,
+        name: body.name,
+        slug,
+        price: parseFloat(body.price),
+        stock_quantity: parseInt(body.stock_quantity, 10),
+        sku: body.sku || `SKU-${Date.now()}`,
+        category_id: body.category_id || null,
+        supplier_id: body.supplier_id || null,
+        image_url: body.image_url || null,
       })
       .select(`
         id, name, price, stock_quantity, sku, image_url, created_at,
@@ -65,11 +75,11 @@ export async function POST(request) {
       `)
       .single();
 
-    if (insertError) throw insertError;
+    if (error) return badRequest(error.message);
 
-    return NextResponse.json({ product: inserted }, { status: 201 });
+    return created(inserted, 'Produto criado com sucesso');
   } catch (error) {
     console.error('POST Error:', error);
-    return NextResponse.json({ error: 'Erro ao criar produto' }, { status: 500 });
+    return serverError('Erro ao criar produto');
   }
 }

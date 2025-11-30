@@ -2,7 +2,19 @@
 import { supabase } from '@/lib/supabase';
 import { NextResponse } from 'next/server';
 
-// GET → Buscar produto por ID
+const ok = (data, message = 'Sucesso') =>
+  NextResponse.json({ data, message }, { status: 200 });
+
+const badRequest = (message) =>
+  NextResponse.json({ data: null, message }, { status: 400 });
+
+const notFound = (message = 'Produto não encontrado') =>
+  NextResponse.json({ data: null, message }, { status: 404 });
+
+const serverError = (message = 'Erro interno do servidor') =>
+  NextResponse.json({ data: null, message }, { status: 500 });
+
+// GET
 export async function GET(request, { params }) {
   try {
     const { id } = params;
@@ -18,43 +30,41 @@ export async function GET(request, { params }) {
       .eq('id', id)
       .single();
 
-    if (error) throw error;
+    if (error || !product) return notFound();
 
-    return NextResponse.json({ product }, { status: 200 });
+    return ok(product, 'Produto encontrado');
   } catch (error) {
     console.error('GET [id] Error:', error);
-    return NextResponse.json({ error: 'Produto não encontrado' }, { status: 404 });
+    return serverError('Erro ao buscar produto');
   }
 }
 
-// PUT → Atualizar produto
+// PUT
 export async function PUT(request, { params }) {
   try {
-    const data = await request.json();
+    const body = await request.json();
     const { id } = params;
 
-    // Gera slug se mudar o nome
-    let updateData = { ...data };
-    if (data.name) {
-      updateData.slug = data.name
+    let updateData = {};
+    if (body.name) {
+      updateData.name = body.name;
+      updateData.slug = body.name
         .toLowerCase()
         .normalize('NFD')
         .replace(/[\u0300-\u036f]/g, '')
         .replace(/[^a-z0-9]+/g, '-')
         .replace(/(^-|-$)/g, '');
     }
+    if (body.price !== undefined) updateData.price = parseFloat(body.price);
+    if (body.stock_quantity !== undefined) updateData.stock_quantity = parseInt(body.stock_quantity, 10);
+    if (body.sku !== undefined) updateData.sku = body.sku || null;
+    if (body.category_id !== undefined) updateData.category_id = body.category_id || null;
+    if (body.supplier_id !== undefined) updateData.supplier_id = body.supplier_id || null;
+    if (body.image_url !== undefined) updateData.image_url = body.image_url || null;
 
     const { data: updated, error } = await supabase
       .from('products')
-      .update({
-        name: updateData.name,
-        slug: updateData.slug,
-        price: parseFloat(updateData.price),
-        stock_quantity: parseInt(updateData.stock_quantity, 10),
-        sku: updateData.sku || null,
-        category_id: updateData.category_id || null,
-        supplier_id: updateData.supplier_id || null,
-      })
+      .update(updateData)
       .eq('id', id)
       .select(`
         id, name, price, stock_quantity, sku, image_url, created_at,
@@ -64,22 +74,20 @@ export async function PUT(request, { params }) {
       `)
       .single();
 
-    if (error) throw error;
+    if (error || !updated) return notFound();
 
-    return NextResponse.json({ product: updated }, { status: 200 });
+    return ok(updated, 'Produto atualizado com sucesso');
   } catch (error) {
     console.error('PUT Error:', error);
-    return NextResponse.json({ error: 'Erro ao atualizar produto' }, { status: 500 });
+    return serverError('Erro ao atualizar produto');
   }
 }
 
-// DELETE → Excluir produto
-// DELETE → Excluir produto
+// DELETE
 export async function DELETE(request, { params }) {
   try {
     const { id } = params;
 
-    // Primeiro: verifica se o produto existe
     const { data: existing, error: checkError } = await supabase
       .from('products')
       .select('id')
@@ -87,29 +95,16 @@ export async function DELETE(request, { params }) {
       .single();
 
     if (checkError || !existing) {
-      return NextResponse.json(
-        { error: 'Produto não encontrado' },
-        { status: 404 }
-      );
+      return notFound('Produto não encontrado');
     }
 
-    // Agora deleta
-    const { error } = await supabase
-      .from('products')
-      .delete()
-      .eq('id', id);
+    const { error } = await supabase.from('products').delete().eq('id', id);
 
-    if (error) throw error;
+    if (error) return serverError(error.message);
 
-    return NextResponse.json(
-      { message: 'Produto excluído com sucesso' },
-      { status: 200 }
-    );
+    return ok(null, 'Produto excluído com sucesso');
   } catch (error) {
     console.error('DELETE Error:', error);
-    return NextResponse.json(
-      { error: 'Erro ao excluir produto' },
-      { status: 500 }
-    );
+    return serverError('Erro ao excluir produto');
   }
 }
