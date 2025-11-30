@@ -50,52 +50,44 @@ export default function AddProductModal({ onClose, onAdd }) {
   };
 
   const handleSubmit = async (e) => {
-  e.preventDefault();
-  setLoading(true);
+    e.preventDefault();
+    setLoading(true);
 
-  try {
-    const res = await fetch('/api/products', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(formData),
-    });
-
-    // TRATA RESPOSTA INVÁLIDA
-    let result;
     try {
-      result = await res.json();
-    } catch (jsonError) {
-      const text = await res.text();
-      console.error('JSON inválido na resposta:', text);
-      toast.error('Erro na API: resposta inválida');
-      setLoading(false);
-      return;
-    }
+      const res = await fetch('/api/products', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData),
+      });
 
-    if (!res.ok) {
-      toast.error(result.message || 'Erro ao adicionar produto');
-      setLoading(false);
-      return;
-    }
+      let result;
+      try {
+        result = await res.json();
+      } catch {
+        toast.error('Resposta inválida da API');
+        setLoading(false);
+        return;
+      }
 
-    toast.success(result.message || 'Produto adicionado!');
-    onAdd?.();
-    onClose();
-  } catch (error) {
-    toast.error('Erro de rede. Verifique a API.');
-    console.error(error);
-  } finally {
-    setLoading(false);
-  }
-};
+      if (!res.ok) {
+        toast.error(result.message || 'Erro ao adicionar produto');
+        setLoading(false);
+        return;
+      }
+
+      toast.success(result.message || 'Produto adicionado com sucesso!');
+      onAdd?.();
+      onClose();
+    } catch (error) {
+      toast.error('Erro de rede');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-      <div 
-        className="w-full max-w-md mx-auto bg-slate-800 rounded-xl border border-slate-700 shadow-2xl flex flex-col"
-        data-testid="add-product-modal"
-      >
-        {/* HEADER */}
+      <div className="w-full max-w-md mx-auto bg-slate-800 rounded-xl border border-slate-700 shadow-2xl flex flex-col" data-testid="add-product-modal">
         <div className="p-6 border-b border-slate-700">
           <h2 className="text-2xl font-bold text-white flex items-center gap-2">
             <Package className="w-6 h-6 text-green-400" />
@@ -103,7 +95,6 @@ export default function AddProductModal({ onClose, onAdd }) {
           </h2>
         </div>
 
-        {/* FORM */}
         <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-6 space-y-5">
           {/* NOME */}
           <div>
@@ -117,42 +108,8 @@ export default function AddProductModal({ onClose, onAdd }) {
               value={formData.name}
               onChange={handleChange}
               className="w-full px-4 py-3 rounded-lg bg-slate-700 border border-slate-600 text-white placeholder-slate-400 focus:outline-none focus:border-orange-500 transition"
-              placeholder="Mouse Gamer Pro"
+              placeholder="Ex: Mouse Gamer RGB"
               required
-            />
-          </div>
-
-          {/* CATEGORIA */}
-          <div>
-            <label className="flex items-center gap-2 text-slate-300 text-sm font-medium mb-2">
-              <Hash className="w-4 h-4" />
-              Categoria
-            </label>
-            <CustomSelect
-              data-testid="add-product-category"
-              name="category_id"
-              options={categories}
-              value={formData.category_id}
-              onChange={handleChange}
-              placeholder="Selecione"
-              displayField="name"
-            />
-          </div>
-
-          {/* FORNECEDOR */}
-          <div>
-            <label className="flex items-center gap-2 text-slate-300 text-sm font-medium mb-2">
-              <Building2 className="w-4 h-4" />
-              Fornecedor
-            </label>
-            <CustomSelect
-              data-testid="add-product-supplier"
-              name="supplier_id"
-              options={suppliers}
-              value={formData.supplier_id}
-              onChange={handleChange}
-              placeholder="Selecione"
-              displayField="company_name"
             />
           </div>
 
@@ -170,7 +127,7 @@ export default function AddProductModal({ onClose, onAdd }) {
               value={formData.price}
               onChange={handleChange}
               className="w-full px-4 py-3 rounded-lg bg-slate-700 border border-slate-600 text-white placeholder-slate-400 focus:outline-none focus:border-orange-500 transition"
-              placeholder="299.90"
+              placeholder="R$ 299,90"
               required
             />
           </div>
@@ -188,7 +145,7 @@ export default function AddProductModal({ onClose, onAdd }) {
               value={formData.stock_quantity}
               onChange={handleChange}
               className="w-full px-4 py-3 rounded-lg bg-slate-700 border border-slate-600 text-white placeholder-slate-400 focus:outline-none focus:border-orange-500 transition"
-              placeholder="50"
+              placeholder="50 unidades"
               required
             />
           </div>
@@ -197,7 +154,7 @@ export default function AddProductModal({ onClose, onAdd }) {
           <div>
             <label className="flex items-center gap-2 text-slate-300 text-sm font-medium mb-2">
               <Barcode className="w-4 h-4" />
-              SKU (opcional)
+              SKU
             </label>
             <input
               data-testid="add-product-sku"
@@ -206,18 +163,52 @@ export default function AddProductModal({ onClose, onAdd }) {
               onChange={handleChange}
               className="w-full px-4 py-3 rounded-lg bg-slate-700 border border-slate-600 text-white placeholder-slate-400 focus:outline-none focus:border-orange-500 transition"
               placeholder="MGP-2024"
+              required
+            />
+          </div>
+
+          {/* CATEGORIA */}
+          <div>
+            <label className="flex items-center gap-2 text-slate-300 text-sm font-medium mb-2">
+              <Hash className="w-4 h-4" />
+              Categoria
+            </label>
+            <CustomSelect
+              data-testid="add-product-category"
+              name="category_id"
+              options={categories}
+              value={formData.category_id}
+              onChange={handleChange}
+              placeholder="Selecione a Categoria"
+              displayField="name"
+            />
+          </div>
+
+          {/* FORNECEDOR */}
+          <div>
+            <label className="flex items-center gap-2 text-slate-300 text-sm font-medium mb-2">
+              <Building2 className="w-4 h-4" />
+              Fornecedor
+            </label>
+            <CustomSelect
+              data-testid="add-product-supplier"
+              name="supplier_id"
+              options={suppliers}
+              value={formData.supplier_id}
+              onChange={handleChange}
+              placeholder="Selecione o Fornecedor"
+              displayField="company_name"
             />
           </div>
         </form>
 
-        {/* BOTÕES */}
         <div className="p-5 border-t border-slate-700 flex gap-3 bg-slate-800">
           <button
             type="submit"
             onClick={handleSubmit}
             disabled={loading}
             data-testid="add-product-submit"
-            className="flex-1 bg-green-600 text-white py-3 rounded-lg hover:bg-green-700 transition font-semibold flex items-center justify-center gap-2 disabled:opacity-50"
+            className="flex-1 bg-green-600 text-white py-3 rounded-lg hover:bg-green-700 transition font-semibold disabled:opacity-50"
           >
             {loading ? 'Adicionando...' : 'Adicionar'}
           </button>
