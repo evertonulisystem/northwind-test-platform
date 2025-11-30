@@ -20,7 +20,7 @@ export async function GET() {
     return NextResponse.json({ products }, { status: 200 });
   } catch (error) {
     console.error('GET Error:', error);
-    return NextResponse.json({ error: 'Erro ao buscar' }, { status: 500 });
+    return NextResponse.json({ error: 'Erro ao buscar produtos' }, { status: 500 });
   }
 }
 
@@ -40,6 +40,8 @@ export async function POST(request) {
     // GERAR SLUG
     const slug = data.name
       .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
       .replace(/[^a-z0-9]+/g, '-')
       .replace(/(^-|-$)/g, '');
 
@@ -51,10 +53,9 @@ export async function POST(request) {
         slug: slug,
         price: parseFloat(data.price),
         stock_quantity: parseInt(data.stock_quantity, 10),
-        sku: data.sku || null,
+        sku: data.sku || `SKU-${Date.now()}`,
         category_id: data.category_id || null,
         supplier_id: data.supplier_id || null,
-        created_at: new Date().toISOString(),
       })
       .select(`
         id, name, price, stock_quantity, sku, image_url, created_at,
@@ -66,7 +67,6 @@ export async function POST(request) {
 
     if (insertError) throw insertError;
 
-    // RETORNA O PRODUTO COMPLETO
     return NextResponse.json({ product: inserted }, { status: 201 });
   } catch (error) {
     console.error('POST Error:', error);
