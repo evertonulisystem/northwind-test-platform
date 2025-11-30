@@ -19,31 +19,52 @@ export default function ProductsPage() {
   const [showConfirm, setShowConfirm] = useState(false);
   const [deleteId, setDeleteId] = useState(null);
 
-  const fetchProducts = async () => {
-    try {
-      setLoading(true);
-      const res = await fetch('/api/products', { cache: 'no-store' });
-      const result = await res.json();
-      if (!res.ok) throw new Error(result.message || 'Erro ao carregar');
-      setProducts(result.data || []);
-    } catch (error) {
-      toast.error(error.message || 'Falha ao carregar produtos');
-    } finally {
-      setLoading(false);
-    }
-  };
+const fetchProducts = async () => {
+  try {
+    setLoading(true);
 
+    const res = await fetch('/api/products', { cache: 'no-store' });
+
+    // 1. VERIFICA SE A RESPOSTA É OK
+    if (!res.ok) {
+      const text = await res.text();
+      console.error('API retornou erro:', res.status, text);
+      throw new Error(`Erro ${res.status}: ${text || 'Resposta inválida'}`);
+    }
+
+    // 2. TENTA FAZER PARSE DO JSON
+    let result;
+    try {
+      result = await res.json();
+    } catch (jsonError) {
+      const text = await res.text();
+      console.error('JSON inválido recebido:', text);
+      throw new Error('Resposta da API não é JSON válido');
+    }
+
+    // 3. VALIDA O FORMATO
+    if (!result || typeof result !== 'object') {
+      throw new Error('Formato de resposta inválido');
+    }
+
+    setProducts(result.data || []);
+  } catch (error) {
+    toast.error(error.message || 'Falha ao carregar produtos');
+    console.error('Erro completo:', error);
+    setProducts([]);
+  } finally {
+    setLoading(false);
+  }
+};
   useEffect(() => {
     fetchProducts();
   }, []);
 
-  // === ABRE MODAL DE CONFIRMAÇÃO ===
   const openConfirm = (id) => {
     setDeleteId(id);
     setShowConfirm(true);
   };
 
-  // === CONFIRMA EXCLUSÃO ===
   const confirmDelete = async () => {
     if (!deleteId) return;
 
@@ -77,26 +98,24 @@ export default function ProductsPage() {
   const handleAdd = async () => {
     await fetchProducts();
     setShowAddModal(false);
-    toast.success('Produto adicionado com sucesso!');
+    //toast.success('Produto adicionado com sucesso!');
   };
 
-  const handleUpdate = async () => {
-    await fetchProducts();
-    setShowEditModal(false);
-    setEditingProduct(null);
-    toast.success('Produto atualizado com sucesso!');
-  };
+ const handleUpdate = async () => {
+  await fetchProducts(); // ← ESPERA TERMINAR
+  setShowEditModal(false);
+  setEditingProduct(null);
+  // REMOVA O TOAST AQUI!
+};
 
   return (
     <>
       <div className="min-h-screen bg-gradient-to-br from-purple-900 via-pink-800 to-orange-700 p-6">
         <div className="max-w-7xl mx-auto">
-          {/* === TÍTULO + BOTÃO REGRAS ABAIXO === */}
           <div className="mb-8 text-center">
             <h1 className="text-5xl font-extrabold text-white mb-3">QA Automation Shop</h1>
             <p className="text-xl text-pink-100 mb-4">Lista de Produtos (Admin View)</p>
 
-            {/* BOTÃO REGRAS ABAIXO DO TÍTULO */}
             <button
               onClick={() => setShowRules(true)}
               className="bg-yellow-500 hover:bg-yellow-600 text-purple-900 font-bold px-6 py-3 rounded-xl shadow-lg flex items-center gap-2 mx-auto transition transform hover:scale-105"
@@ -174,7 +193,6 @@ export default function ProductsPage() {
         </div>
       </div>
 
-      {/* === MODAIS === */}
       {showAddModal && (
         <AddProductModal onClose={() => setShowAddModal(false)} onAdd={handleAdd} />
       )}

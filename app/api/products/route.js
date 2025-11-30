@@ -2,84 +2,84 @@
 import { supabase } from '@/lib/supabase';
 import { NextResponse } from 'next/server';
 
-const ok = (data, message = 'Sucesso') =>
-  NextResponse.json({ data, message }, { status: 200 });
-
-const created = (data, message = 'Criado com sucesso') =>
-  NextResponse.json({ data, message }, { status: 201 });
-
-const badRequest = (message) =>
-  NextResponse.json({ data: null, message }, { status: 400 });
-
-const notFound = (message = 'Recurso não encontrado') =>
-  NextResponse.json({ data: null, message }, { status: 404 });
-
-const serverError = (message = 'Erro interno do servidor') =>
-  NextResponse.json({ data: null, message }, { status: 500 });
-
-// GET
+// === GET ALL (SÓ AQUI!) ===
 export async function GET() {
   try {
-    const { data: products, error } = await supabase
+    const { data, error } = await supabase
       .from('products')
       .select(`
-        id, name, price, stock_quantity, sku, image_url, created_at,
-        category_id, supplier_id,
-        categories (name),
-        suppliers (company_name)
+        id, name, price, stock_quantity, sku, category_id, supplier_id, slug,
+        categories(name), suppliers(company_name)
       `)
-      .order('id');
+      .order('id', { ascending: false });
 
-    if (error) return serverError(error.message);
+    if (error) throw error;
 
-    return ok(products, 'Produtos carregados com sucesso');
+    return NextResponse.json(
+      { data: data || [], message: 'Produtos carregados com sucesso' },
+      { status: 200 }
+    );
   } catch (error) {
-    console.error('GET Error:', error);
-    return serverError('Falha ao buscar produtos');
+    return NextResponse.json(
+      { data: null, message: error.message || 'Erro interno' },
+      { status: 500 }
+    );
   }
 }
 
-// POST
+// === POST (ADICIONAR) ===
 export async function POST(request) {
   try {
     const body = await request.json();
+    const slug = body.slug || generateSlug(body.name);
 
-    if (!body.name || !body.price || !body.stock_quantity) {
-      return badRequest('Nome, preço e estoque são obrigatórios');
+    // VERIFICA DUPLICIDADE
+    const { data: existing } = await supabase
+      .from('products')
+      .select('id')
+      .eq('slug', slug)
+      .maybeSingle();
+
+    if (existing) {
+      return NextResponse.json(
+        { data: null, message: 'Já existe um produto com esse nome/slug.' },
+        { status: 409 }
+      );
     }
 
-    const slug = body.name
-      .toLowerCase()
-      .normalize('NFD')
-      .replace(/[\u0300-\u036f]/g, '')
-      .replace(/[^a-z0-9]+/g, '-')
-      .replace(/(^-|-$)/g, '');
-
-    const { data: inserted, error } = await supabase
+    const { data, error } = await supabase
       .from('products')
-      .insert({
-        name: body.name,
-        slug,
-        price: parseFloat(body.price),
-        stock_quantity: parseInt(body.stock_quantity, 10),
-        sku: body.sku || `SKU-${Date.now()}`,
-        category_id: body.category_id || null,
-        supplier_id: body.supplier_id || null,
-        image_url: body.image_url || null,
-      })
-      .select(`
-        id, name, price, stock_quantity, sku, image_url, created_at,
-        category_id, supplier_id,
-        categories (name),
-        suppliers (company_name)
-      `)
+      .insert({ ...body, slug })
+      .select()
       .single();
 
-    if (error) return badRequest(error.message);
+    if (error) throw error;
 
-    return created(inserted, 'Produto criado com sucesso');
+    return NextResponse.json(
+      { data, message: 'Produto adicionado com sucesso!' },
+      { status: 201 }
+    );
   } catch (error) {
-    console.error('POST Error:', error);
-    return serverError('Erro ao criar produto');
+    if (error.message.includes('products_slug_key')) {
+      return NextResponse.json(
+        { data: null, message: 'Slug duplicado.' },
+        { status: 409 }
+      );
+    }
+    return NextResponse.json(
+      { data: null, message: error.message || 'Erro ao adicionar' },
+      { status: 500 }
+    );
   }
+}
+
+function generateSlug(name) {
+  if (!name) return '';
+  return name
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/(^-|-$)/g, '')
+    .substring(0, 100);
 }
