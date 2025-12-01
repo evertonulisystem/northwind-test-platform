@@ -6,50 +6,75 @@ import { NextResponse } from 'next/server';
  * @swagger
  * /api/products:
  *   get:
- *     summary: Lista todos os produtos
+ *     summary: Lista produtos com paginação, filtros e ordenação
  *     tags: [Products]
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         schema: { type: integer, default: 1 }
+ *       - in: query
+ *         name: limit
+ *         schema: { type: integer, default: 10 }
+ *       - in: query
+ *         name: search
+ *         schema: { type: string }
+ *       - in: query
+ *         name: category_id
+ *         schema: { type: integer }
+ *       - in: query
+ *         name: supplier_id
+ *         schema: { type: integer }
  *     responses:
  *       200:
- *         description: Lista de produtos
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 data:
- *                   type: array
- *                   items:
- *                     $ref: '#/components/schemas/Product'
- *                 message:
- *                   type: string
- *       500:
- *         description: Erro interno
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/Error'
+ *         description: Lista paginada
  */
-
-// === GET ALL (SÓ AQUI!) ===
-export async function GET() {
+export async function GET(request) {
   try {
-    const { data, error } = await supabase
+    const { searchParams } = new URL(request.url);
+    const page = parseInt(searchParams.get('page') || '1');
+    const limit = parseInt(searchParams.get('limit') || '10');
+    const search = searchParams.get('search') || '';
+    const category_id = searchParams.get('category_id') || '';
+    const supplier_id = searchParams.get('supplier_id') || '';
+
+    const offset = (page - 1) * limit;
+
+    let query = supabase
       .from('products')
       .select(`
         id, name, price, stock_quantity, sku, category_id, supplier_id, slug,
         categories(name), suppliers(company_name)
-      `)
-      .order('id', { ascending: false });
+      `, { count: 'exact' })
+      .range(offset, offset + limit - 1)
+      .order('name', { ascending: true }); // ORDEM POR NOME ASC
+
+    if (search) {
+      query = query.ilike('name', `%${search}%`);
+    }
+    if (category_id) {
+      query = query.eq('category_id', category_id);
+    }
+    if (supplier_id) {
+      query = query.eq('supplier_id', supplier_id);
+    }
+
+    const { data, error, count } = await query;
 
     if (error) throw error;
 
-    return NextResponse.json(
-      { data: data || [], message: 'Produtos carregados com sucesso' },
-      { status: 200 }
-    );
+    return NextResponse.json({
+      data: data || [],
+      pagination: {
+        page,
+        limit,
+        total: count || 0,
+        totalPages: Math.ceil((count || 0) / limit),
+      },
+      message: 'Produtos carregados com sucesso',
+    });
   } catch (error) {
     return NextResponse.json(
-      { data: null, message: error.message || 'Erro interno' },
+      { data: [], message: error.message || 'Erro interno' },
       { status: 500 }
     );
   }

@@ -7,58 +7,56 @@ import RulesModal from '@/components/RulesModal';
 import ConfirmModal from '@/components/ConfirmModal';
 import AddProductModal from '@/components/AddProductModal';
 import EditProductModal from '@/components/EditProductModal';
-import { AlertTriangle } from 'lucide-react';
+import { AlertTriangle, Plus, Edit, Trash2 } from 'lucide-react';
 
 export default function ProductsPage() {
   const [products, setProducts] = useState([]);
+  const [pagination, setPagination] = useState({ page: 1, totalPages: 1, total: 0 });
   const [showAddModal, setShowAddModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
-  const [editingProduct, setEditingProduct] = useState(null);
+  const [editingProduct, setEditingProduct] = useState(null); // ← CORRIGIDO AQUI!!!
   const [loading, setLoading] = useState(true);
   const [showRules, setShowRules] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
   const [deleteId, setDeleteId] = useState(null);
 
-const fetchProducts = async () => {
-  try {
-    setLoading(true);
+  const ITEMS_PER_PAGE = 10;
 
-    const res = await fetch('/api/products', { cache: 'no-store' });
-
-    // 1. VERIFICA SE A RESPOSTA É OK
-    if (!res.ok) {
-      const text = await res.text();
-      console.error('API retornou erro:', res.status, text);
-      throw new Error(`Erro ${res.status}: ${text || 'Resposta inválida'}`);
-    }
-
-    // 2. TENTA FAZER PARSE DO JSON
-    let result;
+  const fetchProducts = async () => {
     try {
-      result = await res.json();
-    } catch (jsonError) {
-      const text = await res.text();
-      console.error('JSON inválido recebido:', text);
-      throw new Error('Resposta da API não é JSON válido');
-    }
+      setLoading(true);
+      const res = await fetch(`/api/products?page=${pagination.page}&limit=${ITEMS_PER_PAGE}`, {
+        cache: 'no-store',
+      });
 
-    // 3. VALIDA O FORMATO
-    if (!result || typeof result !== 'object') {
-      throw new Error('Formato de resposta inválido');
-    }
+      if (!res.ok) {
+        const text = await res.text();
+        throw new Error(`Erro ${res.status}: ${text || 'Falha na requisição'}`);
+      }
 
-    setProducts(result.data || []);
-  } catch (error) {
-    toast.error(error.message || 'Falha ao carregar produtos');
-    console.error('Erro completo:', error);
-    setProducts([]);
-  } finally {
-    setLoading(false);
-  }
-};
+      const result = await res.json();
+
+      if (!result?.data) {
+        throw new Error('Formato de resposta inválido');
+      }
+
+      setProducts(result.data || []);
+      setPagination({
+        page: result.pagination?.page || 1,
+        totalPages: result.pagination?.totalPages || 1,
+        total: result.pagination?.total || 0,
+      });
+    } catch (error) {
+      toast.error(error.message || 'Falha ao carregar produtos');
+      setProducts([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
     fetchProducts();
-  }, []);
+  }, [pagination.page]);
 
   const openConfirm = (id) => {
     setDeleteId(id);
@@ -82,13 +80,16 @@ const fetchProducts = async () => {
 
       if (!res.ok) {
         setProducts(prev => [...prev, deletedProduct]);
-        toast.error(result.message);
+        toast.error(result.message || 'Erro ao excluir');
       } else {
-        toast.success(result.message);
+        toast.success(result.message || 'Produto excluído!');
+        if (products.length === 1 && pagination.page > 1) {
+          setPagination(prev => ({ ...prev, page: prev.page - 1 }));
+        }
       }
     } catch (error) {
       setProducts(prev => [...prev, deletedProduct]);
-      toast.error('Erro ao excluir');
+      toast.error('Erro ao excluir produto');
     } finally {
       setShowConfirm(false);
       setDeleteId(null);
@@ -98,15 +99,19 @@ const fetchProducts = async () => {
   const handleAdd = async () => {
     await fetchProducts();
     setShowAddModal(false);
-    //toast.success('Produto adicionado com sucesso!');
   };
 
- const handleUpdate = async () => {
-  await fetchProducts(); // ← ESPERA TERMINAR
-  setShowEditModal(false);
-  setEditingProduct(null);
-  // REMOVA O TOAST AQUI!
-};
+  const handleUpdate = async () => {
+    await fetchProducts();
+    setShowEditModal(false);
+    setEditingProduct(null);
+  };
+
+  const handlePageChange = (newPage) => {
+    if (newPage >= 1 && newPage <= pagination.totalPages) {
+      setPagination(prev => ({ ...prev, page: newPage }));
+    }
+  };
 
   return (
     <>
@@ -130,64 +135,97 @@ const fetchProducts = async () => {
               onClick={() => setShowAddModal(true)}
               className="bg-green-600 text-white px-6 py-3 rounded-xl hover:bg-green-700 transition font-semibold shadow-lg flex items-center gap-2"
             >
+              <Plus className="w-5 h-5" />
               Adicionar Produto
             </button>
           </div>
 
           <div className="bg-slate-800/90 backdrop-blur-md rounded-2xl shadow-2xl border border-slate-700 overflow-hidden">
             {loading ? (
-              <div className="p-8 text-center text-slate-400">Carregando produtos...</div>
+              <div className="p-12 text-center text-slate-400">Carregando produtos...</div>
             ) : products.length === 0 ? (
-              <div className="p-8 text-center text-slate-400">Nenhum produto cadastrado.</div>
-            ) : (
-              <div className="overflow-x-auto">
-                <table className="w-full text-left">
-                  <thead className="bg-slate-700/50 border-b border-slate-600">
-                    <tr>
-                      <th className="px-4 py-3 text-slate-200 font-semibold text-sm min-w-[60px]">ID</th>
-                      <th className="px-4 py-3 text-slate-200 font-semibold text-sm min-w-[200px]">Nome</th>
-                      <th className="px-4 py-3 text-slate-200 font-semibold text-sm min-w-[100px]">Preço</th>
-                      <th className="px-4 py-3 text-slate-200 font-semibold text-sm min-w-[120px]">Categoria</th>
-                      <th className="px-4 py-3 text-slate-200 font-semibold text-sm min-w-[140px]">Fornecedor</th>
-                      <th className="px-4 py-3 text-slate-200 font-semibold text-sm min-w-[120px] text-center">Ações</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {products.map((p) => (
-                      <tr key={p.id} className="border-b border-slate-700 hover:bg-slate-700/30 transition">
-                        <td className="px-4 py-2 text-slate-300 font-mono text-sm">{p.id}</td>
-                        <td className="px-4 py-2 text-white font-medium text-sm">{p.name}</td>
-                        <td className="px-4 py-2 text-green-400 font-semibold text-sm">
-                          R$ {parseFloat(p.price).toFixed(2)}
-                        </td>
-                        <td className="px-4 py-2 text-slate-300 text-sm">{p.categories?.name || '-'}</td>
-                        <td className="px-4 py-2 text-slate-300 text-sm">{p.suppliers?.company_name || '-'}</td>
-                        <td className="px-4 py-2 text-center">
-                          <div className="flex justify-center gap-2">
-                            <button
-                              onClick={() => {
-                                setEditingProduct(p);
-                                setShowEditModal(true);
-                              }}
-                              className="bg-blue-600 text-white px-2 py-1 rounded text-xs hover:bg-blue-700 transition"
-                              title="Editar"
-                            >
-                              Edit
-                            </button>
-                            <button
-                              onClick={() => openConfirm(p.id)}
-                              className="bg-red-600 text-white px-2 py-1 rounded text-xs hover:bg-red-700 transition"
-                              title="Excluir"
-                            >
-                              Delete
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+              <div className="p-12 text-center text-slate-400">
+                <p className="text-xl">Nenhum produto cadastrado ainda.</p>
               </div>
+            ) : (
+              <>
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left">
+                    <thead className="bg-slate-700/50 border-b border-slate-600">
+                      <tr>
+                        <th className="px-4 py-3 text-slate-200 font-semibold text-sm min-w-[60px]">ID</th>
+                        <th className="px-4 py-3 text-slate-200 font-semibold text-sm min-w-[200px]">Nome</th>
+                        <th className="px-4 py-3 text-slate-200 font-semibold text-sm min-w-[100px]">Preço</th>
+                        <th className="px-4 py-3 text-slate-200 font-semibold text-sm min-w-[120px]">Categoria</th>
+                        <th className="px-4 py-3 text-slate-200 font-semibold text-sm min-w-[140px]">Fornecedor</th>
+                        <th className="px-4 py-3 text-slate-200 font-semibold text-sm min-w-[120px] text-center">Ações</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {products.map((p) => (
+                        <tr key={p.id} className="border-b border-slate-700 hover:bg-slate-700/30 transition">
+                          <td className="px-4 py-2 text-slate-300 font-mono text-sm">{p.id}</td>
+                          <td className="px-4 py-2 text-white font-medium text-sm">{p.name}</td>
+                          <td className="px-4 py-2 text-green-400 font-semibold text-sm">
+                            R$ {parseFloat(p.price).toFixed(2)}
+                          </td>
+                          <td className="px-4 py-2 text-slate-300 text-sm">{p.categories?.name || '-'}</td>
+                          <td className="px-4 py-2 text-slate-300 text-sm">{p.suppliers?.company_name || '-'}</td>
+                          <td className="px-4 py-2 text-center">
+                            <div className="flex justify-center gap-2">
+                              <button
+                                onClick={() => {
+                                  setEditingProduct(p);
+                                  setShowEditModal(true);
+                                }}
+                                className="bg-blue-600 text-white px-3 py-1.5 rounded text-xs hover:bg-blue-700 transition flex items-center gap-1"
+                                title="Editar"
+                              >
+                                <Edit className="w-4 h-4" />
+                                Edit
+                              </button>
+                              <button
+                                onClick={() => openConfirm(p.id)}
+                                className="bg-red-600 text-white px-3 py-1.5 rounded text-xs hover:bg-red-700 transition flex items-center gap-1"
+                                title="Excluir"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                                Delete
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+
+                {/* PAGINAÇÃO */}
+                <div className="bg-slate-900/50 px-6 py-4 border-t border-slate-700 flex items-center justify-between flex-wrap gap-4">
+                  <p className="text-slate-400 text-sm">
+                    Mostrando {(pagination.page - 1) * ITEMS_PER_PAGE + 1}–{Math.min(pagination.page * ITEMS_PER_PAGE, pagination.total)} de {pagination.total} produtos
+                  </p>
+                  <div className="flex items-center gap-3">
+                    <button
+                      onClick={() => handlePageChange(pagination.page - 1)}
+                      disabled={pagination.page === 1}
+                      className="px-4 py-2 bg-slate-700 text-white rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-600 transition"
+                    >
+                      Anterior
+                    </button>
+                    <span className="text-slate-300 font-medium">
+                      Página {pagination.page} de {pagination.totalPages}
+                    </span>
+                    <button
+                      onClick={() => handlePageChange(pagination.page + 1)}
+                      disabled={pagination.page === pagination.totalPages}
+                      className="px-4 py-2 bg-slate-700 text-white rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-600 transition"
+                    >
+                      Próxima
+                    </button>
+                  </div>
+                </div>
+              </>
             )}
           </div>
         </div>
