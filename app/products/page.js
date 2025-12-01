@@ -50,6 +50,9 @@ export default function ProductsPage() {
   const [showConfirm, setShowConfirm] = useState(false);
   const [deleteId, setDeleteId] = useState(null);
 
+  const [showDetails, setShowDetails] = useState(false);
+const [selectedProduct, setSelectedProduct] = useState(null);
+
   const ITEMS_PER_PAGE = 10;
 
   // Carrega TODOS os produtos uma vez (poucos dados, é rápido)
@@ -267,6 +270,11 @@ export default function ProductsPage() {
                                 className="bg-red-600 hover:bg-red-700 text-white px-3 py-1.5 rounded text-xs transition flex items-center gap-1">
                                 <Trash2 className="w-4 h-4" /> Delete
                               </button>
+                              <button 
+  onClick={() => { setSelectedProduct(p); setShowDetails(true); }}
+  className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition flex items-center gap-1.5 shadow-md">
+  <Search className="w-4 h-4" /> Detalhes
+</button>
                             </div>
                           </td>
                         </tr>
@@ -302,6 +310,16 @@ export default function ProductsPage() {
       </div>
 
       {/* MODAIS */}
+      {/* MODAL DE DETALHES */}
+      {showDetails && (
+        <ProductDetailsModal
+          product={selectedProduct}
+          onClose={() => {
+            setShowDetails(false);
+            setSelectedProduct(null);
+          }}
+        />
+      )}
       {showAddModal && <AddProductModal onClose={() => setShowAddModal(false)} onAdd={handleAdd} />}
       {showEditModal && editingProduct && (
         <EditProductModal product={editingProduct}
