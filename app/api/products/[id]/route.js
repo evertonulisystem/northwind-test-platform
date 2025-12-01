@@ -156,3 +156,106 @@ export async function PUT(request, { params }) {
     );
   }
 }
+ 
+// === DELETE (CORRIGIDO - PADRÃO data + message) ===
+export async function DELETE(request, { params }) {
+  try {
+    const { id } = params;
+    const idNum = parseInt(id, 10);
+
+    if (isNaN(idNum) || idNum <= 0) {
+      return NextResponse.json(
+        { data: null, message: 'ID inválido' },
+        { status: 400 }
+      );
+    }
+
+    // VERIFICA SE EXISTE
+    const { data: existing, error: checkError } = await supabase
+      .from('products')
+      .select('id')
+      .eq('id', idNum)
+      .maybeSingle();
+
+    if (checkError) throw checkError;
+
+    if (!existing) {
+      return NextResponse.json(
+        { data: null, message: 'Produto não encontrado' }, // CORRIGIDO
+        { status: 404 }
+      );
+    }
+
+    // DELETA
+    const { error: deleteError } = await supabase
+      .from('products')
+      .delete()
+      .eq('id', idNum);
+
+    if (deleteError) throw deleteError;
+
+    return NextResponse.json(
+      { data: null, message: 'Produto excluído com sucesso!' },
+      { status: 200 }
+    );
+  } catch (error) {
+    console.error('Erro no DELETE:', error);
+    return NextResponse.json(
+      { data: null, message: error.message || 'Erro ao excluir produto' },
+      { status: 500 }
+    );
+  }
+}
+
+// === GET POR ID - 100% FUNCIONAL ===
+export async function GET(request, { params }) {
+  try {
+    const { id } = params;
+    const idNum = parseInt(id, 10);
+
+    if (isNaN(idNum) || idNum <= 0) {
+      return NextResponse.json(
+        { data: null, message: 'ID inválido' },
+        { status: 400 }
+      );
+    }
+
+    const { data, error } = await supabase
+      .from('products')
+      .select(`
+        id, 
+        name, 
+        price, 
+        stock_quantity, 
+        sku, 
+        category_id, 
+        supplier_id, 
+        slug,
+        categories(name),
+        suppliers(company_name)
+      `)
+      .eq('id', idNum)
+      .single();
+
+    if (error) {
+      if (error.code === 'PGRST116') {
+        return NextResponse.json(
+          { data: null, message: 'Produto não encontrado' },
+          { status: 404 }
+        );
+      }
+      throw error;
+    }
+
+    return NextResponse.json(
+      { data, message: 'Produto encontrado' },
+      { status: 200 }
+    );
+  } catch (error) {
+    console.error('Erro no GET /api/products/[id]:', error);
+    return NextResponse.json(
+      { data: null, message: 'Erro interno do servidor' },
+      { status: 500 }
+    );
+  }
+}
