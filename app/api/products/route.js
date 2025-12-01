@@ -2,6 +2,34 @@
 import { supabase } from '@/lib/supabase';
 import { NextResponse } from 'next/server';
 
+/**
+ * @swagger
+ * /api/products:
+ *   get:
+ *     summary: Lista todos os produtos
+ *     tags: [Products]
+ *     responses:
+ *       200:
+ *         description: Lista de produtos
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/Product'
+ *                 message:
+ *                   type: string
+ *       500:
+ *         description: Erro interno
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ */
+
 // === GET ALL (SÓ AQUI!) ===
 export async function GET() {
   try {
@@ -26,6 +54,60 @@ export async function GET() {
     );
   }
 }
+
+/**
+ * @swagger
+ * /api/products:
+ *   post:
+ *     summary: Adiciona um novo produto
+ *     tags: [Products]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - name
+ *               - price
+ *               - stock_quantity
+ *               - sku
+ *             properties:
+ *               name:
+ *                 type: string
+ *                 example: "Mouse Gamer RGB"
+ *               price:
+ *                 type: number
+ *                 example: 299.90
+ *               stock_quantity:
+ *                 type: integer
+ *                 example: 50
+ *               sku:
+ *                 type: string
+ *                 example: "MGP-2024"
+ *               category_id:
+ *                 type: integer
+ *                 nullable: true
+ *               supplier_id:
+ *                 type: integer
+ *                 nullable: true
+ *     responses:
+ *       201:
+ *         description: Produto criado
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 data:
+ *                   $ref: '#/components/schemas/Product'
+ *                 message:
+ *                   type: string
+ *       409:
+ *         description: SKU ou slug duplicado
+ *       400:
+ *         description: Dados inválidos
+ */
 
 // === POST (ADICIONAR) ===
 export async function POST(request) {

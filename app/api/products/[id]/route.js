@@ -14,6 +14,48 @@ function generateSlug(name) {
     .substring(0, 100);
 }
 
+/**
+ * @swagger
+ * /api/products/{id}:
+ *   put:
+ *     summary: Atualiza um produto existente
+ *     tags: [Products]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               name:
+ *                 type: string
+ *               price:
+ *                 type: number
+ *               stock_quantity:
+ *                 type: integer
+ *               sku:
+ *                 type: string
+ *               category_id:
+ *                 type: integer
+ *                 nullable: true
+ *               supplier_id:
+ *                 type: integer
+ *                 nullable: true
+ *     responses:
+ *       200:
+ *         description: Produto atualizado
+ *       404:
+ *         description: Produto não encontrado
+ *       409:
+ *         description: SKU ou slug duplicado
+ */
+
 // === PUT (EDITAR) - VERSÃO FINAL COM DEBUG ===
 export async function PUT(request, { params }) {
   try {
@@ -156,7 +198,27 @@ export async function PUT(request, { params }) {
     );
   }
 }
- 
+/**
+ * @swagger
+ * /api/products/{id}:
+ *   delete:
+ *     summary: Remove um produto
+ *     tags: [Products]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Produto excluído
+ *       404:
+ *         description: Produto não encontrado
+ *       400:
+ *         description: ID inválido
+ */
+
 // === DELETE (CORRIGIDO - PADRÃO data + message) ===
 export async function DELETE(request, { params }) {
   try {
@@ -206,6 +268,36 @@ export async function DELETE(request, { params }) {
     );
   }
 }
+
+/**
+ * @swagger
+ * /api/products/{id}:
+ *   get:
+ *     summary: Busca produto por ID
+ *     tags: [Products]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Produto encontrado
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 data:
+ *                   $ref: '#/components/schemas/Product'
+ *                 message:
+ *                   type: string
+ *       404:
+ *         description: Produto não encontrado
+ *       400:
+ *         description: ID inválido
+ */
 
 // === GET POR ID - 100% FUNCIONAL ===
 export async function GET(request, { params }) {
