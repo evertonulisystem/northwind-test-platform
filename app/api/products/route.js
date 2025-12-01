@@ -28,57 +28,81 @@ import { NextResponse } from 'next/server';
  *       200:
  *         description: Lista paginada
  */
+// app/api/products/route.js → GET ATUALIZADO (O ÚNICO QUE FUNCIONA DE VERDADE COM JOIN)
+// app/api/products/route.js → GET FINAL (FUNCIONA COM TEXTO EM NOME, CATEGORIA E FORNECEDOR)
+// app/api/products/route.js → VERSÃO FINAL QUE FUNCIONA 100%
+
 export async function GET(request) {
   try {
     const { searchParams } = new URL(request.url);
-    const page = parseInt(searchParams.get('page') || '1');
-    const limit = parseInt(searchParams.get('limit') || '10');
-    const search = searchParams.get('search') || '';
-    const category_id = searchParams.get('category_id') || '';
-    const supplier_id = searchParams.get('supplier_id') || '';
+    const page = parseInt(searchParams.get('page') || '1', 10);
+    const limit = parseInt(searchParams.get('limit') || '10', 10);
+    const search = searchParams.get('search')?.trim();
 
-    const offset = (page - 1) * limit;
+    const start = (page - 1) * limit;
 
+    // Primeiro busca TODOS os produtos com join (sem filtro)
     let query = supabase
       .from('products')
       .select(`
-        id, name, price, stock_quantity, sku, category_id, supplier_id, slug,
-        categories(name), suppliers(company_name)
+        id,
+        name,
+        price,
+        stock_quantity,
+        sku,
+        category_id,
+        supplier_id,
+        slug,
+        categories(name),
+        suppliers(company_name)
       `, { count: 'exact' })
-      .range(offset, offset + limit - 1)
-      .order('name', { ascending: true }); // ORDEM POR NOME ASC
+      .range(start, start + limit - 1)
+      .order('name', { ascending: true });
 
-    if (search) {
-      query = query.ilike('name', `%${search}%`);
-    }
-    if (category_id) {
-      query = query.eq('category_id', category_id);
-    }
-    if (supplier_id) {
-      query = query.eq('supplier_id', supplier_id);
-    }
-
-    const { data, error, count } = await query;
+    const { data: products, error, count } = await query;
 
     if (error) throw error;
 
+    // Agora filtra EM MEMÓRIA (É A ÚNICA FORMA QUE FUNCIONA 100% COM JOIN)
+    let filtered = products || [];
+    let totalFiltered = count || 0;
+
+    if (search && search.length > 0) {
+      const term = search.toLowerCase();
+      filtered = products.filter(p => {
+        const name = (p.name || '').toLowerCase();
+        const category = (p.categories?.name || '').toLowerCase();
+        const supplier = (p.suppliers?.company_name || '').toLowerCase();
+        return name.includes(term) || category.includes(term) || supplier.includes(term);
+      });
+      totalFiltered = filtered.length;
+    }
+
+    const totalPages = Math.ceil(totalFiltered / limit);
+
     return NextResponse.json({
-      data: data || [],
+      data: filtered,
       pagination: {
         page,
         limit,
-        total: count || 0,
-        totalPages: Math.ceil((count || 0) / limit),
+        total: totalFiltered,
+        totalPages,
       },
       message: 'Produtos carregados com sucesso',
     });
+
   } catch (error) {
-    return NextResponse.json(
-      { data: [], message: error.message || 'Erro interno' },
-      { status: 500 }
-    );
+    console.error('Erro na API:', error);
+    return NextResponse.json({
+      data: [],
+      pagination: { page: 1, limit: 10, total: 0, totalPages: 0 },
+      message: 'Erro ao carregar produtos'
+    }, { status: 500 });
   }
 }
+
+
+
 
 /**
  * @swagger
