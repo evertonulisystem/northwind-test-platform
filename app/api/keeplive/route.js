@@ -1,0 +1,36 @@
+import { supabase } from '@/lib/supabase'
+import { NextResponse } from 'next/server'
+
+/**
+ * @swagger
+ * /api/keepalive:
+ *   get:
+ *     summary: Mantém o projeto Supabase ativo (anti-pause)
+ *     tags: [Health]
+ *     responses:
+ *       200:
+ *         description: Supabase ativo
+ */
+export async function GET() {
+  try {
+    const { error } = await supabase
+      .from('keepalive')
+      .upsert({
+        id: 1,
+        last_ping: new Date().toISOString()
+      })
+
+    if (error) throw error
+
+    return NextResponse.json({
+      status: 'ok',
+      message: 'Supabase ativo'
+    })
+
+  } catch (error) {
+    return NextResponse.json(
+      { status: 'error', message: error.message },
+      { status: 500 }
+    )
+  }
+}
