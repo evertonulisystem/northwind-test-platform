@@ -31,7 +31,6 @@ import { NextResponse } from 'next/server';
 // app/api/products/route.js → GET ATUALIZADO (O ÚNICO QUE FUNCIONA DE VERDADE COM JOIN)
 // app/api/products/route.js → GET FINAL (FUNCIONA COM TEXTO EM NOME, CATEGORIA E FORNECEDOR)
 // app/api/products/route.js → VERSÃO FINAL QUE FUNCIONA 100%
-
 export async function GET(request) {
   try {
     const { searchParams } = new URL(request.url);
@@ -41,7 +40,6 @@ export async function GET(request) {
 
     const start = (page - 1) * limit;
 
-    // Primeiro busca TODOS os produtos com join (sem filtro)
     let query = supabase
       .from('products')
       .select(`
@@ -59,51 +57,41 @@ export async function GET(request) {
       .range(start, start + limit - 1)
       .order('name', { ascending: true });
 
-    const { data: products, error, count } = await query;
-
-    if (error) throw error;
-
-    // Agora filtra EM MEMÓRIA (É A ÚNICA FORMA QUE FUNCIONA 100% COM JOIN)
-    let filtered = products || [];
-    let totalFiltered = count || 0;
-
     if (search && search.length > 0) {
-      const term = search.toLowerCase();
-      filtered = products.filter(p => {
-        const name = (p.name || '').toLowerCase();
-        const category = (p.categories?.name || '').toLowerCase();
-        const supplier = (p.suppliers?.company_name || '').toLowerCase();
-        return name.includes(term) || category.includes(term) || supplier.includes(term);
-      });
-      totalFiltered = filtered.length;
+      const pattern = `%${search}%`;
+      // AQUI É O JEITO CERTO QUE O SUPABASE ACEITA COM JOIN
+      query = query.or(
+        `name.ilike.${pattern},categories.name.ilike.${pattern},suppliers.company_name.ilike.${pattern}`
+      );
     }
 
-    const totalPages = Math.ceil(totalFiltered / limit);
+    const { data, error, count } = await query;
+
+    if (error) {
+      console.error('Erro Supabase:', error);
+      throw error;
+    }
 
     return NextResponse.json({
-      data: filtered,
+      data: data || [],
       pagination: {
         page,
         limit,
-        total: totalFiltered,
-        totalPages,
+        total: count || 0,
+        totalPages: Math.ceil((count || 0) / limit),
       },
       message: 'Produtos carregados com sucesso',
     });
 
   } catch (error) {
-    console.error('Erro na API:', error);
+    console.error('Erro fatal:', error);
     return NextResponse.json({
       data: [],
       pagination: { page: 1, limit: 10, total: 0, totalPages: 0 },
-      message: 'Erro ao carregar produtos'
+      message: 'Erro interno'
     }, { status: 500 });
   }
 }
-
-
-
-
 /**
  * @swagger
  * /api/products:

@@ -1,19 +1,26 @@
-// components/EditProductModal.jsx
+// components/EditProductModal.jsx → VERSÃO FINAL COM VALIDAÇÕES FODA (IGUAL AO ADD)
 'use client';
 
 import { useState, useEffect } from 'react';
 import toast from 'react-hot-toast';
 import CustomSelect from '@/components/CustomSelect';
-import { Package, DollarSign, Hash, Tag, Building2, Barcode } from 'lucide-react';
+import { Package, DollarSign, Hash, Tag, Building2, Barcode, AlertCircle } from 'lucide-react';
 
 export default function EditProductModal({ product, onClose, onUpdate }) {
   const [formData, setFormData] = useState({
     name: product.name || '',
-    price: product.price || 0,
-    stock_quantity: product.stock_quantity || 0,
+    price: product.price || '',
+    stock_quantity: product.stock_quantity || '',
     sku: product.sku || '',
     category_id: product.category_id || '',
     supplier_id: product.supplier_id || '',
+  });
+
+  const [errors, setErrors] = useState({
+    name: '',
+    price: '',
+    stock_quantity: '',
+    sku: '',
   });
 
   const [categories, setCategories] = useState([]);
@@ -47,51 +54,106 @@ export default function EditProductModal({ product, onClose, onUpdate }) {
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
+    // Limpa erro ao digitar
+    if (errors[name]) {
+      setErrors(prev => ({ ...prev, [name]: '' }));
+    }
+  };
+
+  const validateForm = () => {
+    const newErrors = {};
+
+    // NOME
+    const name = formData.name.trim();
+    if (!name) {
+      newErrors.name = 'Nome é obrigatório';
+    } else if (name.length < 6) {
+      newErrors.name = 'Mínimo 6 caracteres';
+    } else if (name.length > 40) {
+      newErrors.name = 'Máximo 40 caracteres';
+    } else if (/\d/.test(name)) {
+      newErrors.name = 'Não pode conter números';
+    } else if (/[^a-zA-Z\s]/.test(name)) {
+      newErrors.name = 'Caracteres especiais não permitidos';
+    } else if (/\s{2,}/.test(name)) {
+      newErrors.name = 'Não pode ter espaços duplicados';
+    }
+
+    // PREÇO
+    const price = formData.price;
+    if (!price) {
+      newErrors.price = 'Preço é obrigatório';
+    } else if (isNaN(price) || parseFloat(price) <= 0) {
+      newErrors.price = 'Deve ser um valor positivo';
+    }
+
+    // ESTOQUE
+    const stock = formData.stock_quantity;
+    if (!stock) {
+      newErrors.stock_quantity = 'Estoque é obrigatório';
+    } else if (isNaN(stock) || stock < 1 || stock > 999) {
+      newErrors.stock_quantity = 'Apenas números de 1 a 999';
+    }
+
+    // SKU
+    const sku = formData.sku.trim().toUpperCase();
+    if (!sku) {
+      newErrors.sku = 'SKU é obrigatório';
+    } else if (sku.length < 5 || sku.length > 20) {
+      newErrors.sku = 'Deve ter entre 5 e 20 caracteres';
+    } else if (!/^[A-Z0-9-]+$/.test(sku)) {
+      newErrors.sku = 'Apenas letras maiúsculas, números e hífen';
+    } else if (!/^[A-Z]/.test(sku)) {
+      newErrors.sku = 'Deve começar com letra maiúscula';
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
   };
 
   const handleSubmit = async (e) => {
-  e.preventDefault();
-  setLoading(true);
+    e.preventDefault();
 
-  try {
-    const res = await fetch(`/api/products/${product.id}`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        ...formData,
-        category_id: formData.category_id || null,
-        supplier_id: formData.supplier_id || null,
-      }),
-    });
+    if (!validateForm()) {
+      toast.error('Corrija os erros antes de salvar');
+      return;
+    }
 
-    let result;
+    setLoading(true);
+
+    const payload = {
+      ...formData,
+      price: parseFloat(formData.price),
+      stock_quantity: parseInt(formData.stock_quantity),
+      sku: formData.sku.trim().toUpperCase(),
+      category_id: formData.category_id || null,
+      supplier_id: formData.supplier_id || null,
+    };
+
     try {
-      result = await res.json();
-    } catch (jsonError) {
-      const text = await res.text();
-      console.error('JSON inválido:', text);
-      toast.error('Erro na API: resposta inválida');
+      const res = await fetch(`/api/products/${product.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+
+      const result = await res.json();
+
+      if (!res.ok) {
+        toast.error(result.message || 'Erro ao atualizar');
+        setLoading(false);
+        return;
+      }
+
+      toast.success('Produto atualizado com sucesso!');
+      onUpdate?.();
+      onClose();
+    } catch (error) {
+      toast.error('Erro de rede');
+    } finally {
       setLoading(false);
-      return;
     }
-
-    if (!res.ok) {
-      toast.error(result.message || 'Erro ao atualizar');
-      setLoading(false);
-      return;
-    }
-
-    toast.success(result.message || 'Produto atualizado!');
-    onUpdate?.();
-    onClose();
-
-    
-  } catch (error) {
-    toast.error('Erro de rede');
-  } finally {
-    setLoading(false);
-  }
-};
+  };
 
   return (
     <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
@@ -99,6 +161,7 @@ export default function EditProductModal({ product, onClose, onUpdate }) {
         className="w-full max-w-md mx-auto bg-slate-800 rounded-xl border border-slate-700 shadow-2xl flex flex-col"
         data-testid="edit-product-modal"
       >
+        
         <div className="p-6 border-b border-slate-700">
           <h2 className="text-2xl font-bold text-white flex items-center gap-2">
             <Package className="w-6 h-6 text-blue-400" />
@@ -106,26 +169,108 @@ export default function EditProductModal({ product, onClose, onUpdate }) {
           </h2>
         </div>
 
-        <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-6 space-y-5">
+        <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-6 space-y-4">
+          {/* NOME */}
           <div>
-            <label className="flex items-center gap-2 text-slate-300 text-sm font-medium mb-2">
+            <label className="flex items-center gap-2 text-slate-300 text-sm font-medium mb-1">
               <Tag className="w-4 h-4" />
-              Nome
+              Nome <span className="text-red-500">*</span>
             </label>
             <input
               data-testid="edit-product-name"
               name="name"
               value={formData.name}
               onChange={handleChange}
-              className="w-full px-4 py-3 rounded-lg bg-slate-700 border border-slate-600 text-white placeholder-slate-400 focus:outline-none focus:border-orange-500 transition"
-              required
+              className="w-full px-4 py-2.5 rounded-lg bg-slate-700 border border-slate-600 text-white placeholder-slate-400 focus:outline-none focus:border-orange-500 transition"
+              placeholder="Informe o nome do produto"
             />
+            {errors.name && (
+              <p data-testid="error-name" className="text-red-400 text-xs mt-1 flex items-center gap-1">
+                <AlertCircle className="w-3 h-3" /> {errors.name}
+              </p>
+            )}
           </div>
 
+          {/* PREÇO */}
+         {/* PREÇO — VERSÃO CORRIGIDA E INDESTRUTÍVEL */}
+<div>
+  <label className="flex items-center gap-2 text-slate-300 text-sm font-medium mb-1">
+    <DollarSign className="w-4 h-4" />
+    Preço (R$) <span className="text-red-500">*</span>
+  </label>
+  <input
+    data-testid="edit-product-price"
+    name="price"
+    type="number"
+    step="0.01"
+    min="0.01"
+    max="999999.99"
+    value={formData.price}
+    onChange={(e) => {
+      const value = e.target.value;
+      // Bloqueia valores absurdos já no front
+      if (value === '' || (parseFloat(value) >= 0 && parseFloat(value) <= 999999.99)) {
+        handleChange(e);
+      }
+    }}
+    className="w-full px-4 py-2.5 rounded-lg bg-slate-700 border border-slate-600 text-white placeholder-slate-400 focus:outline-none focus:border-orange-500 transition"
+    placeholder="Informe o preço unitário do produto"
+  />
+  {errors.price && (
+    <p data-testid="error-price" className="text-red-400 text-xs mt-1 flex items-center gap-1">
+      <AlertCircle className="w-3 h-3" /> {errors.price}
+    </p>
+  )}
+</div>
+
+          {/* ESTOQUE */}
           <div>
-            <label className="flex items-center gap-2 text-slate-300 text-sm font-medium mb-2">
+            <label className="flex items-center gap-2 text-slate-300 text-sm font-medium mb-1">
+              <Package className="w-4 h-4" />
+              Estoque <span className="text-red-500">*</span>
+            </label>
+            <input
+              data-testid="edit-product-stock"
+              name="stock_quantity"
+              type="text"
+              value={formData.stock_quantity}
+              onChange={handleChange}
+              className="w-full px-4 py-2.5 rounded-lg bg-slate-700 border border-slate-600 text-white placeholder-slate-400 focus:outline-none focus:border-orange-500 transition"
+              placeholder="Apenas números entre 1 e 999"
+            />
+            {errors.stock_quantity && (
+              <p data-testid="error-stock" className="text-red-400 text-xs mt-1 flex items-center gap-1">
+                <AlertCircle className="w-3 h-3" /> {errors.stock_quantity}
+              </p>
+            )}
+          </div>
+
+          {/* SKU */}
+          <div>
+            <label className="flex items-center gap-2 text-slate-300 text-sm font-medium mb-1">
+              <Barcode className="w-4 h-4" />
+              SKU <span className="text-red-500">*</span>
+            </label>
+            <input
+              data-testid="edit-product-sku"
+              name="sku"
+              value={formData.sku}
+              onChange={handleChange}
+              className="w-full px-4 py-2.5 rounded-lg bg-slate-700 border border-slate-600 text-white placeholder-slate-400 focus:outline-none focus:border-orange-500 transition uppercase"
+              placeholder="Ex: MGP-2024"
+            />
+            {errors.sku && (
+              <p data-testid="error-sku" className="text-red-400 text-xs mt-1 flex items-center gap-1">
+                <AlertCircle className="w-3 h-3" /> {errors.sku}
+              </p>
+            )}
+          </div>
+
+          {/* CATEGORIA */}
+          <div>
+            <label className="flex items-center gap-2 text-slate-300 text-sm font-medium mb-1">
               <Hash className="w-4 h-4" />
-              Categoria
+              Categoria <span className="text-red-500">*</span>
             </label>
             <CustomSelect
               data-testid="edit-product-category"
@@ -138,10 +283,11 @@ export default function EditProductModal({ product, onClose, onUpdate }) {
             />
           </div>
 
+          {/* FORNECEDOR */}
           <div>
-            <label className="flex items-center gap-2 text-slate-300 text-sm font-medium mb-2">
+            <label className="flex items-center gap-2 text-slate-300 text-sm font-medium mb-1">
               <Building2 className="w-4 h-4" />
-              Fornecedor
+              Fornecedor <span className="text-red-500">*</span>
             </label>
             <CustomSelect
               data-testid="edit-product-supplier"
@@ -153,55 +299,6 @@ export default function EditProductModal({ product, onClose, onUpdate }) {
               displayField="company_name"
             />
           </div>
-
-          <div>
-            <label className="flex items-center gap-2 text-slate-300 text-sm font-medium mb-2">
-              <DollarSign className="w-4 h-4" />
-              Preço (R$)
-            </label>
-            <input
-              data-testid="edit-product-price"
-              name="price"
-              type="number"
-              step="0.01"
-              value={formData.price}
-              onChange={handleChange}
-              className="w-full px-4 py-3 rounded-lg bg-slate-700 border border-slate-600 text-white placeholder-slate-400 focus:outline-none focus:border-orange-500 transition"
-              required
-            />
-          </div>
-
-          <div>
-            <label className="flex items-center gap-2 text-slate-300 text-sm font-medium mb-2">
-              <Package className="w-4 h-4" />
-              Estoque
-            </label>
-            <input
-              data-testid="edit-product-stock"
-              name="stock_quantity"
-              type="number"
-              value={formData.stock_quantity}
-              onChange={handleChange}
-              className="w-full px-4 py-3 rounded-lg bg-slate-700 border border-slate-600 text-white placeholder-slate-400 focus:outline-none focus:border-orange-500 transition"
-              required
-            />
-          </div>
-
-          <div>
-  <label className="flex items-center gap-2 text-slate-300 text-sm font-medium mb-2">
-    <Barcode className="w-4 h-4" />
-    SKU <span className="text-red-400">*</span>
-  </label>
-  <input
-    data-testid="edit-product-sku"
-    name="sku"
-    value={formData.sku}
-    onChange={handleChange}
-    className="w-full px-4 py-3 rounded-lg bg-slate-700 border border-slate-600 text-white placeholder-slate-400 focus:outline-none focus:border-orange-500 transition"
-    placeholder="MGP-2024"
-    required
-  />
-</div>
         </form>
 
         <div className="p-5 border-t border-slate-700 flex gap-3 bg-slate-800">

@@ -1,10 +1,10 @@
-// components/AddProductModal.jsx
+// components/AddProductModal.jsx → VERSÃO FINAL COM VALIDAÇÕES FODA (TEU ESTILO 100%)
 'use client';
 
 import { useState, useEffect } from 'react';
 import toast from 'react-hot-toast';
 import CustomSelect from '@/components/CustomSelect';
-import { Package, DollarSign, Hash, Tag, Building2, Barcode } from 'lucide-react';
+import { Package, DollarSign, Hash, Tag, Building2, Barcode, AlertCircle } from 'lucide-react';
 
 export default function AddProductModal({ onClose, onAdd }) {
   const [formData, setFormData] = useState({
@@ -14,6 +14,13 @@ export default function AddProductModal({ onClose, onAdd }) {
     sku: '',
     category_id: '',
     supplier_id: '',
+  });
+
+  const [errors, setErrors] = useState({
+    name: '',
+    price: '',
+    stock_quantity: '',
+    sku: '',
   });
 
   const [categories, setCategories] = useState([]);
@@ -47,39 +54,101 @@ export default function AddProductModal({ onClose, onAdd }) {
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
+    // Limpa erro ao digitar
+    if (errors[name]) {
+      setErrors(prev => ({ ...prev, [name]: '' }));
+    }
+  };
+
+  const validateForm = () => {
+    const newErrors = {};
+
+    // NOME
+    const name = formData.name.trim();
+    if (!name) {
+      newErrors.name = 'Nome é obrigatório';
+    } else if (name.length < 6) {
+      newErrors.name = 'Mínimo 6 caracteres';
+    } else if (name.length > 40) {
+      newErrors.name = 'Máximo 40 caracteres';
+    } else if (/\d/.test(name)) {
+      newErrors.name = 'Não pode conter números';
+    } else if (/[^a-zA-Z\s]/.test(name)) {
+      newErrors.name = 'Caracteres especiais não permitidos';
+    } else if (/\s{2,}/.test(name)) {
+      newErrors.name = 'Não pode ter espaços duplicados';
+    }
+
+    // PREÇO
+    const price = formData.price;
+    if (!price) {
+      newErrors.price = 'Preço é obrigatório';
+    } else if (isNaN(price) || parseFloat(price) <= 0) {
+      newErrors.price = 'Deve ser um valor positivo';
+    }
+
+    // ESTOQUE
+    const stock = formData.stock_quantity;
+    if (!stock) {
+      newErrors.stock_quantity = 'Estoque é obrigatório';
+    } else if (isNaN(stock) || stock < 1 || stock > 999) {
+      newErrors.stock_quantity = 'Apenas números de 1 a 999';
+    }
+
+    // SKU
+    const sku = formData.sku.trim().toUpperCase();
+    if (!sku) {
+      newErrors.sku = 'SKU é obrigatório';
+    } else if (sku.length < 5 || sku.length > 20) {
+      newErrors.sku = 'Deve ter entre 5 e 20 caracteres';
+    } else if (!/^[A-Z0-9-]+$/.test(sku)) {
+      newErrors.sku = 'Apenas letras maiúsculas, números e hífen';
+    } else if (!/^[A-Z]/.test(sku)) {
+      newErrors.sku = 'Deve começar com letra maiúscula';
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  // retorna true se não tiver erro
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (!validateForm()) {
+      toast.error('Corrija os erros antes de salvar');
+      return;
+    }
+
     setLoading(true);
 
     try {
+      const payload = {
+        ...formData,
+        price: parseFloat(formData.price),
+        stock_quantity: parseInt(formData.stock_quantity),
+        sku: formData.sku.trim().toUpperCase(),
+      };
+
       const res = await fetch('/api/products', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(payload),
       });
 
-      let result;
-      try {
-        result = await res.json();
-      } catch {
-        toast.error('Resposta inválida da API');
-        setLoading(false);
-        return;
-      }
+      const result = await res.json();
 
       if (!res.ok) {
-        toast.error(result.message || 'Erro ao adicionar produto');
+        toast.error(result.message || 'Erro ao adicionar');
         setLoading(false);
         return;
       }
 
-      toast.success(result.message || 'Produto adicionado com sucesso!');
+      toast.success('Produto adicionado com sucesso!');
       onAdd?.();
       onClose();
     } catch (error) {
-      toast.error('Erro de rede');
+      toast.error('Erro de conexão');
     } finally {
       setLoading(false);
     }
@@ -88,6 +157,7 @@ export default function AddProductModal({ onClose, onAdd }) {
   return (
     <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
       <div className="w-full max-w-md mx-auto bg-slate-800 rounded-xl border border-slate-700 shadow-2xl flex flex-col" data-testid="add-product-modal">
+        
         <div className="p-6 border-b border-slate-700">
           <h2 className="text-2xl font-bold text-white flex items-center gap-2">
             <Package className="w-6 h-6 text-green-400" />
@@ -95,83 +165,108 @@ export default function AddProductModal({ onClose, onAdd }) {
           </h2>
         </div>
 
-        <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-6 space-y-5">
+        <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-6 space-y-4">
           {/* NOME */}
           <div>
-            <label className="flex items-center gap-2 text-slate-300 text-sm font-medium mb-2">
+            <label className="flex items-center gap-2 text-slate-300 text-sm font-medium mb-1">
               <Tag className="w-4 h-4" />
-              Nome
+              Nome <span className="text-red-500">*</span>
             </label>
             <input
               data-testid="add-product-name"
               name="name"
               value={formData.name}
               onChange={handleChange}
-              className="w-full px-4 py-3 rounded-lg bg-slate-700 border border-slate-600 text-white placeholder-slate-400 focus:outline-none focus:border-orange-500 transition"
-              placeholder="Ex: Mouse Gamer RGB"
-              required
+              className="w-full px-4 py-2.5 rounded-lg bg-slate-700 border border-slate-600 text-white placeholder-slate-400 focus:outline-none focus:border-orange-500 transition"
+              placeholder="Informe o nome do produto"
             />
+            {errors.name && (
+              <p data-testid="error-name" className="text-red-400 text-xs mt-1 flex items-center gap-1">
+                <AlertCircle className="w-3 h-3" /> {errors.name}
+              </p>
+            )}
           </div>
 
           {/* PREÇO */}
-          <div>
-            <label className="flex items-center gap-2 text-slate-300 text-sm font-medium mb-2">
-              <DollarSign className="w-4 h-4" />
-              Preço (R$)
-            </label>
-            <input
-              data-testid="add-product-price"
-              name="price"
-              type="number"
-              step="0.01"
-              value={formData.price}
-              onChange={handleChange}
-              className="w-full px-4 py-3 rounded-lg bg-slate-700 border border-slate-600 text-white placeholder-slate-400 focus:outline-none focus:border-orange-500 transition"
-              placeholder="R$ 299,90"
-              required
-            />
-          </div>
+        {/* PREÇO — VERSÃO CORRIGIDA E INDESTRUTÍVEL */}
+<div>
+  <label className="flex items-center gap-2 text-slate-300 text-sm font-medium mb-1">
+    <DollarSign className="w-4 h-4" />
+    Preço (R$) <span className="text-red-500">*</span>
+  </label>
+  <input
+    data-testid="edit-product-price"
+    name="price"
+    type="number"
+    step="0.01"
+    min="0.01"
+    max="999999.99"
+    value={formData.price}
+    onChange={(e) => {
+      const value = e.target.value;
+      // Bloqueia valores absurdos já no front
+      if (value === '' || (parseFloat(value) >= 0 && parseFloat(value) <= 999999.99)) {
+        handleChange(e);
+      }
+    }}
+    className="w-full px-4 py-2.5 rounded-lg bg-slate-700 border border-slate-600 text-white placeholder-slate-400 focus:outline-none focus:border-orange-500 transition"
+    placeholder="Informe o preço unitário do produto"
+  />
+  {errors.price && (
+    <p data-testid="error-price" className="text-red-400 text-xs mt-1 flex items-center gap-1">
+      <AlertCircle className="w-3 h-3" /> {errors.price}
+    </p>
+  )}
+</div>
 
           {/* ESTOQUE */}
           <div>
-            <label className="flex items-center gap-2 text-slate-300 text-sm font-medium mb-2">
+            <label className="flex items-center gap-2 text-slate-300 text-sm font-medium mb-1">
               <Package className="w-4 h-4" />
-              Estoque
+              Estoque <span className="text-red-500">*</span>
             </label>
             <input
               data-testid="add-product-stock"
               name="stock_quantity"
-              type="number"
+              type="text"
               value={formData.stock_quantity}
               onChange={handleChange}
-              className="w-full px-4 py-3 rounded-lg bg-slate-700 border border-slate-600 text-white placeholder-slate-400 focus:outline-none focus:border-orange-500 transition"
-              placeholder="50 unidades"
-              required
+              className="w-full px-4 py-2.5 rounded-lg bg-slate-700 border border-slate-600 text-white placeholder-slate-400 focus:outline-none focus:border-orange-500 transition"
+              placeholder="Apenas números entre 1 e 999"
             />
+            {errors.stock_quantity && (
+              <p data-testid="error-stock" className="text-red-400 text-xs mt-1 flex items-center gap-1">
+                <AlertCircle className="w-3 h-3" /> {errors.stock_quantity}
+              </p>
+            )}
           </div>
 
           {/* SKU */}
           <div>
-            <label className="flex items-center gap-2 text-slate-300 text-sm font-medium mb-2">
+            <label className="flex items-center gap-2 text-slate-300 text-sm font-medium mb-1">
               <Barcode className="w-4 h-4" />
-              SKU
+              SKU <span className="text-red-500">*</span>
             </label>
             <input
               data-testid="add-product-sku"
               name="sku"
               value={formData.sku}
               onChange={handleChange}
-              className="w-full px-4 py-3 rounded-lg bg-slate-700 border border-slate-600 text-white placeholder-slate-400 focus:outline-none focus:border-orange-500 transition"
-              placeholder="MGP-2024"
-              required
+              className="w-full px-4 py-2.5 rounded-lg bg-slate-700 border border-slate-600 text-white placeholder-slate-400 focus:outline-none focus:border-orange-500 transition uppercase"
+              placeholder="Ex: MGP-2024"
             />
+            {errors.sku && (
+              <p data-testid="error-sku" className="text-red-400 text-xs mt-1 flex items-center gap-1">
+                <AlertCircle className="w-3 h-3" /> {errors.sku}
+              </p>
+            )}
           </div>
 
           {/* CATEGORIA */}
           <div>
-            <label className="flex items-center gap-2 text-slate-300 text-sm font-medium mb-2">
+            <label className="flex items-center gap-2 text-slate-300 text-sm font-medium mb-1">
               <Hash className="w-4 h-4" />
-              Categoria
+              Categoria <span className="text-red-500">*</span>
             </label>
             <CustomSelect
               data-testid="add-product-category"
@@ -186,9 +281,9 @@ export default function AddProductModal({ onClose, onAdd }) {
 
           {/* FORNECEDOR */}
           <div>
-            <label className="flex items-center gap-2 text-slate-300 text-sm font-medium mb-2">
+            <label className="flex items-center gap-2 text-slate-300 text-sm font-medium mb-1">
               <Building2 className="w-4 h-4" />
-              Fornecedor
+              Fornecedor <span className="text-red-500">*</span>
             </label>
             <CustomSelect
               data-testid="add-product-supplier"
