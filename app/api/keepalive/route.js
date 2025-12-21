@@ -1,5 +1,9 @@
+export const dynamic = 'force-dynamic'
+
 import { supabase } from '@/lib/supabase'
 import { NextResponse } from 'next/server'
+
+
 
 /**
  * @swagger
