@@ -15,11 +15,9 @@ export async function GET() {
   try {
     const { error } = await supabase
       .from('keepalive')
-      .upsert({
-        id: 1,
+      .insert({
         last_ping: new Date().toISOString()
       })
-
     if (error) throw error
 
     return NextResponse.json({
