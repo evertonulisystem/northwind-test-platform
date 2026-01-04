@@ -1,0 +1,218 @@
+{
+	"info": {
+		"_postman_id": "e5e725d8-89e1-415c-817b-f7a06638d5fd",
+		"name": "Produtos",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "15307284"
+	},
+	"item": [
+		{
+			"name": "API OnLine",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "accept",
+						"value": "*/*"
+					}
+				],
+				"url": {
+					"raw": "https://northwind-test-platform.vercel.app/api/keepalive",
+					"protocol": "https",
+					"host": [
+						"northwind-test-platform",
+						"vercel",
+						"app"
+					],
+					"path": [
+						"api",
+						"keepalive"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Editar Produto",
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "accept",
+						"value": "*/*"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"name\": \"string\",\n  \"price\": 0,\n  \"stock_quantity\": 0,\n  \"sku\": \"string\",\n  \"category_id\": 0,\n  \"supplier_id\": 0\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://northwind-test-platform.vercel.app/api/products/72",
+					"protocol": "https",
+					"host": [
+						"northwind-test-platform",
+						"vercel",
+						"app"
+					],
+					"path": [
+						"api",
+						"products",
+						"72"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Excluir Produto",
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "accept",
+						"value": "*/*"
+					}
+				],
+				"url": {
+					"raw": "https://northwind-test-platform.vercel.app/api/products/71",
+					"protocol": "https",
+					"host": [
+						"northwind-test-platform",
+						"vercel",
+						"app"
+					],
+					"path": [
+						"api",
+						"products",
+						"71"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Listar por ID",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "accept",
+						"value": "application/json"
+					}
+				],
+				"url": {
+					"raw": "https://northwind-test-platform.vercel.app/api/products/71",
+					"protocol": "https",
+					"host": [
+						"northwind-test-platform",
+						"vercel",
+						"app"
+					],
+					"path": [
+						"api",
+						"products",
+						"71"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Listar Produtos",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "accept",
+						"value": "*/*"
+					}
+				],
+				"url": {
+					"raw": "https://northwind-test-platform.vercel.app/api/products?page=1&limit=10&search=ter&category_id=1&supplier_id=1",
+					"protocol": "https",
+					"host": [
+						"northwind-test-platform",
+						"vercel",
+						"app"
+					],
+					"path": [
+						"api",
+						"products"
+					],
+					"query": [
+						{
+							"key": "page",
+							"value": "1"
+						},
+						{
+							"key": "limit",
+							"value": "10"
+						},
+						{
+							"key": "search",
+							"value": "ter"
+						},
+						{
+							"key": "category_id",
+							"value": "1"
+						},
+						{
+							"key": "supplier_id",
+							"value": "1"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Cadastro de Produto",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "accept",
+						"value": "application/json"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"name\": \"Mouse Gamer RGB\",\r\n  \"price\": 299.9,\r\n  \"stock_quantity\": 50,\r\n  \"sku\": \"MGP-2024\",\r\n  \"category_id\": 0,\r\n  \"supplier_id\": 0\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://northwind-test-platform.vercel.app/api/products",
+					"protocol": "https",
+					"host": [
+						"northwind-test-platform",
+						"vercel",
+						"app"
+					],
+					"path": [
+						"api",
+						"products"
+					]
+				},
+				"description": "Generated from cURL: curl -X 'POST' \\\r\n  'https://northwind-test-platform.vercel.app/api/products' \\\r\n  -H 'accept: application/json' \\\r\n  -H 'Content-Type: application/json' \\\r\n  -d '{\r\n  \"name\": \"Mouse Gamer RGB\",\r\n  \"price\": 299.9,\r\n  \"stock_quantity\": 50,\r\n  \"sku\": \"MGP-2024\",\r\n  \"category_id\": 0,\r\n  \"supplier_id\": 0\r\n}'"
+			},
+			"response": []
+		}
+	]
+}
