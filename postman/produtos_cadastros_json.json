@@ -1,0 +1,162 @@
+[
+  {
+    "name": "Camiseta Básica Branca",
+    "price": 49.9,
+    "stock_quantity": 100,
+    "sku": "TSHIRT-BR-001",
+    "category_id": 1,
+    "supplier_id": 1
+  },
+  {
+    "name": "Camiseta Básica Preta",
+    "price": 49.9,
+    "stock_quantity": 120,
+    "sku": "TSHIRT-PR-002",
+    "category_id": 1,
+    "supplier_id": 1
+  },
+  {
+    "name": "Calça Jeans Azul",
+    "price": 129.9,
+    "stock_quantity": 80,
+    "sku": "JEANS-AZ-003",
+    "category_id": 2,
+    "supplier_id": 2
+  },
+  {
+    "name": "Calça Jeans Preta",
+    "price": 139.9,
+    "stock_quantity": 60,
+    "sku": "JEANS-PR-004",
+    "category_id": 2,
+    "supplier_id": 2
+  },
+  {
+    "name": "Tênis Esportivo Branco",
+    "price": 199.9,
+    "stock_quantity": 50,
+    "sku": "SHOES-BR-005",
+    "category_id": 3,
+    "supplier_id": 3
+  },
+  {
+    "name": "Tênis Esportivo Preto",
+    "price": 209.9,
+    "stock_quantity": 40,
+    "sku": "SHOES-PR-006",
+    "category_id": 3,
+    "supplier_id": 3
+  },
+  {
+    "name": "Jaqueta Jeans",
+    "price": 189.9,
+    "stock_quantity": 30,
+    "sku": "JACKET-JE-007",
+    "category_id": 4,
+    "supplier_id": 2
+  },
+  {
+    "name": "Jaqueta de Couro",
+    "price": 299.9,
+    "stock_quantity": 20,
+    "sku": "JACKET-CO-008",
+    "category_id": 4,
+    "supplier_id": 4
+  },
+  {
+    "name": "Moletom Cinza",
+    "price": 159.9,
+    "stock_quantity": 70,
+    "sku": "HOODIE-CZ-009",
+    "category_id": 5,
+    "supplier_id": 1
+  },
+  {
+    "name": "Moletom Preto",
+    "price": 159.9,
+    "stock_quantity": 65,
+    "sku": "HOODIE-PR-010",
+    "category_id": 5,
+    "supplier_id": 1
+  },
+  {
+    "name": "Boné Preto",
+    "price": 79.9,
+    "stock_quantity": 90,
+    "sku": "CAP-PR-011",
+    "category_id": 6,
+    "supplier_id": 5
+  },
+  {
+    "name": "Boné Azul",
+    "price": 79.9,
+    "stock_quantity": 85,
+    "sku": "CAP-AZ-012",
+    "category_id": 6,
+    "supplier_id": 5
+  },
+  {
+    "name": "Meia Cano Alto Branca",
+    "price": 19.9,
+    "stock_quantity": 200,
+    "sku": "SOCKS-BR-013",
+    "category_id": 7,
+    "supplier_id": 1
+  },
+  {
+    "name": "Meia Cano Alto Preta",
+    "price": 19.9,
+    "stock_quantity": 190,
+    "sku": "SOCKS-PR-014",
+    "category_id": 7,
+    "supplier_id": 1
+  },
+  {
+    "name": "Relógio Esportivo Digital",
+    "price": 249.9,
+    "stock_quantity": 35,
+    "sku": "WATCH-DG-015",
+    "category_id": 8,
+    "supplier_id": 6
+  },
+  {
+    "name": "Relógio Clássico Analógico",
+    "price": 349.9,
+    "stock_quantity": 25,
+    "sku": "WATCH-AN-016",
+    "category_id": 8,
+    "supplier_id": 6
+  },
+  {
+    "name": "Cinto de Couro Marrom",
+    "price": 89.9,
+    "stock_quantity": 55,
+    "sku": "BELT-MR-017",
+    "category_id": 9,
+    "supplier_id": 4
+  },
+  {
+    "name": "Cinto de Couro Preto",
+    "price": 89.9,
+    "stock_quantity": 50,
+    "sku": "BELT-PR-018",
+    "category_id": 9,
+    "supplier_id": 4
+  },
+  {
+    "name": "Mochila Escolar Preta",
+    "price": 149.9,
+    "stock_quantity": 45,
+    "sku": "BAG-PR-019",
+    "category_id": 10,
+    "supplier_id": 7
+  },
+  {
+    "name": "Mochila Esportiva Azul",
+    "price": 159.9,
+    "stock_quantity": 40,
+    "sku": "BAG-AZ-020",
+    "category_id": 10,
+    "supplier_id": 7
+  }
+]

@@ -1,0 +1,21 @@
+name,price,stock_quantity,sku,category_id,supplier_id
+Camiseta Básica Branca,49.9,100,TSHIRT-BR-001,1,1
+Camiseta Básica Preta,49.9,120,TSHIRT-PR-002,1,1
+Calça Jeans Azul,129.9,80,JEANS-AZ-003,2,2
+Calça Jeans Preta,139.9,60,JEANS-PR-004,2,2
+Tênis Esportivo Branco,199.9,50,SHOES-BR-005,3,3
+Tênis Esportivo Preto,209.9,40,SHOES-PR-006,3,3
+Jaqueta Jeans,189.9,30,JACKET-JE-007,4,2
+Jaqueta de Couro,299.9,20,JACKET-CO-008,4,4
+Moletom Cinza,159.9,70,HOODIE-CZ-009,5,1
+Moletom Preto,159.9,65,HOODIE-PR-010,5,1
+Boné Preto,79.9,90,CAP-PR-011,6,5
+Boné Azul,79.9,85,CAP-AZ-012,6,5
+Meia Cano Alto Branca,19.9,200,SOCKS-BR-013,7,1
+Meia Cano Alto Preta,19.9,190,SOCKS-PR-014,7,1
+Relógio Esportivo Digital,249.9,35,WATCH-DG-015,8,6
+Relógio Clássico Analógico,349.9,25,WATCH-AN-016,8,6
+Cinto de Couro Marrom,89.9,55,BELT-MR-017,9,4
+Cinto de Couro Preto,89.9,50,BELT-PR-018,9,4
+Mochila Escolar Preta,149.9,45,BAG-PR-019,10,7
+Mochila Esportiva Azul,159.9,40,BAG-AZ-020,10,7
