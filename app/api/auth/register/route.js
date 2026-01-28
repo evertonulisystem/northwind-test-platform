@@ -7,16 +7,43 @@ export const dynamic = "force-dynamic";
 
 
 /**
- * POST /api/auth/register
- * Registra um novo usuário no sistema
- * 
- * Padrão de respostas:
- * - 201: { data: { token, user }, mensagens: "Sucesso" }
- * - 400: { data: null, mensagens: ["Erro 1", "Erro 2"] }
- * - 409: { data: null, mensagens: ["Email já cadastrado"] }
- * - 500: { data: null, mensagens: ["Erro interno"] }
+ * @swagger
+ * /api/auth/register:
+ *   post:
+ *     summary: Registrar novo usuário
+ *     tags: [Autenticação]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/RegisterRequest'
+ *     responses:
+ *       201:
+ *         description: Usuário cadastrado com sucesso
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/AuthSuccessResponse'
+ *       400:
+ *         description: Dados inválidos
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *       409:
+ *         description: Email já cadastrado
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *       500:
+ *         description: Erro interno do servidor
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
  */
-
 export async function POST(request) {
   try {
     // 1. Extrair dados do corpo da requisição
