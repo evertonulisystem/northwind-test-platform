@@ -5,20 +5,37 @@ import bcrypt from 'bcryptjs';
 
 export const dynamic = "force-dynamic";
 
+
 /**
  * POST /api/auth/register
  * Registra um novo usuário no sistema
+ * 
+ * Padrão de respostas:
+ * - 201: { data: { token, user }, mensagens: "Sucesso" }
+ * - 400: { data: null, mensagens: ["Erro 1", "Erro 2"] }
+ * - 409: { data: null, mensagens: ["Email já cadastrado"] }
+ * - 500: { data: null, mensagens: ["Erro interno"] }
  */
+
 export async function POST(request) {
   try {
     // 1. Extrair dados do corpo da requisição
     const body = await request.json();
     const { full_name, email, password, confirmPassword } = body;
 
-    // 2. Validar campos obrigatórios
-    if (!full_name || !email || !password || !confirmPassword) {
+ // 2. Validar campos obrigatórios
+    const missingFields = [];
+    if (!full_name) missingFields.push('Nome completo é obrigatório');
+    if (!email) missingFields.push('Email é obrigatório');
+    if (!password) missingFields.push('Senha é obrigatória');
+    if (!confirmPassword) missingFields.push('Confirmação de senha é obrigatória');
+
+    if (missingFields.length > 0) {
       return Response.json(
-        { error: 'Todos os campos são obrigatórios' },
+        { 
+          data: null,
+          mensagens: missingFields
+        },
         { status: 400 }
       );
     }
@@ -26,7 +43,10 @@ export async function POST(request) {
     // 3. Validar nome
     if (full_name.trim().length < 2) {
       return Response.json(
-        { error: 'Nome deve ter no mínimo 2 caracteres' },
+        { 
+          data: null,
+          mensagens: ['Nome deve ter no mínimo 2 caracteres']
+        },
         { status: 400 }
       );
     }
@@ -35,7 +55,10 @@ export async function POST(request) {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
       return Response.json(
-        { error: 'Email inválido' },
+        { 
+          data: null,
+          mensagens: ['Formato de email incorreto. Exemplo: usuario@dominio.com']
+        },
         { status: 400 }
       );
     }
@@ -45,8 +68,8 @@ export async function POST(request) {
     if (passwordErrors.length > 0) {
       return Response.json(
         { 
-          error: 'Senha inválida', 
-          details: passwordErrors 
+          data: null,
+          mensagens: ['Senha inválida', ...passwordErrors]
         },
         { status: 400 }
       );
@@ -55,7 +78,10 @@ export async function POST(request) {
     // 6. Validar confirmação de senha
     if (password !== confirmPassword) {
       return Response.json(
-        { error: 'As senhas não coincidem' },
+        { 
+          data: null,
+          mensagens: ['As senhas não coincidem. Verifique e tente novamente']
+        },
         { status: 400 }
       );
     }
@@ -69,7 +95,10 @@ export async function POST(request) {
 
     if (existingUser) {
       return Response.json(
-        { error: 'Email já cadastrado' },
+        { 
+          data: null,
+          mensagens: ['Email já cadastrado. Tente fazer login ou use outro email']
+        },
         { status: 409 }
       );
     }
@@ -84,7 +113,7 @@ export async function POST(request) {
         full_name: full_name.trim(),
         email: email.toLowerCase().trim(),
         password_hash: passwordHash,
-        role: 'customer', // Padrão para novos usuários ver se pode na tabela users do supabase
+        role: 'customer', // Padrão para novos usuários
         is_active: true, // Ativado automaticamente
         last_login: null
       })
@@ -94,7 +123,10 @@ export async function POST(request) {
     if (insertError) {
       console.error('Erro ao inserir usuário:', insertError);
       return Response.json(
-        { error: 'Erro ao criar usuário' },
+        { 
+          data: null,
+          mensagens: ['Erro ao criar usuário. Tente novamente mais tarde']
+        },
         { status: 500 }
       );
     }
@@ -104,20 +136,25 @@ export async function POST(request) {
 
     // 11. Retornar sucesso
     return Response.json({
-      message: 'Usuário cadastrado com sucesso',
-      token,
-      user: {
-        id: newUser.id,
-        full_name: newUser.full_name,
-        email: newUser.email,
-        role: newUser.role
-      }
+      data: {
+        token,
+        user: {
+          id: newUser.id,
+          full_name: newUser.full_name,
+          email: newUser.email,
+          role: newUser.role
+        }
+      },
+      mensagens: 'Usuário cadastrado com sucesso'
     }, { status: 201 });
 
   } catch (error) {
     console.error('Erro no registro:', error);
     return Response.json(
-      { error: 'Erro interno do servidor' },
+      { 
+        data: null,
+        mensagens: ['Erro interno do servidor. Tente novamente mais tarde']
+      },
       { status: 500 }
     );
   }
