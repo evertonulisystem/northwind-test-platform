@@ -9,8 +9,7 @@ const PUBLIC_ROUTES = [
   '/api/keepalive',
   '/api/docs', 
   '/api/swagger.json',
-  //'/api-docs', 
-  // Se tiver Swagger UI
+  '/api-docs',   // Se tiver Swagger UI
 ];
 
 /**
@@ -36,8 +35,11 @@ export function middleware(request) {
   // 3. Verificar token JWT
   const authHeader = request.headers.get('authorization');
   
-  // 3.1. Token ausente
+  console.log('🔍 Middleware - Auth Header:', authHeader); // 👈 DEBUG
+
+  // 3.1. Token ausente // 4. Verificar se header existe e começa com "Bearer "
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
+     console.log('❌ Middleware - Token ausente ou formato inválido');
     return NextResponse.json(
       { 
         data: null,
@@ -49,9 +51,13 @@ export function middleware(request) {
 
   // 3.2. Extrair e verificar token
   const token = authHeader.substring(7);
+
+  console.log('✅ Middleware - Token extraído:', token.substring(0, 20) + '...'); // 👈 DEBUG
+
   const payload = verifyToken(token);
   
   if (!payload) {
+     console.log('❌ Middleware - Token inválido ou expirado');
     return NextResponse.json(
       { 
         data: null,
@@ -62,6 +68,7 @@ export function middleware(request) {
   }
 
   // 4. Adicionar usuário ao request (para uso nos handlers)
+   console.log('✅ Middleware - Token válido, usuário:', payload.email);
   request.user = payload;
 
   return NextResponse.next();
