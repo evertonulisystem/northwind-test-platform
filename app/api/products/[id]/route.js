@@ -1,6 +1,7 @@
 // app/api/products/[id]/route.js
 import { supabase } from '@/lib/supabase';
 import { NextResponse } from 'next/server';
+import { verifyToken, getTokenFromRequest } from '@/lib/jwt';
 
 // === FUNÇÃO DE SLUG ===
 function generateSlug(name) {
@@ -59,6 +60,29 @@ function generateSlug(name) {
 // === PUT (EDITAR) - VERSÃO FINAL COM DEBUG ===
 export async function PUT(request, { params }) {
   try {
+    // Verificar autenticação
+    const token = getTokenFromRequest(request);
+    if (!token) {
+      return NextResponse.json(
+        { 
+          data: null,
+          mensagens: ['Token ausente'] 
+        }, 
+        { status: 401 }
+      );
+    }
+
+    const payload = verifyToken(token);
+    if (!payload) {
+      return NextResponse.json(
+        { 
+          data: null,
+          mensagens: ['Token inválido'] 
+        }, 
+        { status: 401 }
+      );
+    }
+
     const { id } = params;
     const body = await request.json();
 
@@ -222,6 +246,29 @@ export async function PUT(request, { params }) {
 // === DELETE (CORRIGIDO - PADRÃO data + message) ===
 export async function DELETE(request, { params }) {
   try {
+    // Verificar autenticação
+    const token = getTokenFromRequest(request);
+    if (!token) {
+      return NextResponse.json(
+        { 
+          data: null,
+          mensagens: ['Token ausente'] 
+        }, 
+        { status: 401 }
+      );
+    }
+
+    const payload = verifyToken(token);
+    if (!payload) {
+      return NextResponse.json(
+        { 
+          data: null,
+          mensagens: ['Token inválido'] 
+        }, 
+        { status: 401 }
+      );
+    }
+
     const { id } = params;
     const idNum = parseInt(id, 10);
 

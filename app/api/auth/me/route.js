@@ -1,19 +1,24 @@
 // app/api/auth/me/route.js
 import { supabase } from '@/lib/supabase';
-import { verifyToken } from '@/lib/jwt';
-import { cookies } from 'next/headers';
+import { verifyToken, getTokenFromRequest } from '@/lib/jwt';
 
 export const dynamic = "force-dynamic";
 
-export async function GET() {
-  const token = cookies().get('auth-token')?.value;
+export async function GET(request) {
+  const token = getTokenFromRequest(request);
   if (!token) {
-    return Response.json({ error: 'Não autorizado' }, { status: 401 });
+    return Response.json({ 
+      data: null,
+      mensagens: ['Token ausente'] 
+    }, { status: 401 });
   }
 
   const payload = verifyToken(token);
   if (!payload) {
-    return Response.json({ error: 'Token inválido' }, { status: 401 });
+    return Response.json({ 
+      data: null,
+      mensagens: ['Token inválido'] 
+    }, { status: 401 });
   }
 
   const { data: user, error } = await supabase
@@ -22,12 +27,18 @@ export async function GET() {
       id, email, full_name, role, phone, address, birth_date, 
       created_at, last_login, is_active
     `)
-    .eq('id', payload.sub)
+    .eq('id', payload.id)
     .single();
 
   if (error || !user) {
-    return Response.json({ error: 'Usuário não encontrado' }, { status: 404 });
+    return Response.json({ 
+      data: null,
+      mensagens: ['Usuário não encontrado'] 
+    }, { status: 404 });
   }
 
-  return Response.json({ user });
+  return Response.json({ 
+    data: { user },
+    mensagens: 'Dados do usuário recuperados com sucesso'
+  });
 }

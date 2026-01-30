@@ -1,6 +1,7 @@
 // app/api/products/route.js
 import { supabase } from '@/lib/supabase';
 import { NextResponse } from 'next/server';
+import { verifyToken, getTokenFromRequest } from '@/lib/jwt';
 
 /**
  * @swagger
@@ -149,6 +150,29 @@ export async function GET(request) {
 // === POST (ADICIONAR) ===
 export async function POST(request) {
   try {
+    // Verificar autenticação
+    const token = getTokenFromRequest(request);
+    if (!token) {
+      return NextResponse.json(
+        { 
+          data: null,
+          mensagens: ['Token ausente'] 
+        }, 
+        { status: 401 }
+      );
+    }
+
+    const payload = verifyToken(token);
+    if (!payload) {
+      return NextResponse.json(
+        { 
+          data: null,
+          mensagens: ['Token inválido'] 
+        }, 
+        { status: 401 }
+      );
+    }
+
     const body = await request.json();
     const slug = body.slug || generateSlug(body.name);
 
