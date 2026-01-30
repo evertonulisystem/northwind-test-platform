@@ -5,8 +5,15 @@ import { verifyToken, getTokenFromRequest } from '@/lib/jwt';
 export const dynamic = "force-dynamic";
 
 export async function GET(request) {
+  console.log('=== DEBUG /api/auth/me ===');
+  console.log('Headers:', Object.fromEntries(request.headers.entries()));
+  
   const token = getTokenFromRequest(request);
+  console.log('Token extraído:', token ? 'SIM' : 'NÃO');
+  console.log('Auth header:', request.headers.get('authorization'));
+  
   if (!token) {
+    console.log('❌ Token ausente - retornando erro 401');
     return Response.json({ 
       data: null,
       mensagens: ['Token ausente'] 
@@ -14,7 +21,10 @@ export async function GET(request) {
   }
 
   const payload = verifyToken(token);
+  console.log('Payload do token:', payload);
+
   if (!payload) {
+    console.log('❌ Token inválido - retornando erro 401');
     return Response.json({ 
       data: null,
       mensagens: ['Token inválido'] 
