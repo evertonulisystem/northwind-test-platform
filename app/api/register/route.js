@@ -1,7 +1,7 @@
 // app/api/auth/register/route.js
 import { NextResponse } from 'next/server';
 import { hash } from 'bcryptjs'; // Criptografia de senha
-import { validateEmail, validatePassword } from '@/lib/__validators'; // Reutilizável
+import { validateEmail, validatePassword } from '@/lib/validators'; // Reutilizável
 
 // Mock database (substituir por Prisma/Sequelize em produção)
 const users = []; // Em produção: import db from '@/lib/db'
