@@ -1,15 +1,16 @@
 // app/api/auth/register/route.js
 import { NextResponse } from 'next/server';
-import { hash } from 'bcryptjs'; // Criptografia de senha
-import { validateEmail, validatePassword } from '@/lib/validators'; // Reutilizável
+import { hash } from 'bcryptjs';
+import { generateToken } from '@/lib/jwt'; // 👈 IMPORTAR generateToken
+import { validateEmail, validatePassword } from '@/lib/validators';
 
 // Mock database (substituir por Prisma/Sequelize em produção)
-const users = []; // Em produção: import db from '@/lib/db'
+const users = [];
 
 export async function POST(request) {
   try {
     const body = await request.json();
-    const { email, password } = body;
+    const { email, password, full_name } = body;
 
     // VALIDAÇÃO 1: Campos obrigatórios
     if (!email || !password) {
@@ -45,7 +46,7 @@ export async function POST(request) {
       );
     }
 
-    // CRIPTOGRAFAR senha (CRUCIAL para segurança)
+    // CRIPTOGRAFAR senha
     const hashedPassword = await hash(password, 12);
 
     // CRIAR usuário
@@ -53,16 +54,37 @@ export async function POST(request) {
       id: crypto.randomUUID(),
       email,
       password: hashedPassword,
+      full_name: full_name || email.split('@')[0],
+      role: 'user',
+      is_active: true,
       createdAt: new Date().toISOString()
     };
 
-    users.push(newUser); // Em produção: await db.user.create({ ... })
+    users.push(newUser);
 
+    // 🔥 GERAR TOKEN JWT (ISSO ESTAVA FALTANDO!)
+    const token = generateToken({
+      id: newUser.id,
+      email: newUser.email,
+      role: newUser.role
+    });
+
+    console.log('✅ Usuário registrado com sucesso:', newUser.email);
+
+    // RETORNAR token junto com os dados
     return NextResponse.json(
       {
         success: true,
         message: 'User created successfully',
-        userId: newUser.id
+        data: {
+          user: {
+            id: newUser.id,
+            email: newUser.email,
+            full_name: newUser.full_name,
+            role: newUser.role
+          },
+          token // 👈 TOKEN JWT AQUI!
+        }
       },
       { status: 201 }
     );
