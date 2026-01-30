@@ -4,6 +4,44 @@ import bcrypt from 'bcryptjs';
 
 export const dynamic = "force-dynamic";
 
+/**
+ * @swagger
+ * /api/auth/login:
+ *   post:
+ *     summary: Realiza login de usuário
+ *     tags: [Autenticação]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/LoginRequest'
+ *     responses:
+ *       200:
+ *         description: Login realizado com sucesso
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/AuthSuccessResponse'
+ *       401:
+ *         description: Email ou senha inválidos
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *       403:
+ *         description: Usuário inativo
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *       500:
+ *         description: Erro interno do servidor
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ */
 export async function POST(request) {
   try {
     const body = await request.json();
@@ -11,7 +49,10 @@ export async function POST(request) {
 
     if (!email || !password) {
       return Response.json(
-        { error: 'Email e senha são obrigatórios' },
+        { 
+          data: null,
+          mensagens: ['Email e senha são obrigatórios']
+        },
         { status: 400 }
       );
     }
@@ -25,7 +66,10 @@ export async function POST(request) {
 
     if (error || !user) {
       return Response.json(
-        { error: 'Email ou senha inválidos' },
+        { 
+          data: null,
+          mensagens: ['Email ou senha inválidos']
+        },
         { status: 401 }
       );
     }
@@ -33,7 +77,10 @@ export async function POST(request) {
     // Verifica se usuário está ativo
     if (!user.is_active) {
       return Response.json(
-        { error: 'Usuário inativo' },
+        { 
+          data: null,
+          mensagens: ['Usuário inativo']
+        },
         { status: 403 }
       );
     }
@@ -43,7 +90,10 @@ export async function POST(request) {
     
     if (!validPassword) {
       return Response.json(
-        { error: 'Email ou senha inválidos' },
+        { 
+          data: null,
+          mensagens: ['Email ou senha inválidos']
+        },
         { status: 401 }
       );
     }
@@ -58,20 +108,25 @@ export async function POST(request) {
     const token = generateToken(user);
 
     return Response.json({
-      message: 'Login realizado com sucesso',
-      token,
-      user: {
-        id: user.id,
-        email: user.email,
-        full_name: user.full_name,
-        role: user.role
-      }
+      data: {
+        token,
+        user: {
+          id: user.id,
+          email: user.email,
+          full_name: user.full_name,
+          role: user.role
+        }
+      },
+      mensagens: 'Login realizado com sucesso'
     }, { status: 200 });
 
   } catch (error) {
     console.error('Erro no login:', error);
     return Response.json(
-      { error: 'Erro interno do servidor' },
+      { 
+        data: null,
+        mensagens: ['Erro interno do servidor']
+      },
       { status: 500 }
     );
   }
