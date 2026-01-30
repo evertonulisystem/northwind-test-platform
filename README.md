@@ -45,3 +45,4 @@ npm install bcryptjs jsonwebtoken
 npm install -D @types/bcryptjs @types/jsonwebtoken
 
 # simulação ultimo commit
+Completar ultima informação do commit
