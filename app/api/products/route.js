@@ -216,6 +216,30 @@ export async function POST(request) {
           { status: 409 }
         );
       }
+      if (error.message.includes('products_category_id_fkey')) {
+        return NextResponse.json(
+          { data: null, message: 'Categoria informada não existe. Por favor, escolha uma categoria válida.' },
+          { status: 400 }
+        );
+      }
+      if (error.message.includes('products_supplier_id_fkey')) {
+        return NextResponse.json(
+          { data: null, message: 'Fornecedor informado não existe. Por favor, escolha um fornecedor válido.' },
+          { status: 400 }
+        );
+      }
+      if (error.message.includes('null value in column')) {
+        return NextResponse.json(
+          { data: null, message: 'Campos obrigatórios não foram preenchidos. Verifique nome, preço, estoque e SKU.' },
+          { status: 400 }
+        );
+      }
+      if (error.message.includes('invalid input syntax')) {
+        return NextResponse.json(
+          { data: null, message: 'Formato de dados inválido. Verifique se os valores estão corretos.' },
+          { status: 400 }
+        );
+      }
       throw error;
     }
 
