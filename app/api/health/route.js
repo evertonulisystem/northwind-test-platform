@@ -223,21 +223,12 @@ export async function GET() {
 /**
  * @swagger
  * /api/health:
- *   options:
+ *   get:
  *     summary: Verificar disponibilidade do health check
  *     tags: [Health]
  *     responses:
  *       200:
- *         description: Endpoint disponível
+ *         description: Serviço disponível
+ *       503:
+ *         description: Serviço indisponível
  */
-export async function OPTIONS() {
-  return new NextResponse(null, {
-    status: 200,
-    headers: {
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Methods': 'GET, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-      'Access-Control-Max-Age': '86400'
-    }
-  });
-}
