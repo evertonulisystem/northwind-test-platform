@@ -25,23 +25,46 @@ export default function ProductsPage() {
 
   const [debouncedName] = useDebounce(searchName, 400);
 
-  // Listas derivadas
-  const categories = Array.from(new Set(
-    allProducts
-      .filter(p => p.name?.toLowerCase().includes(debouncedName.toLowerCase()))
-      .map(p => p.categories?.name)
-      .filter(Boolean)
-  )).map(name => ({ name }));
+  // Estados para categorias e fornecedores da API
+  const [categories, setCategories] = useState([]);
+  const [suppliers, setSuppliers] = useState([]);
 
-  const suppliers = Array.from(new Set(
-    allProducts
-      .filter(p => 
-        p.name?.toLowerCase().includes(debouncedName.toLowerCase()) &&
-        (!selectedCategory || p.categories?.name === selectedCategory)
-      )
-      .map(p => p.suppliers?.company_name)
-      .filter(Boolean)
-  )).map(name => ({ company_name: name }));
+  // Funções para buscar categorias e fornecedores da API
+  const fetchCategories = useCallback(async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const headers = { 'Content-Type': 'application/json' };
+      
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+      
+      const res = await fetch('/api/categories', { headers });
+      const result = await res.json();
+      setCategories(result.data || []);
+      console.log('🐛 DEBUG CATEGORIES - Carregadas:', result.data?.length || 0);
+    } catch (error) {
+      console.error('🐛 DEBUG CATEGORIES - Erro:', error);
+    }
+  }, []);
+
+  const fetchSuppliers = useCallback(async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const headers = { 'Content-Type': 'application/json' };
+      
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+      
+      const res = await fetch('/api/suppliers', { headers });
+      const result = await res.json();
+      setSuppliers(result.data || []);
+      console.log('🐛 DEBUG SUPPLIERS - Carregados:', result.data?.length || 0);
+    } catch (error) {
+      console.error('🐛 DEBUG SUPPLIERS - Erro:', error);
+    }
+  }, []);
 
   const [showAddModal, setShowAddModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
@@ -90,7 +113,9 @@ export default function ProductsPage() {
 
   useEffect(() => {
     fetchAllProducts();
-  }, [fetchAllProducts]);
+    fetchCategories();
+    fetchSuppliers();
+  }, [fetchAllProducts, fetchCategories, fetchSuppliers]);
 
   // Filtra e pagina os produtos
   useEffect(() => {
@@ -217,7 +242,7 @@ export default function ProductsPage() {
               </div>
 
               {/* CATEGORIA */}
-              {debouncedName && categories.length > 0 && (
+              {categories.length > 0 && (
                 <div className="relative min-w-[240px]">
                   <select
                     value={selectedCategory}
@@ -226,7 +251,7 @@ export default function ProductsPage() {
                   >
                     <option value="">Todas as categorias</option>
                     {categories.map(cat => (
-                      <option key={cat.name} value={cat.name}>{cat.name}</option>
+                      <option key={cat.id || cat.name} value={cat.name}>{cat.name}</option>
                     ))}
                   </select>
                   <ChevronDown className="absolute right-3 top-4 w-5 h-5 text-slate-400 pointer-events-none" />
@@ -234,7 +259,7 @@ export default function ProductsPage() {
               )}
 
               {/* FORNECEDOR */}
-              {selectedCategory && suppliers.length > 0 && (
+              {suppliers.length > 0 && (
                 <div className="relative min-w-[240px]">
                   <select
                     value={selectedSupplier}
@@ -243,7 +268,7 @@ export default function ProductsPage() {
                   >
                     <option value="">Todos os fornecedores</option>
                     {suppliers.map(sup => (
-                      <option key={sup.company_name} value={sup.company_name}>{sup.company_name}</option>
+                      <option key={sup.id || sup.company_name} value={sup.id || sup.company_name}>{sup.company_name}</option>
                     ))}
                   </select>
                   <ChevronDown className="absolute right-3 top-4 w-5 h-5 text-slate-400 pointer-events-none" />
