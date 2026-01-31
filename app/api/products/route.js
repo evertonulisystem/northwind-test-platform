@@ -179,7 +179,34 @@ export async function POST(request) {
       );
     }
 
-    const body = await request.json();
+    let body;
+    try {
+      body = await request.json();
+    } catch (jsonError) {
+      return NextResponse.json(
+        { data: null, message: 'Dados inválidos. Verifique se todos os campos foram preenchidos corretamente.' },
+        { status: 400 }
+      );
+    }
+
+    if (!body || Object.keys(body).length === 0) {
+      return NextResponse.json(
+        { data: null, message: 'Nenhum dado informado. Preencha os campos do produto.' },
+        { status: 400 }
+      );
+    }
+
+    // Validação de campos obrigatórios
+    const requiredFields = ['name', 'price', 'stock_quantity', 'sku', 'category_id', 'supplier_id'];
+    const missingFields = requiredFields.filter(field => !body[field]);
+    
+    if (missingFields.length > 0) {
+      return NextResponse.json(
+        { data: null, message: `Campos obrigatórios não preenchidos: ${missingFields.join(', ')}.` },
+        { status: 400 }
+      );
+    }
+
     const slug = body.slug || generateSlug(body.name);
 
     // VERIFICA DUPLICIDADE
