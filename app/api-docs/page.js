@@ -23,5 +23,17 @@ export default function ApiDocs() {
     );
   }
 
-  return <SwaggerUI spec={spec} />;
+  return (
+    <SwaggerUI 
+      spec={spec}
+      requestInterceptor={(request) => {
+        // Adiciona automaticamente o token se estiver no localStorage
+        const token = localStorage.getItem('swagger_token');
+        if (token) {
+          request.headers.Authorization = `Bearer ${token}`;
+        }
+        return request;
+      }}
+    />
+  );
 }

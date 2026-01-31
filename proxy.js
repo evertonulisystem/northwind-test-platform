@@ -8,7 +8,6 @@ const PUBLIC_ROUTES = [
   '/api/docs', 
   '/api/swagger.json',
   '/api-docs',
-  '/api/products',
   '/api/categories',
   '/api/suppliers',
   '/api/debug',
