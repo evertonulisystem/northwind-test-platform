@@ -4,12 +4,12 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useDebounce } from 'use-debounce';
 import toast from 'react-hot-toast';
-import RulesModal from '@/components/RulesModal';
-import ConfirmModal from '@/components/ConfirmModal';
-import AddProductModal from '@/components/AddProductModal';
-import EditProductModal from '@/components/EditProductModal';
+import RulesModal from '@/components/RulesModal.jsx';
+import ConfirmModal from '@/components/ConfirmModal.jsx';
+import AddProductModal from '@/components/AddProductModal.jsx';
+import EditProductModal from '@/components/EditProductModal.jsx';
 import { AlertTriangle, Plus, Edit, Trash2, Search, X, ChevronDown } from 'lucide-react';
-import ProductDetailsModal from '@/components/ProductDetailsModal';
+import ProductDetailsModal from '@/components/ProductDetailsModal.jsx';
 
 export default function ProductsPage() {
   const [products, setProducts] = useState([]);
@@ -51,7 +51,7 @@ export default function ProductsPage() {
   const [deleteId, setDeleteId] = useState(null);
 
   const [showDetails, setShowDetails] = useState(false);
-const [selectedProduct, setSelectedProduct] = useState(null);
+  const [selectedProduct, setSelectedProduct] = useState(null);
 
   const ITEMS_PER_PAGE = 10;
 
@@ -59,10 +59,29 @@ const [selectedProduct, setSelectedProduct] = useState(null);
   const fetchAllProducts = useCallback(async () => {
     try {
       setLoading(true);
-      const res = await fetch('/api/products?limit=1000', { cache: 'no-store' });
+      console.log('🐛 DEBUG PRODUCTS - Buscando produtos...');
+      
+      const token = localStorage.getItem('token');
+      const headers = { 'Content-Type': 'application/json' };
+      
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+        console.log('🐛 DEBUG PRODUCTS - Token encontrado, adicionando ao header');
+      } else {
+        console.log('🐛 DEBUG PRODUCTS - Nenhum token encontrado');
+      }
+      
+      const res = await fetch('/api/products?limit=1000', { 
+        cache: 'no-store',
+        headers
+      });
+      console.log('🐛 DEBUG PRODUCTS - Response status:', res.status);
       const result = await res.json();
+      console.log('🐛 DEBUG PRODUCTS - Dados recebidos:', result);
       setAllProducts(result.data || []);
+      console.log('🐛 DEBUG PRODUCTS - Produtos setados:', result.data?.length || 0);
     } catch (error) {
+      console.error('🐛 DEBUG PRODUCTS - Erro:', error);
       toast.error('Erro ao carregar produtos');
     } finally {
       setLoading(false);
