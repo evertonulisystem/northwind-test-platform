@@ -47,27 +47,26 @@ export async function POST(request) {
     let body;
     let email, password;
 
-    // Tentar diferentes formatos de parsing
+    // Lê o body apenas uma vez como texto
+    const text = await request.text();
+    console.log('🐛 DEBUG LOGIN - Raw body:', text);
+
+    // Tenta fazer parse como JSON primeiro
     try {
-      // Primeiro tenta JSON
-      body = await request.json();
-      console.log('🐛 DEBUG LOGIN - Body JSON:', body);
+      body = JSON.parse(text);
+      console.log('🐛 DEBUG LOGIN - Parsed as JSON:', body);
       email = body.email;
       password = body.password;
     } catch (jsonError) {
-      console.log('🐛 DEBUG LOGIN - JSON failed, trying text...');
+      console.log('🐛 DEBUG LOGIN - JSON failed, trying form-data...');
       
-      // Se JSON falhar, tenta text (form-data)
-      const text = await request.text();
-      console.log('🐛 DEBUG LOGIN - Raw text:', text);
-      
-      // Parse de form-data: email=test&password=123
+      // Se JSON falhar, tenta parse como form-data
       const params = new URLSearchParams(text);
       email = params.get('email');
       password = params.get('password');
       
       body = { email, password };
-      console.log('🐛 DEBUG LOGIN - Parsed form-data:', { email, password });
+      console.log('🐛 DEBUG LOGIN - Parsed as form-data:', { email, password });
     }
 
     console.log('🐛 DEBUG LOGIN - Final parsed data:', { email, password });
