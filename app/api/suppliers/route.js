@@ -194,7 +194,7 @@ export async function POST(request) {
       );
     }
 
-    if (!uf || !uf.trim()) {
+    if (!state || !state.trim()) {
       return NextResponse.json(
         { data: null, message: 'UF do fornecedor é obrigatória.' },
         { status: 400 }
