@@ -33,6 +33,10 @@ import { verifyToken, getTokenFromRequest } from '@/lib/jwt';
 // app/api/products/route.js → GET FINAL (FUNCIONA COM TEXTO EM NOME, CATEGORIA E FORNECEDOR)
 // app/api/products/route.js → VERSÃO FINAL QUE FUNCIONA 100%
 export async function GET(request) {
+  console.log('=== DEBUG GET /api/products ===');
+  console.log('URL:', request.url);
+  console.log('Headers:', Object.fromEntries(request.headers.entries()));
+  
   try {
     const { searchParams } = new URL(request.url);
     const page = parseInt(searchParams.get('page') || '1', 10);
@@ -72,6 +76,8 @@ export async function GET(request) {
       console.error('Erro Supabase:', error);
       throw error;
     }
+
+    console.log('Dados retornados:', data?.length || 0, 'produtos');
 
     return NextResponse.json({
       data: data || [],
