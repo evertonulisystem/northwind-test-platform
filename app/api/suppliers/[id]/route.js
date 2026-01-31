@@ -1,57 +1,52 @@
-// app/api/suppliers/route.js
+// app/api/suppliers/[id]/route.js
 import { supabase } from '@/lib/supabase';
 import { NextResponse } from 'next/server';
 import { verifyToken, getTokenFromRequest } from '@/lib/jwt';
 
 /**
  * @swagger
- * /api/suppliers:
+ * /api/suppliers/{id}:
  *   get:
- *     summary: Lista todos os fornecedores
+ *     summary: Lista produtos de um fornecedor
  *     tags: [Suppliers]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
  *     responses:
  *       200:
- *         description: Lista de fornecedores
+ *         description: Lista de produtos do fornecedor
  */
-export async function GET(request) {
+export async function GET(request, { params }) {
   try {
-    // Verificar autenticação
-    const token = getTokenFromRequest(request);
-    if (!token) {
+    const resolvedParams = await params;
+    const { id } = resolvedParams;
+    const idNum = parseInt(id, 10);
+
+    if (isNaN(idNum) || idNum <= 0) {
       return NextResponse.json(
-        { 
-          data: null,
-          mensagens: ['Token ausente'] 
-        }, 
-        { status: 401 }
+        { data: null, message: 'ID inválido' },
+        { status: 400 }
       );
     }
 
-    const payload = verifyToken(token);
-    if (!payload) {
-      return NextResponse.json(
-        { 
-          data: null,
-          mensagens: ['Token inválido'] 
-        }, 
-        { status: 401 }
-      );
-    }
+    const { data: products, error } = await supabase
+      .from('products')
+      .select(`
+        id, name, price, stock_quantity, sku,
+        categories (name)
+      `)
+      .eq('supplier_id', idNum)
+      .order('name');
 
-    const { data, error } = await supabase
-      .from('suppliers')
-      .select('*')
-      .order('company_name', { ascending: true });
+    if (error) return NextResponse.json({ error: error.message }, { status: 500 });
 
-    if (error) throw error;
-
-    return NextResponse.json(
-      { data, message: 'Fornecedores carregados com sucesso!' },
-      { status: 200 }
-    );
+    return NextResponse.json({ products });
   } catch (error) {
     return NextResponse.json(
-      { data: null, message: 'Erro ao carregar fornecedores' },
+      { data: null, message: 'Erro ao buscar produtos do fornecedor' },
       { status: 500 }
     );
   }
@@ -59,10 +54,16 @@ export async function GET(request) {
 
 /**
  * @swagger
- * /api/suppliers:
- *   post:
- *     summary: Adiciona um novo fornecedor
+ * /api/suppliers/{id}:
+ *   put:
+ *     summary: Atualiza um fornecedor existente
  *     tags: [Suppliers]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
  *     requestBody:
  *       required: true
  *       content:
@@ -104,14 +105,16 @@ export async function GET(request) {
  *                 pattern: "^[A-Z]{2}$"
  *                 example: "SP"
  *     responses:
- *       201:
- *         description: Fornecedor criado
+ *       200:
+ *         description: Fornecedor atualizado
  *       400:
  *         description: Dados inválidos
+ *       404:
+ *         description: Fornecedor não encontrado
  *       409:
  *         description: Email ou CNPJ duplicado
  */
-export async function POST(request) {
+export async function PUT(request, { params }) {
   try {
     // Verificar autenticação
     const token = getTokenFromRequest(request);
@@ -136,6 +139,17 @@ export async function POST(request) {
       );
     }
 
+    const resolvedParams = await params;
+    const { id } = resolvedParams;
+    const idNum = parseInt(id, 10);
+
+    if (isNaN(idNum) || idNum <= 0) {
+      return NextResponse.json(
+        { data: null, message: 'ID inválido' },
+        { status: 400 }
+      );
+    }
+
     let body;
     try {
       body = await request.json();
@@ -155,9 +169,6 @@ export async function POST(request) {
 
     // Validação de campos obrigatórios
     const { company_name, contact_name, email, phone, cnpj, uf } = body;
-    
-    console.log('🐛 DEBUG POST /api/suppliers');
-    console.log('Body recebido:', body);
     
     if (!company_name || !company_name.trim()) {
       return NextResponse.json(
@@ -264,37 +275,56 @@ export async function POST(request) {
       );
     }
 
-    // VERIFICA DUPLICIDADE (email)
-    const { data: emailExisting } = await supabase
+    // VERIFICA SE EXISTE
+    const { data: existing, error: checkError } = await supabase
+      .from('suppliers')
+      .select('id')
+      .eq('id', idNum)
+      .maybeSingle();
+
+    if (checkError) throw checkError;
+
+    if (!existing) {
+      return NextResponse.json(
+        { data: null, message: 'Fornecedor não encontrado.' },
+        { status: 404 }
+      );
+    }
+
+    // VERIFICA DUPLICIDADE (email) - exceto a si mesmo
+    const { data: emailDuplicate } = await supabase
       .from('suppliers')
       .select('id')
       .eq('email', email.trim().toLowerCase())
+      .neq('id', idNum)
       .maybeSingle();
 
-    if (emailExisting) {
+    if (emailDuplicate) {
       return NextResponse.json(
         { data: null, message: 'Já existe um fornecedor com este e-mail.' },
         { status: 409 }
       );
     }
 
-    // VERIFICA DUPLICIDADE (cnpj)
-    const { data: cnpjExisting } = await supabase
+    // VERIFICA DUPLICIDADE (cnpj) - exceto a si mesmo
+    const { data: cnpjDuplicate } = await supabase
       .from('suppliers')
       .select('id')
       .eq('cnpj', cleanCnpj)
+      .neq('id', idNum)
       .maybeSingle();
 
-    if (cnpjExisting) {
+    if (cnpjDuplicate) {
       return NextResponse.json(
         { data: null, message: 'Já existe um fornecedor com este CNPJ.' },
         { status: 409 }
       );
     }
 
+    // ATUALIZA
     const { data, error } = await supabase
       .from('suppliers')
-      .insert({
+      .update({
         company_name: company_name.trim(),
         contact_name: contact_name.trim(),
         email: email.trim().toLowerCase(),
@@ -302,6 +332,7 @@ export async function POST(request) {
         cnpj: cleanCnpj,
         uf: uf.trim().toUpperCase()
       })
+      .eq('id', idNum)
       .select()
       .single();
 
@@ -311,12 +342,120 @@ export async function POST(request) {
     }
 
     return NextResponse.json(
-      { data, message: 'Fornecedor criado com sucesso!' },
-      { status: 201 }
+      { data, message: 'Fornecedor atualizado com sucesso!' },
+      { status: 200 }
     );
   } catch (error) {
     return NextResponse.json(
-      { data: null, message: error.message || 'Erro ao criar fornecedor' },
+      { data: null, message: error.message || 'Erro ao atualizar fornecedor' },
+      { status: 500 }
+    );
+  }
+}
+
+/**
+ * @swagger
+ * /api/suppliers/{id}:
+ *   delete:
+ *     summary: Exclui um fornecedor
+ *     tags: [Suppliers]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Fornecedor excluído
+ *       404:
+ *         description: Fornecedor não encontrado
+ *       400:
+ *         description: Fornecedor em uso
+ */
+export async function DELETE(request, { params }) {
+  try {
+    // Verificar autenticação
+    const token = getTokenFromRequest(request);
+    if (!token) {
+      return NextResponse.json(
+        { 
+          data: null,
+          mensagens: ['Token ausente'] 
+        }, 
+        { status: 401 }
+      );
+    }
+
+    const payload = verifyToken(token);
+    if (!payload) {
+      return NextResponse.json(
+        { 
+          data: null,
+          mensagens: ['Token inválido'] 
+        }, 
+        { status: 401 }
+      );
+    }
+
+    const resolvedParams = await params;
+    const { id } = resolvedParams;
+    const idNum = parseInt(id, 10);
+
+    if (isNaN(idNum) || idNum <= 0) {
+      return NextResponse.json(
+        { data: null, message: 'ID inválido' },
+        { status: 400 }
+      );
+    }
+
+    // VERIFICA SE EXISTE
+    const { data: existing, error: checkError } = await supabase
+      .from('suppliers')
+      .select('id')
+      .eq('id', idNum)
+      .maybeSingle();
+
+    if (checkError) throw checkError;
+
+    if (!existing) {
+      return NextResponse.json(
+        { data: null, message: 'Fornecedor não encontrado.' },
+        { status: 404 }
+      );
+    }
+
+    // VERIFICA SE ESTÁ EM USO
+    const { data: productsUsing, error: checkUsageError } = await supabase
+      .from('products')
+      .select('id')
+      .eq('supplier_id', idNum)
+      .limit(1);
+
+    if (checkUsageError) throw checkUsageError;
+
+    if (productsUsing && productsUsing.length > 0) {
+      return NextResponse.json(
+        { data: null, message: 'Não é possível excluir. Este fornecedor está sendo usado por produtos.' },
+        { status: 400 }
+      );
+    }
+
+    // DELETA
+    const { error: deleteError } = await supabase
+      .from('suppliers')
+      .delete()
+      .eq('id', idNum);
+
+    if (deleteError) throw deleteError;
+
+    return NextResponse.json(
+      { data: null, message: 'Fornecedor excluído com sucesso!' },
+      { status: 200 }
+    );
+  } catch (error) {
+    return NextResponse.json(
+      { data: null, message: error.message || 'Erro ao excluir fornecedor' },
       { status: 500 }
     );
   }
