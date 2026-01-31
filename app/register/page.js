@@ -163,15 +163,15 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-gradient-to-br from-purple-600 via-pink-500 to-orange-400 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8">
         <div>
-          <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
+          <h2 className="mt-6 text-center text-3xl font-extrabold text-white drop-shadow-lg">
             Criar Conta
           </h2>
-          <p className="mt-2 text-center text-sm text-gray-600">
+          <p className="mt-2 text-center text-sm text-white/90">
             Ou{' '}
-            <a href="/login" className="font-medium text-indigo-600 hover:text-indigo-500">
+            <a href="/login" className="font-medium text-white hover:text-yellow-200 transition-colors duration-200">
               faça login na sua conta existente
             </a>
           </p>
@@ -181,16 +181,16 @@ export default function RegisterPage() {
           <div className="space-y-4">
             {/* Nome Completo */}
             <div>
-              <label htmlFor="full_name" className="block text-sm font-medium text-gray-700">
-                Nome Completo <span className="text-red-500">*</span>
+              <label htmlFor="full_name" className="block text-sm font-medium text-white">
+                Nome Completo <span className="text-yellow-300">*</span>
               </label>
               <input
                 id="full_name"
                 name="full_name"
                 type="text"
                 required
-                className={`mt-1 block w-full px-3 py-2 border rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm ${
-                  errors.full_name ? 'border-red-500' : 'border-gray-300'
+                className={`mt-1 block w-full px-3 py-2 border rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-purple-500 focus:border-purple-500 sm:text-sm bg-white/90 backdrop-blur text-gray-900 placeholder-gray-500 ${
+                  errors.full_name ? 'border-red-400 bg-red-50/50' : 'border-white/30'
                 }`}
                 placeholder="João Silva"
                 value={formData.full_name}
@@ -198,7 +198,7 @@ export default function RegisterPage() {
                 data-testid="full-name-input"
               />
               {errors.full_name && (
-                <p className="mt-1 text-sm text-red-600" data-testid="full-name-error">
+                <p className="mt-1 text-sm text-red-200" data-testid="full-name-error">
                   {errors.full_name}
                 </p>
               )}
@@ -206,16 +206,16 @@ export default function RegisterPage() {
 
             {/* Email */}
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700">
-                E-mail <span className="text-red-500">*</span>
+              <label htmlFor="email" className="block text-sm font-medium text-white">
+                E-mail <span className="text-yellow-300">*</span>
               </label>
               <input
                 id="email"
                 name="email"
                 type="email"
                 required
-                className={`mt-1 block w-full px-3 py-2 border rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm ${
-                  errors.email ? 'border-red-500' : 'border-gray-300'
+                className={`mt-1 block w-full px-3 py-2 border rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-purple-500 focus:border-purple-500 sm:text-sm bg-white/90 backdrop-blur text-gray-900 placeholder-gray-500 ${
+                  errors.email ? 'border-red-400 bg-red-50/50' : 'border-white/30'
                 }`}
                 placeholder="joao@exemplo.com"
                 value={formData.email}
@@ -223,7 +223,7 @@ export default function RegisterPage() {
                 data-testid="email-input"
               />
               {errors.email && (
-                <p className="mt-1 text-sm text-red-600" data-testid="email-error">
+                <p className="mt-1 text-sm text-red-200" data-testid="email-error">
                   {errors.email}
                 </p>
               )}
@@ -231,16 +231,16 @@ export default function RegisterPage() {
 
             {/* Senha */}
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700">
-                Senha <span className="text-red-500">*</span>
+              <label htmlFor="password" className="block text-sm font-medium text-white">
+                Senha <span className="text-yellow-300">*</span>
               </label>
               <input
                 id="password"
                 name="password"
                 type="password"
                 required
-                className={`mt-1 block w-full px-3 py-2 border rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm ${
-                  errors.password ? 'border-red-500' : 'border-gray-300'
+                className={`mt-1 block w-full px-3 py-2 border rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-purple-500 focus:border-purple-500 sm:text-sm bg-white/90 backdrop-blur text-gray-900 placeholder-gray-500 ${
+                  errors.password ? 'border-red-400 bg-red-50/50' : 'border-white/30'
                 }`}
                 placeholder="SenhaForte@123"
                 value={formData.password}
@@ -248,26 +248,26 @@ export default function RegisterPage() {
                 data-testid="password-input"
               />
               {errors.password && (
-                <p className="mt-1 text-sm text-red-600" data-testid="password-error">
+                <p className="mt-1 text-sm text-red-200" data-testid="password-error">
                   {errors.password}
                 </p>
               )}
-              <div className="mt-1 text-xs text-gray-500">
+              <div className="mt-1 text-xs text-white/80">
                 <p>Requisitos da senha:</p>
                 <ul className="list-disc list-inside space-y-1">
-                  <li className={formData.password.length >= 8 ? 'text-green-600' : 'text-gray-400'}>
+                  <li className={formData.password.length >= 8 ? 'text-green-300' : 'text-white/60'}>
                     Mínimo 8 caracteres
                   </li>
-                  <li className={/(?=.*[a-z])/.test(formData.password) ? 'text-green-600' : 'text-gray-400'}>
+                  <li className={/(?=.*[a-z])/.test(formData.password) ? 'text-green-300' : 'text-white/60'}>
                     Uma letra minúscula
                   </li>
-                  <li className={/(?=.*[A-Z])/.test(formData.password) ? 'text-green-600' : 'text-gray-400'}>
+                  <li className={/(?=.*[A-Z])/.test(formData.password) ? 'text-green-300' : 'text-white/60'}>
                     Uma letra maiúscula
                   </li>
-                  <li className={/(?=.*\d)/.test(formData.password) ? 'text-green-600' : 'text-gray-400'}>
+                  <li className={/(?=.*\d)/.test(formData.password) ? 'text-green-300' : 'text-white/60'}>
                     Um número
                   </li>
-                  <li className={/(?=.*[@$!%*?&])/.test(formData.password) ? 'text-green-600' : 'text-gray-400'}>
+                  <li className={/(?=.*[@$!%*?&])/.test(formData.password) ? 'text-green-300' : 'text-white/60'}>
                     Um caractere especial (@$!%*?&)
                   </li>
                 </ul>
@@ -276,16 +276,16 @@ export default function RegisterPage() {
 
             {/* Confirmação de Senha */}
             <div>
-              <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700">
-                Confirme a Senha <span className="text-red-500">*</span>
+              <label htmlFor="confirmPassword" className="block text-sm font-medium text-white">
+                Confirme a Senha <span className="text-yellow-300">*</span>
               </label>
               <input
                 id="confirmPassword"
                 name="confirmPassword"
                 type="password"
                 required
-                className={`mt-1 block w-full px-3 py-2 border rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm ${
-                  errors.confirmPassword ? 'border-red-500' : 'border-gray-300'
+                className={`mt-1 block w-full px-3 py-2 border rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-purple-500 focus:border-purple-500 sm:text-sm bg-white/90 backdrop-blur text-gray-900 placeholder-gray-500 ${
+                  errors.confirmPassword ? 'border-red-400 bg-red-50/50' : 'border-white/30'
                 }`}
                 placeholder="SenhaForte@123"
                 value={formData.confirmPassword}
@@ -293,7 +293,7 @@ export default function RegisterPage() {
                 data-testid="confirm-password-input"
               />
               {errors.confirmPassword && (
-                <p className="mt-1 text-sm text-red-600" data-testid="confirm-password-error">
+                <p className="mt-1 text-sm text-red-200" data-testid="confirm-password-error">
                   {errors.confirmPassword}
                 </p>
               )}
@@ -305,11 +305,11 @@ export default function RegisterPage() {
             <button
               type="submit"
               disabled={!isFormValid() || loading}
-              className={`group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white ${
+              className={`group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white transition-colors duration-200 ${
                 isFormValid() && !loading
-                  ? 'bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500'
-                  : 'bg-gray-400 cursor-not-allowed'
-              } transition-colors duration-200`}
+                  ? 'bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 shadow-lg'
+                  : 'bg-gray-500 cursor-not-allowed opacity-50'
+              }`}
               data-testid="register-button"
             >
               {loading ? (
