@@ -15,49 +15,7 @@ function generateSlug(name) {
     .substring(0, 100);
 }
 
-/**
- * @swagger
- * /api/products/{id}:
- *   put:
- *     summary: Atualiza um produto existente
- *     tags: [Products]
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         schema:
- *           type: integer
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               name:
- *                 type: string
- *               price:
- *                 type: number
- *               stock_quantity:
- *                 type: integer
- *               sku:
- *                 type: string
- *               category_id:
- *                 type: integer
- *                 nullable: true
- *               supplier_id:
- *                 type: integer
- *                 nullable: true
- *     responses:
- *       200:
- *         description: Produto atualizado
- *       404:
- *         description: Produto não encontrado
- *       409:
- *         description: SKU ou slug duplicado
- */
-
-// === PUT (EDITAR) - VERSÃO FINAL COM DEBUG ===
+// === PUT (EDITAR) ===
 export async function PUT(request, { params }) {
   try {
     // Verificar autenticação
@@ -83,13 +41,17 @@ export async function PUT(request, { params }) {
       );
     }
 
-    const { id } = params;
+    const resolvedParams = await params;
+    const { id } = resolvedParams;
     const body = await request.json();
 
     console.log('PUT /api/products/[id] - ID:', id);
+    console.log('PUT /api/products/[id] - typeof id:', typeof id);
     console.log('Body recebido:', body);
 
     const idNum = parseInt(id, 10);
+    console.log('ID convertido:', idNum, 'isNaN:', isNaN(idNum));
+    
     if (isNaN(idNum)) {
       return NextResponse.json(
         { data: null, message: 'ID inválido' },
@@ -222,28 +184,8 @@ export async function PUT(request, { params }) {
     );
   }
 }
-/**
- * @swagger
- * /api/products/{id}:
- *   delete:
- *     summary: Remove um produto
- *     tags: [Products]
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         schema:
- *           type: integer
- *     responses:
- *       200:
- *         description: Produto excluído
- *       404:
- *         description: Produto não encontrado
- *       400:
- *         description: ID inválido
- */
 
-// === DELETE (CORRIGIDO - PADRÃO data + message) ===
+// === DELETE ===
 export async function DELETE(request, { params }) {
   try {
     // Verificar autenticação
@@ -269,7 +211,8 @@ export async function DELETE(request, { params }) {
       );
     }
 
-    const { id } = params;
+    const resolvedParams = await params;
+    const { id } = resolvedParams;
     const idNum = parseInt(id, 10);
 
     if (isNaN(idNum) || idNum <= 0) {
@@ -290,7 +233,7 @@ export async function DELETE(request, { params }) {
 
     if (!existing) {
       return NextResponse.json(
-        { data: null, message: 'Produto não encontrado' }, // CORRIGIDO
+        { data: null, message: 'Produto não encontrado' },
         { status: 404 }
       );
     }
@@ -311,89 +254,6 @@ export async function DELETE(request, { params }) {
     console.error('Erro no DELETE:', error);
     return NextResponse.json(
       { data: null, message: error.message || 'Erro ao excluir produto' },
-      { status: 500 }
-    );
-  }
-}
-
-/**
- * @swagger
- * /api/products/{id}:
- *   get:
- *     summary: Busca produto por ID
- *     tags: [Products]
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         schema:
- *           type: integer
- *     responses:
- *       200:
- *         description: Produto encontrado
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 data:
- *                   $ref: '#/components/schemas/Product'
- *                 message:
- *                   type: string
- *       404:
- *         description: Produto não encontrado
- *       400:
- *         description: ID inválido
- */
-
-// === GET POR ID - 100% FUNCIONAL ===
-export async function GET(request, { params }) {
-  try {
-    const { id } = params;
-    const idNum = parseInt(id, 10);
-
-    if (isNaN(idNum) || idNum <= 0) {
-      return NextResponse.json(
-        { data: null, message: 'ID inválido' },
-        { status: 400 }
-      );
-    }
-
-    const { data, error } = await supabase
-      .from('products')
-      .select(`
-        id, 
-        name, 
-        price, 
-        stock_quantity, 
-        sku, 
-        category_id, 
-        supplier_id, 
-        slug,
-        categories(name),
-        suppliers(company_name)
-      `)
-      .eq('id', idNum)
-      .single();
-
-    if (error) {
-      if (error.code === 'PGRST116') {
-        return NextResponse.json(
-          { data: null, message: 'Produto não encontrado' },
-          { status: 404 }
-        );
-      }
-      throw error;
-    }
-
-    return NextResponse.json(
-      { data, message: 'Produto encontrado' },
-      { status: 200 }
-    );
-  } catch (error) {
-    console.error('Erro no GET /api/products/[id]:', error);
-    return NextResponse.json(
-      { data: null, message: 'Erro interno do servidor' },
       { status: 500 }
     );
   }
