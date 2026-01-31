@@ -31,8 +31,8 @@ export default function LoginPage() {
         throw new Error(data.error || 'Erro ao fazer login');
       }
 
-      localStorage.setItem('token', data.token);
-      localStorage.setItem('user', JSON.stringify(data.user));
+      localStorage.setItem('token', data.data.token);
+      localStorage.setItem('user', JSON.stringify(data.data.user));
       router.push('/products');
 
     } catch (err) {

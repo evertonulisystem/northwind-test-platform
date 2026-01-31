@@ -130,9 +130,22 @@ export default function AddProductModal({ onClose, onAdd }) {
         sku: formData.sku.trim().toUpperCase(),
       };
 
+      const token = localStorage.getItem('token');
+      
+      if (!token) {
+        toast.error('Você precisa estar logado para adicionar produtos');
+        setLoading(false);
+        return;
+      }
+      
+      console.log('Token enviado:', token.substring(0, 20) + '...');
+      
       const res = await fetch('/api/products', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
         body: JSON.stringify(payload),
       });
 
