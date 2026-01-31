@@ -44,8 +44,33 @@ export const dynamic = "force-dynamic";
  */
 export async function POST(request) {
   try {
-    const body = await request.json();
-    const { email, password } = body;
+    let body;
+    let email, password;
+
+    // Tentar diferentes formatos de parsing
+    try {
+      // Primeiro tenta JSON
+      body = await request.json();
+      console.log('🐛 DEBUG LOGIN - Body JSON:', body);
+      email = body.email;
+      password = body.password;
+    } catch (jsonError) {
+      console.log('🐛 DEBUG LOGIN - JSON failed, trying text...');
+      
+      // Se JSON falhar, tenta text (form-data)
+      const text = await request.text();
+      console.log('🐛 DEBUG LOGIN - Raw text:', text);
+      
+      // Parse de form-data: email=test&password=123
+      const params = new URLSearchParams(text);
+      email = params.get('email');
+      password = params.get('password');
+      
+      body = { email, password };
+      console.log('🐛 DEBUG LOGIN - Parsed form-data:', { email, password });
+    }
+
+    console.log('🐛 DEBUG LOGIN - Final parsed data:', { email, password });
 
     if (!email || !password) {
       return Response.json(

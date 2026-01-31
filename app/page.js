@@ -18,6 +18,9 @@ export default function LoginPage() {
     setError('');
     setLoading(true);
 
+    console.log('🐛 DEBUG LOGIN - FormData:', formData);
+    console.log('🐛 DEBUG LOGIN - JSON:', JSON.stringify(formData));
+
     try {
       const response = await fetch('/api/auth/login', {
         method: 'POST',
@@ -26,6 +29,7 @@ export default function LoginPage() {
       });
 
       const data = await response.json();
+      console.log('🐛 DEBUG LOGIN - Response:', data);
 
       if (!response.ok) {
         throw new Error(data.error || 'Erro ao fazer login');
@@ -36,6 +40,7 @@ export default function LoginPage() {
       router.push('/products');
 
     } catch (err) {
+      console.error('🐛 DEBUG LOGIN - Error:', err);
       setError(err.message);
     } finally {
       setLoading(false);
