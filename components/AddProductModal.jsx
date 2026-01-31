@@ -169,7 +169,7 @@ export default function AddProductModal({ onClose, onAdd }) {
 
   return (
     <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-      <div className="w-full max-w-md mx-auto bg-slate-800 rounded-xl border border-slate-700 shadow-2xl flex flex-col" data-testid="add-product-modal">
+      <div className="w-full max-w-md mx-auto bg-gradient-to-br from-purple-600/20 via-pink-500/20 to-orange-400/20 rounded-xl border border-white/30 shadow-2xl backdrop-blur-md flex flex-col" data-testid="add-product-modal">
         
         <div className="p-6 border-b border-slate-700">
           <h2 className="text-2xl font-bold text-white flex items-center gap-2">
@@ -190,7 +190,7 @@ export default function AddProductModal({ onClose, onAdd }) {
               name="name"
               value={formData.name}
               onChange={handleChange}
-              className="w-full px-4 py-2.5 rounded-lg bg-slate-700 border border-slate-600 text-white placeholder-slate-400 focus:outline-none focus:border-orange-500 transition"
+              className="w-full px-4 py-2.5 rounded-lg bg-white/80 backdrop-blur text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-purple-500 focus:border-purple-500 transition"
               placeholder="Informe o nome do produto"
             />
             {errors.name && (
@@ -222,7 +222,7 @@ export default function AddProductModal({ onClose, onAdd }) {
         handleChange(e);
       }
     }}
-    className="w-full px-4 py-2.5 rounded-lg bg-slate-700 border border-slate-600 text-white placeholder-slate-400 focus:outline-none focus:border-orange-500 transition"
+    className="w-full px-4 py-2.5 rounded-lg bg-white/80 backdrop-blur text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-purple-500 focus:border-purple-500 transition"
     placeholder="Informe o preço unitário do produto"
   />
   {errors.price && (
@@ -244,7 +244,7 @@ export default function AddProductModal({ onClose, onAdd }) {
               type="text"
               value={formData.stock_quantity}
               onChange={handleChange}
-              className="w-full px-4 py-2.5 rounded-lg bg-slate-700 border border-slate-600 text-white placeholder-slate-400 focus:outline-none focus:border-orange-500 transition"
+              className="w-full px-4 py-2.5 rounded-lg bg-white/80 backdrop-blur text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-purple-500 focus:border-purple-500 transition"
               placeholder="Apenas números entre 1 e 999"
             />
             {errors.stock_quantity && (
@@ -265,7 +265,7 @@ export default function AddProductModal({ onClose, onAdd }) {
               name="sku"
               value={formData.sku}
               onChange={handleChange}
-              className="w-full px-4 py-2.5 rounded-lg bg-slate-700 border border-slate-600 text-white placeholder-slate-400 focus:outline-none focus:border-orange-500 transition uppercase"
+              className="w-full px-4 py-2.5 rounded-lg bg-white/80 backdrop-blur text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-purple-500 focus:border-purple-500 transition uppercase"
               placeholder="Ex: MGP-2024"
             />
             {errors.sku && (
@@ -310,13 +310,13 @@ export default function AddProductModal({ onClose, onAdd }) {
           </div>
         </form>
 
-        <div className="p-5 border-t border-slate-700 flex gap-3 bg-slate-800">
+        <div className="p-5 border-t border-white/20 flex gap-3 bg-gradient-to-r from-purple-600/10 via-pink-500/10 to-orange-400/10">
           <button
             type="submit"
             onClick={handleSubmit}
             disabled={loading}
             data-testid="add-product-submit"
-            className="flex-1 bg-green-600 text-white py-3 rounded-lg hover:bg-green-700 transition font-semibold disabled:opacity-50"
+            className="flex-1 bg-gradient-to-r from-purple-600 to-pink-600 text-white py-3 rounded-lg hover:from-purple-700 hover:to-pink-700 transition font-semibold disabled:opacity-50 shadow-lg"
           >
             {loading ? 'Adicionando...' : 'Adicionar'}
           </button>
@@ -324,7 +324,7 @@ export default function AddProductModal({ onClose, onAdd }) {
             type="button"
             onClick={onClose}
             data-testid="add-product-cancel"
-            className="flex-1 bg-slate-700 text-white py-3 rounded-lg hover:bg-slate-600 transition font-semibold"
+            className="flex-1 bg-white/20 backdrop-blur text-white py-3 rounded-lg hover:bg-white/30 transition font-semibold border border-white/30"
           >
             Cancelar
           </button>
