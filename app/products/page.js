@@ -125,7 +125,21 @@ const [selectedProduct, setSelectedProduct] = useState(null);
     const deleted = products.find(p => p.id === deleteId);
     setProducts(prev => prev.filter(p => p.id !== deleteId));
     try {
-      const res = await fetch(`/api/products/${deleteId}`, { method: 'DELETE' });
+      const token = localStorage.getItem('token');
+      
+      if (!token) {
+        toast.error('Você precisa estar logado para excluir produtos');
+        setShowConfirm(false);
+        setDeleteId(null);
+        return;
+      }
+      
+      const res = await fetch(`/api/products/${deleteId}`, { 
+        method: 'DELETE',
+        headers: { 
+          'Authorization': `Bearer ${token}`
+        }
+      });
       if (!res.ok) throw new Error();
       toast.success('Produto excluído!');
       await fetchAllProducts(); // recarrega tudo

@@ -131,9 +131,20 @@ export default function EditProductModal({ product, onClose, onUpdate }) {
     };
 
     try {
+      const token = localStorage.getItem('token');
+      
+      if (!token) {
+        toast.error('Você precisa estar logado para editar produtos');
+        setLoading(false);
+        return;
+      }
+      
       const res = await fetch(`/api/products/${product.id}`, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
         body: JSON.stringify(payload),
       });
 
