@@ -1,4 +1,4 @@
-// app/api-docs/page.js
+// app/api-docs/swagger-page.js
 'use client';
 
 import { useEffect, useState } from 'react';
