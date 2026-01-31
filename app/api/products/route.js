@@ -202,7 +202,22 @@ export async function POST(request) {
       .select()
       .single();
 
-    if (error) throw error;
+    if (error) {
+      // Tratamento amigável de erros comuns
+      if (error.message.includes('products_sku_key')) {
+        return NextResponse.json(
+          { data: null, message: 'Já existe um produto com este SKU. Por favor, escolha outro SKU.' },
+          { status: 409 }
+        );
+      }
+      if (error.message.includes('products_slug_key')) {
+        return NextResponse.json(
+          { data: null, message: 'Já existe um produto com este nome. Por favor, escolha outro nome.' },
+          { status: 409 }
+        );
+      }
+      throw error;
+    }
 
     return NextResponse.json(
       { data, message: 'Produto adicionado com sucesso!' },
