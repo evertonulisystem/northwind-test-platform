@@ -271,6 +271,211 @@ export async function PUT(request, { params }) {
  *       400:
  *         description: Categoria em uso
  */
+/**
+ * @swagger
+ * /api/categories/{id}:
+ *   patch:
+ *     summary: Atualiza parcialmente uma categoria
+ *     tags: [Categories]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               name:
+ *                 type: string
+ *                 maxLength: 25
+ *                 example: "Eletrônicos"
+ *               description:
+ *                 type: string
+ *                 minLength: 6
+ *                 maxLength: 40
+ *                 example: "Produtos eletrônicos variados"
+ *     responses:
+ *       200:
+ *         description: Categoria atualizada parcialmente
+ *       400:
+ *         description: Dados inválidos
+ *       404:
+ *         description: Categoria não encontrada
+ *       409:
+ *         description: Categoria duplicada
+ */
+export async function PATCH(request, { params }) {
+  try {
+    // Verificar autenticação
+    const token = getTokenFromRequest(request);
+    if (!token) {
+      return NextResponse.json(
+        { 
+          data: null,
+          mensagens: ['Token ausente'] 
+        }, 
+        { status: 401 }
+      );
+    }
+
+    const payload = verifyToken(token);
+    if (!payload) {
+      return NextResponse.json(
+        { 
+          data: null,
+          mensagens: ['Token inválido'] 
+        }, 
+        { status: 401 }
+      );
+    }
+
+    const resolvedParams = await params;
+    const { id } = resolvedParams;
+    const idNum = parseInt(id, 10);
+
+    if (isNaN(idNum) || idNum <= 0) {
+      return NextResponse.json(
+        { data: null, message: 'ID inválido' },
+        { status: 400 }
+      );
+    }
+
+    let body;
+    try {
+      body = await request.json();
+    } catch (jsonError) {
+      return NextResponse.json(
+        { data: null, message: 'Dados inválidos. Verifique se todos os campos foram preenchidos corretamente.' },
+        { status: 400 }
+      );
+    }
+
+    if (!body || Object.keys(body).length === 0) {
+      return NextResponse.json(
+        { data: null, message: 'Nenhum dado informado. Envie pelo menos um campo para atualizar.' },
+        { status: 400 }
+      );
+    }
+
+    // VERIFICA SE EXISTE
+    const { data: existing, error: checkError } = await supabase
+      .from('categories')
+      .select('id, name, description')
+      .eq('id', idNum)
+      .maybeSingle();
+
+    if (checkError) throw checkError;
+
+    if (!existing) {
+      return NextResponse.json(
+        { data: null, message: 'Categoria não encontrada.' },
+        { status: 404 }
+      );
+    }
+
+    console.log('🐛 DEBUG PATCH /api/categories/[id]');
+    console.log('Categoria existente:', existing);
+    console.log('Dados recebidos:', body);
+
+    // Validação de campos (apenas os enviados)
+    const { name, description } = body;
+    const updateData = {};
+
+    // Valida name se enviado
+    if (name !== undefined) {
+      if (!name || !name.trim()) {
+        return NextResponse.json(
+          { data: null, message: 'Nome da categoria não pode ser vazio.' },
+          { status: 400 }
+        );
+      }
+
+      if (name.trim().length > 25) {
+        return NextResponse.json(
+          { data: null, message: 'Nome da categoria deve ter no máximo 25 caracteres.' },
+          { status: 400 }
+        );
+      }
+
+      // VERIFICA DUPLICIDADE (nome) - apenas se for diferente do atual
+      if (name.trim() !== existing.name) {
+        const { data: duplicate } = await supabase
+          .from('categories')
+          .select('id')
+          .eq('name', name.trim())
+          .neq('id', idNum)
+          .maybeSingle();
+
+        if (duplicate) {
+          return NextResponse.json(
+            { data: null, message: 'Já existe uma categoria com este nome.' },
+            { status: 409 }
+          );
+        }
+      }
+
+      updateData.name = name.trim();
+      updateData.slug = generateSlug(name.trim());
+    }
+
+    // Valida description se enviado
+    if (description !== undefined) {
+      if (!description || !description.trim()) {
+        return NextResponse.json(
+          { data: null, message: 'Descrição da categoria não pode ser vazia.' },
+          { status: 400 }
+        );
+      }
+
+      if (description.trim().length < 6) {
+        return NextResponse.json(
+          { data: null, message: 'Descrição deve ter no mínimo 6 caracteres.' },
+          { status: 400 }
+        );
+      }
+
+      if (description.trim().length > 40) {
+        return NextResponse.json(
+          { data: null, message: 'Descrição deve ter no máximo 40 caracteres.' },
+          { status: 400 }
+        );
+      }
+
+      updateData.description = description.trim();
+    }
+
+    // ATUALIZA APENAS OS CAMPOS ENVIADOS
+    const { data, error } = await supabase
+      .from('categories')
+      .update(updateData)
+      .eq('id', idNum)
+      .select()
+      .single();
+
+    if (error) {
+      console.log('❌ Erro Supabase PATCH:', error);
+      throw error;
+    }
+
+    console.log('✅ Categoria atualizada com PATCH:', data);
+
+    return NextResponse.json(
+      { data, message: 'Categoria atualizada parcialmente com sucesso!' },
+      { status: 200 }
+    );
+  } catch (error) {
+    return NextResponse.json(
+      { data: null, message: error.message || 'Erro ao atualizar categoria' },
+      { status: 500 }
+    );
+  }
+}
+
 export async function DELETE(request, { params }) {
   try {
     // Verificar autenticação
