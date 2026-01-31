@@ -67,36 +67,124 @@ export async function POST(request) {
       );
     }
 
-    // 3. Validar nome
-    if (full_name.trim().length < 2) {
+    // 3. Validar nome com regras avançadas
+    const trimmedName = full_name.trim();
+    if (trimmedName.length < 3) {
       return Response.json(
         { 
           data: null,
-          mensagens: ['Nome deve ter no mínimo 2 caracteres']
+          mensagens: ['Nome deve ter no mínimo 3 caracteres']
         },
         { status: 400 }
       );
     }
 
-    // 4. Validar formato de email
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
+    if (trimmedName.length > 100) {
       return Response.json(
         { 
           data: null,
-          mensagens: ['Formato de email incorreto. Exemplo: usuario@dominio.com']
+          mensagens: ['Nome deve ter no máximo 100 caracteres']
         },
         { status: 400 }
       );
     }
 
-    // 5. Validar senha forte
+    // Nome deve conter apenas letras e espaços
+    if (!/^[a-zA-ZÀ-ÿ\s]+$/.test(trimmedName)) {
+      return Response.json(
+        { 
+          data: null,
+          mensagens: ['Nome deve conter apenas letras e espaços']
+        },
+        { status: 400 }
+      );
+    }
+
+    // Não permite nomes com espaços duplicados
+    if (/\s{2,}/.test(trimmedName)) {
+      return Response.json(
+        { 
+          data: null,
+          mensagens: ['Nome não pode ter espaços duplicados']
+        },
+        { status: 400 }
+      );
+    }
+
+    // 4. Validar formato de email avançado
+    const trimmedEmail = email.trim().toLowerCase();
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    
+    if (!emailRegex.test(trimmedEmail)) {
+      return Response.json(
+        { 
+          data: null,
+          mensagens: ['Formato de email inválido. Exemplo: usuario@dominio.com']
+        },
+        { status: 400 }
+      );
+    }
+
+    // Email não pode começar ou terminar com pontos ou hífens
+    if (/^[.-]|[.-]$/.test(trimmedEmail.split('@')[0])) {
+      return Response.json(
+        { 
+          data: null,
+          mensagens: ['Email não pode começar ou terminar com ponto ou hífen']
+        },
+        { status: 400 }
+      );
+    }
+
+    // Email não pode ter pontos consecutivos
+    if (/\.{2,}/.test(trimmedEmail)) {
+      return Response.json(
+        { 
+          data: null,
+          mensagens: ['Email não pode ter pontos consecutivos']
+        },
+        { status: 400 }
+      );
+    }
+
+    if (trimmedEmail.length > 255) {
+      return Response.json(
+        { 
+          data: null,
+          mensagens: ['Email deve ter no máximo 255 caracteres']
+        },
+        { status: 400 }
+      );
+    }
+
+    // 5. Validar senha forte com regras avançadas
     const passwordErrors = validatePassword(password);
     if (passwordErrors.length > 0) {
       return Response.json(
         { 
           data: null,
           mensagens: ['Senha inválida', ...passwordErrors]
+        },
+        { status: 400 }
+      );
+    }
+
+    // Senha não pode conter o email ou nome
+    if (password.toLowerCase().includes(trimmedEmail.toLowerCase().split('@')[0])) {
+      return Response.json(
+        { 
+          data: null,
+          mensagens: ['Senha não pode conter partes do seu email']
+        },
+        { status: 400 }
+      );
+    }
+
+    if (password.toLowerCase().includes(trimmedName.toLowerCase().replace(/\s/g, ''))) {
+      return Response.json(
+        { 
+          data: null,
+          mensagens: ['Senha não pode conter partes do seu nome']
         },
         { status: 400 }
       );
