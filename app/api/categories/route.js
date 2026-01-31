@@ -135,7 +135,13 @@ export async function POST(request) {
     // Validação de campos obrigatórios
     const { name, description } = body;
     
+    console.log('🐛 DEBUG POST /api/categories');
+    console.log('Body recebido:', body);
+    console.log('Name:', name, 'Type:', typeof name, 'Length:', name?.length);
+    console.log('Description:', description, 'Type:', typeof description, 'Length:', description?.length);
+    
     if (!name || !name.trim()) {
+      console.log('❌ Name falhou na validação');
       return NextResponse.json(
         { data: null, message: 'Nome da categoria é obrigatório.' },
         { status: 400 }
@@ -143,6 +149,7 @@ export async function POST(request) {
     }
 
     if (!description || !description.trim()) {
+      console.log('❌ Description falhou na validação');
       return NextResponse.json(
         { data: null, message: 'Descrição da categoria é obrigatória.' },
         { status: 400 }
@@ -185,22 +192,21 @@ export async function POST(request) {
       );
     }
 
+    // Gerar slug automaticamente
+    const slug = generateSlug(name.trim());
+
     const { data, error } = await supabase
       .from('categories')
       .insert({
         name: name.trim(),
-        description: description.trim()
+        description: description.trim(),
+        slug: slug
       })
       .select()
       .single();
 
     if (error) {
-      if (error.message.includes('null value in column')) {
-        return NextResponse.json(
-          { data: null, message: 'Campos obrigatórios não foram preenchidos.' },
-          { status: 400 }
-        );
-      }
+      console.log('❌ Erro Supabase:', error);
       throw error;
     }
 
@@ -214,4 +220,15 @@ export async function POST(request) {
       { status: 500 }
     );
   }
+}
+
+function generateSlug(name) {
+  if (!name) return '';
+  return name
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/(^-|-$)/g, '')
+    .substring(0, 100);
 }

@@ -1,20 +1,360 @@
 // app/api/categories/[id]/route.js
 import { supabase } from '@/lib/supabase';
+import { NextResponse } from 'next/server';
+import { verifyToken, getTokenFromRequest } from '@/lib/jwt';
 
 export const dynamic = "force-dynamic";
 
+/**
+ * @swagger
+ * /api/categories/{id}:
+ *   get:
+ *     summary: Lista produtos de uma categoria
+ *     tags: [Categories]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Lista de produtos da categoria
+ */
 export async function GET(request, { params }) {
-  const { data: products, error } = await supabase
-    .from('products')
-    .select(`
-      id, name, price, stock, image_url,
-      suppliers (company_name)
-    `)
-    .eq('category_id', params.id)
-    .eq('is_active', true)
-    .order('name');
+  try {
+    const resolvedParams = await params;
+    const { id } = resolvedParams;
+    const idNum = parseInt(id, 10);
 
-  if (error) return Response.json({ error: error.message }, { status: 500 });
+    if (isNaN(idNum) || idNum <= 0) {
+      return NextResponse.json(
+        { data: null, message: 'ID inválido' },
+        { status: 400 }
+      );
+    }
 
-  return Response.json({ products });
+    const { data: products, error } = await supabase
+      .from('products')
+      .select(`
+        id, name, price, stock_quantity, sku,
+        suppliers (company_name)
+      `)
+      .eq('category_id', idNum)
+      .order('name');
+
+    if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+
+    return NextResponse.json({ products });
+  } catch (error) {
+    return NextResponse.json(
+      { data: null, message: 'Erro ao buscar produtos da categoria' },
+      { status: 500 }
+    );
+  }
+}
+
+/**
+ * @swagger
+ * /api/categories/{id}:
+ *   put:
+ *     summary: Atualiza uma categoria existente
+ *     tags: [Categories]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - name
+ *               - description
+ *             properties:
+ *               name:
+ *                 type: string
+ *                 maxLength: 25
+ *                 example: "Eletrônicos"
+ *               description:
+ *                 type: string
+ *                 minLength: 6
+ *                 maxLength: 40
+ *                 example: "Produtos eletrônicos variados"
+ *     responses:
+ *       200:
+ *         description: Categoria atualizada
+ *       400:
+ *         description: Dados inválidos
+ *       404:
+ *         description: Categoria não encontrada
+ *       409:
+ *         description: Categoria duplicada
+ */
+export async function PUT(request, { params }) {
+  try {
+    // Verificar autenticação
+    const token = getTokenFromRequest(request);
+    if (!token) {
+      return NextResponse.json(
+        { 
+          data: null,
+          mensagens: ['Token ausente'] 
+        }, 
+        { status: 401 }
+      );
+    }
+
+    const payload = verifyToken(token);
+    if (!payload) {
+      return NextResponse.json(
+        { 
+          data: null,
+          mensagens: ['Token inválido'] 
+        }, 
+        { status: 401 }
+      );
+    }
+
+    const resolvedParams = await params;
+    const { id } = resolvedParams;
+    const idNum = parseInt(id, 10);
+
+    if (isNaN(idNum) || idNum <= 0) {
+      return NextResponse.json(
+        { data: null, message: 'ID inválido' },
+        { status: 400 }
+      );
+    }
+
+    let body;
+    try {
+      body = await request.json();
+    } catch (jsonError) {
+      return NextResponse.json(
+        { data: null, message: 'Dados inválidos. Verifique se todos os campos foram preenchidos corretamente.' },
+        { status: 400 }
+      );
+    }
+
+    if (!body || Object.keys(body).length === 0) {
+      return NextResponse.json(
+        { data: null, message: 'Nenhum dado informado. Preencha os campos da categoria.' },
+        { status: 400 }
+      );
+    }
+
+    // Validação de campos obrigatórios
+    const { name, description } = body;
+    
+    if (!name || !name.trim()) {
+      return NextResponse.json(
+        { data: null, message: 'Nome da categoria é obrigatório.' },
+        { status: 400 }
+      );
+    }
+
+    if (!description || !description.trim()) {
+      return NextResponse.json(
+        { data: null, message: 'Descrição da categoria é obrigatória.' },
+        { status: 400 }
+      );
+    }
+
+    // Validação de tamanho
+    if (name.trim().length > 25) {
+      return NextResponse.json(
+        { data: null, message: 'Nome da categoria deve ter no máximo 25 caracteres.' },
+        { status: 400 }
+      );
+    }
+
+    if (description.trim().length < 6) {
+      return NextResponse.json(
+        { data: null, message: 'Descrição deve ter no mínimo 6 caracteres.' },
+        { status: 400 }
+      );
+    }
+
+    if (description.trim().length > 40) {
+      return NextResponse.json(
+        { data: null, message: 'Descrição deve ter no máximo 40 caracteres.' },
+        { status: 400 }
+      );
+    }
+
+    // VERIFICA SE EXISTE
+    const { data: existing, error: checkError } = await supabase
+      .from('categories')
+      .select('id')
+      .eq('id', idNum)
+      .maybeSingle();
+
+    if (checkError) throw checkError;
+
+    if (!existing) {
+      return NextResponse.json(
+        { data: null, message: 'Categoria não encontrada.' },
+        { status: 404 }
+      );
+    }
+
+    // VERIFICA DUPLICIDADE (nome) - exceto a si mesma
+    const { data: duplicate } = await supabase
+      .from('categories')
+      .select('id')
+      .eq('name', name.trim())
+      .neq('id', idNum)
+      .maybeSingle();
+
+    if (duplicate) {
+      return NextResponse.json(
+        { data: null, message: 'Já existe uma categoria com este nome.' },
+        { status: 409 }
+      );
+    }
+
+    // ATUALIZA
+    const { data, error } = await supabase
+      .from('categories')
+      .update({
+        name: name.trim(),
+        description: description.trim()
+      })
+      .eq('id', idNum)
+      .select()
+      .single();
+
+    if (error) {
+      if (error.message.includes('null value in column')) {
+        return NextResponse.json(
+          { data: null, message: 'Campos obrigatórios não foram preenchidos.' },
+          { status: 400 }
+        );
+      }
+      throw error;
+    }
+
+    return NextResponse.json(
+      { data, message: 'Categoria atualizada com sucesso!' },
+      { status: 200 }
+    );
+  } catch (error) {
+    return NextResponse.json(
+      { data: null, message: error.message || 'Erro ao atualizar categoria' },
+      { status: 500 }
+    );
+  }
+}
+
+/**
+ * @swagger
+ * /api/categories/{id}:
+ *   delete:
+ *     summary: Exclui uma categoria
+ *     tags: [Categories]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Categoria excluída
+ *       404:
+ *         description: Categoria não encontrada
+ *       400:
+ *         description: Categoria em uso
+ */
+export async function DELETE(request, { params }) {
+  try {
+    // Verificar autenticação
+    const token = getTokenFromRequest(request);
+    if (!token) {
+      return NextResponse.json(
+        { 
+          data: null,
+          mensagens: ['Token ausente'] 
+        }, 
+        { status: 401 }
+      );
+    }
+
+    const payload = verifyToken(token);
+    if (!payload) {
+      return NextResponse.json(
+        { 
+          data: null,
+          mensagens: ['Token inválido'] 
+        }, 
+        { status: 401 }
+      );
+    }
+
+    const resolvedParams = await params;
+    const { id } = resolvedParams;
+    const idNum = parseInt(id, 10);
+
+    if (isNaN(idNum) || idNum <= 0) {
+      return NextResponse.json(
+        { data: null, message: 'ID inválido' },
+        { status: 400 }
+      );
+    }
+
+    // VERIFICA SE EXISTE
+    const { data: existing, error: checkError } = await supabase
+      .from('categories')
+      .select('id')
+      .eq('id', idNum)
+      .maybeSingle();
+
+    if (checkError) throw checkError;
+
+    if (!existing) {
+      return NextResponse.json(
+        { data: null, message: 'Categoria não encontrada.' },
+        { status: 404 }
+      );
+    }
+
+    // VERIFICA SE ESTÁ EM USO
+    const { data: productsUsing, error: checkUsageError } = await supabase
+      .from('products')
+      .select('id')
+      .eq('category_id', idNum)
+      .limit(1);
+
+    if (checkUsageError) throw checkUsageError;
+
+    if (productsUsing && productsUsing.length > 0) {
+      return NextResponse.json(
+        { data: null, message: 'Não é possível excluir. Esta categoria está sendo usada por produtos.' },
+        { status: 400 }
+      );
+    }
+
+    // DELETA
+    const { error: deleteError } = await supabase
+      .from('categories')
+      .delete()
+      .eq('id', idNum);
+
+    if (deleteError) throw deleteError;
+
+    return NextResponse.json(
+      { data: null, message: 'Categoria excluída com sucesso!' },
+      { status: 200 }
+    );
+  } catch (error) {
+    return NextResponse.json(
+      { data: null, message: error.message || 'Erro ao excluir categoria' },
+      { status: 500 }
+    );
+  }
 }
