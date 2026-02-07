@@ -357,7 +357,7 @@ export async function PUT(request, { params }) {
         email: email.trim().toLowerCase(),
         phone: phone.trim(),
         cnpj: cleanCnpj,
-        uf: uf.trim().toUpperCase()
+        state: uf.trim().toUpperCase()
       })
       .eq('id', idNum)
       .select()

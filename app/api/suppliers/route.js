@@ -198,7 +198,7 @@ export async function POST(request) {
       );
     }
 
-    if (!state || !state.trim()) {
+    if (!uf || !uf.trim()) {
       return NextResponse.json(
         { data: null, message: 'UF do fornecedor é obrigatória.' },
         { status: 400 }
@@ -304,7 +304,7 @@ export async function POST(request) {
         email: email.trim().toLowerCase(),
         phone: phone.trim(),
         cnpj: cleanCnpj,
-        uf: uf.trim().toUpperCase()
+        state: uf.trim().toUpperCase()
       })
       .select()
       .single();
