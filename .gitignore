@@ -47,3 +47,4 @@ next-env.d.ts
 debug-category.js
 debug-jwt.js
 reproduce_issue.js
+SwaggerCarnaval.js
