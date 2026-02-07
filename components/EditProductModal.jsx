@@ -31,16 +31,25 @@ export default function EditProductModal({ product, onClose, onUpdate }) {
     const fetchData = async () => {
       setLoading(true);
       try {
+        const token = localStorage.getItem('token');
+        const headers = {
+          'Content-Type': 'application/json'
+        };
+
+        if (token) {
+          headers['Authorization'] = `Bearer ${token}`;
+        }
+
         const [catRes, supRes] = await Promise.all([
-          fetch('/api/categories', { cache: 'no-store' }),
-          fetch('/api/suppliers', { cache: 'no-store' }),
+          fetch('/api/categories', { headers, cache: 'no-store' }),
+          fetch('/api/suppliers', { headers, cache: 'no-store' }),
         ]);
 
         const catData = await catRes.json();
         const supData = await supRes.json();
 
-        setCategories(catData.categories || []);
-        setSuppliers(supData.suppliers || []);
+        setCategories(catData.data || []);
+        setSuppliers(supData.data || []);
       } catch (error) {
         toast.error('Erro ao carregar dados');
       } finally {
