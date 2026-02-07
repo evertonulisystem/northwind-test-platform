@@ -63,6 +63,8 @@ export async function GET(request) {
  *   post:
  *     summary: Adiciona uma nova categoria
  *     tags: [Categories]
+ *     security:
+ *       - bearerAuth: []
  *     requestBody:
  *       required: true
  *       content:

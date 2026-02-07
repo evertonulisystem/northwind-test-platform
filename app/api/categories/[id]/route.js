@@ -60,6 +60,8 @@ export async function GET(request, { params }) {
  *   put:
  *     summary: Atualiza uma categoria existente
  *     tags: [Categories]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -257,6 +259,8 @@ export async function PUT(request, { params }) {
  *   delete:
  *     summary: Exclui uma categoria
  *     tags: [Categories]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -277,6 +281,8 @@ export async function PUT(request, { params }) {
  *   patch:
  *     summary: Atualiza parcialmente uma categoria
  *     tags: [Categories]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
