@@ -1,0 +1,124 @@
+{
+  "info": {
+    "_postman_id": "c3b7e7b4-6d7a-4f62-9c2f-collection-suppliers",
+    "name": "Suppliers - Status Scenarios",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:3000" },
+    { "key": "token", "value": "" }
+  ],
+  "item": [
+    {
+      "name": "01 - Created (201)",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "Authorization", "value": "Bearer {{token}}" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"company_name\": \"Tech Solutions Ltda\",\n  \"contact_name\": \"João Silva\",\n  \"email\": \"joao@techsolutions.com\",\n  \"phone\": \"(11) 98765-4321\",\n  \"cnpj\": \"12345678901234\",\n  \"uf\": \"SP\"\n}"
+        },
+        "url": { "raw": "{{baseUrl}}/api/suppliers", "host": ["{{baseUrl}}"], "path": ["api", "suppliers"] },
+        "description": "Cenário de sucesso. Requer token válido em {{token}}."
+      }
+    },
+    {
+      "name": "02 - Bad Request (400) - Campos obrigatórios vazios",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "Authorization", "value": "Bearer {{token}}" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"company_name\": \"\",\n  \"contact_name\": \"\",\n  \"email\": \"\",\n  \"phone\": \"\",\n  \"cnpj\": \"\",\n  \"uf\": \"\"\n}"
+        },
+        "url": { "raw": "{{baseUrl}}/api/suppliers", "host": ["{{baseUrl}}"], "path": ["api", "suppliers"] },
+        "description": "Dispara validações de obrigatoriedade para retornar 400."
+      }
+    },
+    {
+      "name": "03 - Bad Request (400) - Formatos inválidos",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "Authorization", "value": "Bearer {{token}}" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"company_name\": \"TS\",\n  \"contact_name\": \"João\",\n  \"email\": \"joao@\",\n  \"phone\": \"11 98765-4321\",\n  \"cnpj\": \"1234567890123\",\n  \"uf\": \"Sp\"\n}"
+        },
+        "url": { "raw": "{{baseUrl}}/api/suppliers", "host": ["{{baseUrl}}"], "path": ["api", "suppliers"] },
+        "description": "Tamanho mínimo insuficiente e formatos inválidos (email/phone/cnpj/uf)."
+      }
+    },
+    {
+      "name": "04 - Unauthorized (401) - Sem token",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"company_name\": \"Tech Solutions Ltda\",\n  \"contact_name\": \"João Silva\",\n  \"email\": \"joao@techsolutions.com\",\n  \"phone\": \"(11) 98765-4321\",\n  \"cnpj\": \"12345678901234\",\n  \"uf\": \"SP\"\n}"
+        },
+        "url": { "raw": "{{baseUrl}}/api/suppliers", "host": ["{{baseUrl}}"], "path": ["api", "suppliers"] },
+        "description": "Sem Authorization. Deve retornar 401 (Token ausente)."
+      }
+    },
+    {
+      "name": "05 - Conflict (409) - Email duplicado",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "Authorization", "value": "Bearer {{token}}" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"company_name\": \"Outra Empresa Ltda\",\n  \"contact_name\": \"Maria Silva\",\n  \"email\": \"joao@techsolutions.com\",\n  \"phone\": \"(11) 98765-0000\",\n  \"cnpj\": \"98765432109876\",\n  \"uf\": \"RJ\"\n}"
+        },
+        "url": { "raw": "{{baseUrl}}/api/suppliers", "host": ["{{baseUrl}}"], "path": ["api", "suppliers"] },
+        "description": "Execute antes o cenário 01 (Created). Depois repita com o mesmo email para obter 409."
+      }
+    },
+    {
+      "name": "06 - Conflict (409) - CNPJ duplicado",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "Authorization", "value": "Bearer {{token}}" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"company_name\": \"Outra Empresa Ltda\",\n  \"contact_name\": \"Carlos Mendes\",\n  \"email\": \"carlos@empresa.com\",\n  \"phone\": \"(11) 98765-1111\",\n  \"cnpj\": \"12345678901234\",\n  \"uf\": \"MG\"\n}"
+        },
+        "url": { "raw": "{{baseUrl}}/api/suppliers", "host": ["{{baseUrl}}"], "path": ["api", "suppliers"] },
+        "description": "Execute antes o cenário 01 (Created). Depois repita com o mesmo CNPJ para obter 409."
+      }
+    },
+    {
+      "name": "07 - Internal Server Error (500) - Email longo (>255)",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "Authorization", "value": "Bearer {{token}}" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"company_name\": \"Empresa Email Longo\",\n  \"contact_name\": \"João Silva\",\n  \"email\": \"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa@example.com\",\n  \"phone\": \"(11) 98765-4321\",\n  \"cnpj\": \"55555555555555\",\n  \"uf\": \"SP\"\n}"
+        },
+        "url": { "raw": "{{baseUrl}}/api/suppliers", "host": ["{{baseUrl}}"], "path": ["api", "suppliers"] },
+        "description": "String de email excede limite da coluna (VARCHAR 255). Deve gerar 500 no banco."
+      }
+    }
+  ]
+}
