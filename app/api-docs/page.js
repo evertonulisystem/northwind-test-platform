@@ -51,7 +51,7 @@ export default function ApiDocsPage() {
         }
         
         .swagger-ui .info .title small {
-          background: #f1f5f9; /* Slate-100 */
+          background: #84aad1ff; /* Slate-100 */
           padding: 4px 10px;
           border: 1px solid #e2e8f0;
           border-radius: 999px;
