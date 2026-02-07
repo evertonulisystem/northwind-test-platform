@@ -119,7 +119,7 @@ export default function ProductsPage() {
 
   // Filtra e pagina os produtos
   useEffect(() => {
-    let filtered = allProducts;
+    let filtered = [...allProducts];
 
     if (debouncedName) {
       filtered = filtered.filter(p =>
@@ -134,6 +134,9 @@ export default function ProductsPage() {
     if (selectedSupplier) {
       filtered = filtered.filter(p => p.suppliers?.company_name === selectedSupplier);
     }
+
+    // Ordenação por ID ascendente
+    filtered.sort((a, b) => a.id - b.id);
 
     const total = filtered.length;
     const totalPages = Math.ceil(total / ITEMS_PER_PAGE);
