@@ -9,6 +9,8 @@ import { verifyToken, getTokenFromRequest } from '@/lib/jwt';
  *   get:
  *     summary: Lista produtos de um fornecedor
  *     tags: [Suppliers]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -21,6 +23,29 @@ import { verifyToken, getTokenFromRequest } from '@/lib/jwt';
  */
 export async function GET(request, { params }) {
   try {
+    // Verificar autenticação
+    const token = getTokenFromRequest(request);
+    if (!token) {
+      return NextResponse.json(
+        { 
+          data: null,
+          mensagens: ['Token ausente'] 
+        }, 
+        { status: 401 }
+      );
+    }
+
+    const payload = verifyToken(token);
+    if (!payload) {
+      return NextResponse.json(
+        { 
+          data: null,
+          mensagens: ['Token inválido'] 
+        }, 
+        { status: 401 }
+      );
+    }
+
     const resolvedParams = await params;
     const { id } = resolvedParams;
     const idNum = parseInt(id, 10);
@@ -58,6 +83,8 @@ export async function GET(request, { params }) {
  *   put:
  *     summary: Atualiza um fornecedor existente
  *     tags: [Suppliers]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -359,6 +386,8 @@ export async function PUT(request, { params }) {
  *   delete:
  *     summary: Exclui um fornecedor
  *     tags: [Suppliers]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id

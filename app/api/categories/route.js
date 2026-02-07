@@ -9,6 +9,8 @@ import { verifyToken, getTokenFromRequest } from '@/lib/jwt';
  *   get:
  *     summary: Lista todas as categorias
  *     tags: [Categories]
+ *     security:
+ *       - bearerAuth: []
  *     responses:
  *       200:
  *         description: Lista de categorias

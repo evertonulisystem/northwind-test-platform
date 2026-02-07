@@ -11,6 +11,8 @@ export const dynamic = "force-dynamic";
  *   get:
  *     summary: Lista produtos de uma categoria
  *     tags: [Categories]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -23,6 +25,29 @@ export const dynamic = "force-dynamic";
  */
 export async function GET(request, { params }) {
   try {
+    // Verificar autenticação
+    const token = getTokenFromRequest(request);
+    if (!token) {
+      return NextResponse.json(
+        { 
+          data: null,
+          mensagens: ['Token ausente'] 
+        }, 
+        { status: 401 }
+      );
+    }
+
+    const payload = verifyToken(token);
+    if (!payload) {
+      return NextResponse.json(
+        { 
+          data: null,
+          mensagens: ['Token inválido'] 
+        }, 
+        { status: 401 }
+      );
+    }
+
     const resolvedParams = await params;
     const { id } = resolvedParams;
     const idNum = parseInt(id, 10);

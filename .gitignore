@@ -42,3 +42,8 @@ next-env.d.ts
 
 .env.local
 .env*.local
+
+# apoio tecnico
+debug-category.js
+debug-jwt.js
+reproduce_issue.js

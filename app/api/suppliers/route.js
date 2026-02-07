@@ -9,6 +9,8 @@ import { verifyToken, getTokenFromRequest } from '@/lib/jwt';
  *   get:
  *     summary: Lista todos os fornecedores
  *     tags: [Suppliers]
+ *     security:
+ *       - bearerAuth: []
  *     responses:
  *       200:
  *         description: Lista de fornecedores
@@ -63,6 +65,8 @@ export async function GET(request) {
  *   post:
  *     summary: Adiciona um novo fornecedor
  *     tags: [Suppliers]
+ *     security:
+ *       - bearerAuth: []
  *     requestBody:
  *       required: true
  *       content:
