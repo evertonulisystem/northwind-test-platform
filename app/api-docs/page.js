@@ -237,6 +237,7 @@ export default function ApiDocsPage() {
           url="/api/swagger.json"
           requestInterceptor={(request) => {
             const token = localStorage.getItem('token');
+            request.credentials = 'omit';
             if (token) {
               request.headers.Authorization = `Bearer ${token}`;
             }
