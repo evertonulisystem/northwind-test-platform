@@ -104,12 +104,67 @@ export default function RegisterPage() {
     setErrors({});
 
     // Validação final de todos os campos
+    const currentErrors = {};
     Object.keys(formData).forEach(field => {
-      validateField(field, formData[field]);
+      // Simular validação final
+      const value = formData[field];
+      switch (field) {
+        case 'full_name':
+          if (!value.trim()) {
+            currentErrors.full_name = 'Nome completo é obrigatório';
+          } else if (value.trim().length < 3) {
+            currentErrors.full_name = 'Nome deve ter no mínimo 3 caracteres';
+          } else if (value.trim().length > 100) {
+            currentErrors.full_name = 'Nome deve ter no máximo 100 caracteres';
+          } else if (!/^[a-zA-ZÀ-ÿ\s]+$/.test(value.trim())) {
+            currentErrors.full_name = 'Nome deve conter apenas letras e espaços';
+          } else if (/\s{2,}/.test(value.trim())) {
+            currentErrors.full_name = 'Nome não pode ter espaços duplicados';
+          }
+          break;
+        case 'email':
+          if (!value.trim()) {
+            currentErrors.email = 'E-mail é obrigatório';
+          } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim())) {
+            currentErrors.email = 'E-mail inválido';
+          } else if (value.trim().length > 255) {
+            currentErrors.email = 'E-mail deve ter no máximo 255 caracteres';
+          }
+          break;
+        case 'password':
+          if (!value) {
+            currentErrors.password = 'Senha é obrigatória';
+          } else if (value.length < 8) {
+            currentErrors.password = 'Senha deve ter no mínimo 8 caracteres';
+          } else if (value.length > 128) {
+            currentErrors.password = 'Senha deve ter no máximo 128 caracteres';
+          } else if (!/(?=.*[a-z])/.test(value)) {
+            currentErrors.password = 'Senha deve ter pelo menos uma letra minúscula';
+          } else if (!/(?=.*[A-Z])/.test(value)) {
+            currentErrors.password = 'Senha deve ter pelo menos uma letra maiúscula';
+          } else if (!/(?=.*\d)/.test(value)) {
+            currentErrors.password = 'Senha deve ter pelo menos um número';
+          } else if (!/(?=.*[@$!%*?&])/.test(value)) {
+            currentErrors.password = 'Senha deve ter pelo menos um caractere especial (@$!%*?&)';
+          } else if (/(\w)\1{2,}/.test(value)) {
+            currentErrors.password = 'Senha não pode ter 3 ou mais caracteres repetidos';
+          }
+          break;
+        case 'confirmPassword':
+          if (!value) {
+            currentErrors.confirmPassword = 'Confirmação de senha é obrigatória';
+          } else if (value !== formData.password) {
+            currentErrors.confirmPassword = 'Senhas não conferem';
+          }
+          break;
+      }
     });
 
-    // Verifica se há erros
-    if (Object.keys(errors).length > 0) {
+    // Atualizar erros e verificar se há problemas
+    setErrors(currentErrors);
+
+    // Verifica se há erros após atualização
+    if (Object.keys(currentErrors).length > 0) {
       setLoading(false);
       toast.error('Corrija os erros antes de continuar');
       return;
