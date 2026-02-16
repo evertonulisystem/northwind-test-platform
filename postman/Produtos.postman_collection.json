@@ -5,6 +5,20 @@
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
 		"_exporter_id": "15307284"
 	},
+	"auth": {
+		"type": "bearer",
+		"bearer": [
+			{
+				"key": "token",
+				"value": "{{token}}",
+				"type": "string"
+			}
+		]
+	},
+	"variable": [
+		{ "key": "baseUrl", "value": "http://localhost:3000" },
+		{ "key": "token", "value": "" }
+	],
 	"item": [
 		{
 			"name": "API OnLine",
@@ -17,17 +31,9 @@
 					}
 				],
 				"url": {
-					"raw": "https://northwind-test-platform.vercel.app/api/keepalive",
-					"protocol": "https",
-					"host": [
-						"northwind-test-platform",
-						"vercel",
-						"app"
-					],
-					"path": [
-						"api",
-						"keepalive"
-					]
+					"raw": "{{baseUrl}}/api/keepalive",
+					"host": ["{{baseUrl}}"],
+					"path": ["api","keepalive"]
 				}
 			},
 			"response": []
@@ -44,6 +50,10 @@
 					{
 						"key": "Content-Type",
 						"value": "application/json"
+					},
+					{
+						"key": "Authorization",
+						"value": "Bearer {{token}}"
 					}
 				],
 				"body": {
@@ -55,20 +65,7 @@
 						}
 					}
 				},
-				"url": {
-					"raw": "https://northwind-test-platform.vercel.app/api/products/72",
-					"protocol": "https",
-					"host": [
-						"northwind-test-platform",
-						"vercel",
-						"app"
-					],
-					"path": [
-						"api",
-						"products",
-						"72"
-					]
-				}
+				"url": { "raw": "{{baseUrl}}/api/products/72", "host": ["{{baseUrl}}"], "path": ["api","products","72"] }
 			},
 			"response": []
 		},
@@ -80,22 +77,13 @@
 					{
 						"key": "accept",
 						"value": "*/*"
+					},
+					{
+						"key": "Authorization",
+						"value": "Bearer {{token}}"
 					}
 				],
-				"url": {
-					"raw": "https://northwind-test-platform.vercel.app/api/products/71",
-					"protocol": "https",
-					"host": [
-						"northwind-test-platform",
-						"vercel",
-						"app"
-					],
-					"path": [
-						"api",
-						"products",
-						"71"
-					]
-				}
+				"url": { "raw": "{{baseUrl}}/api/products/71", "host": ["{{baseUrl}}"], "path": ["api","products","71"] }
 			},
 			"response": []
 		},
@@ -107,22 +95,13 @@
 					{
 						"key": "accept",
 						"value": "application/json"
+					},
+					{
+						"key": "Authorization",
+						"value": "Bearer {{token}}"
 					}
 				],
-				"url": {
-					"raw": "https://northwind-test-platform.vercel.app/api/products/71",
-					"protocol": "https",
-					"host": [
-						"northwind-test-platform",
-						"vercel",
-						"app"
-					],
-					"path": [
-						"api",
-						"products",
-						"71"
-					]
-				}
+				"url": { "raw": "{{baseUrl}}/api/products/71", "host": ["{{baseUrl}}"], "path": ["api","products","71"] }
 			},
 			"response": []
 		},
@@ -134,41 +113,22 @@
 					{
 						"key": "accept",
 						"value": "*/*"
+					},
+					{
+						"key": "Authorization",
+						"value": "Bearer {{token}}"
 					}
 				],
 				"url": {
-					"raw": "https://northwind-test-platform.vercel.app/api/products?page=1&limit=10&search=ter&category_id=1&supplier_id=1",
-					"protocol": "https",
-					"host": [
-						"northwind-test-platform",
-						"vercel",
-						"app"
-					],
-					"path": [
-						"api",
-						"products"
-					],
+					"raw": "{{baseUrl}}/api/products?page=1&limit=10&search=ter&category_id=1&supplier_id=1",
+					"host": ["{{baseUrl}}"],
+					"path": ["api","products"],
 					"query": [
-						{
-							"key": "page",
-							"value": "1"
-						},
-						{
-							"key": "limit",
-							"value": "10"
-						},
-						{
-							"key": "search",
-							"value": "ter"
-						},
-						{
-							"key": "category_id",
-							"value": "1"
-						},
-						{
-							"key": "supplier_id",
-							"value": "1"
-						}
+						{ "key": "page", "value": "1" },
+						{ "key": "limit", "value": "10" },
+						{ "key": "search", "value": "ter" },
+						{ "key": "category_id", "value": "1" },
+						{ "key": "supplier_id", "value": "1" }
 					]
 				}
 			},
@@ -186,6 +146,10 @@
 					{
 						"key": "Content-Type",
 						"value": "application/json"
+					},
+					{
+						"key": "Authorization",
+						"value": "Bearer {{token}}"
 					}
 				],
 				"body": {
@@ -197,19 +161,7 @@
 						}
 					}
 				},
-				"url": {
-					"raw": "https://northwind-test-platform.vercel.app/api/products",
-					"protocol": "https",
-					"host": [
-						"northwind-test-platform",
-						"vercel",
-						"app"
-					],
-					"path": [
-						"api",
-						"products"
-					]
-				},
+				"url": { "raw": "{{baseUrl}}/api/products", "host": ["{{baseUrl}}"], "path": ["api","products"] },
 				"description": "Generated from cURL: curl -X 'POST' \\\r\n  'https://northwind-test-platform.vercel.app/api/products' \\\r\n  -H 'accept: application/json' \\\r\n  -H 'Content-Type: application/json' \\\r\n  -d '{\r\n  \"name\": \"Mouse Gamer RGB\",\r\n  \"price\": 299.9,\r\n  \"stock_quantity\": 50,\r\n  \"sku\": \"MGP-2024\",\r\n  \"category_id\": 0,\r\n  \"supplier_id\": 0\r\n}'"
 			},
 			"response": []
