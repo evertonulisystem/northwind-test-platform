@@ -49,8 +49,10 @@ debug-jwt.js
 reproduce_issue.js
 SwaggerCarnaval.js
 
-
+# Avaliações
 exemplo*
 engenharia*
-ENGENHARIA*
+ENGENHARIA_*
 prompt*
+US*.md
+WEB*.md

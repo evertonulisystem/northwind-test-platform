@@ -81,6 +81,34 @@ export async function POST(request) {
       );
     }
 
+    // Validação básica de formato do email
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    console.log('🔍 DEBUG LOGIN - Email recebido:', email);
+    console.log('🔍 DEBUG LOGIN - Email trim:', email.trim());
+    console.log('🔍 DEBUG LOGIN - Regex test:', emailRegex.test(email.trim()));
+    
+    if (!emailRegex.test(email.trim())) {
+      console.log('❌ DEBUG LOGIN - Email inválido!');
+      return Response.json(
+        { 
+          data: null,
+          mensagens: ['Formato de email inválido. Use: nome@dominio.com']
+        },
+        { status: 400 }
+      );
+    }
+
+    // Validação básica da senha
+    if (password.length < 6) {
+      return Response.json(
+        { 
+          data: null,
+          mensagens: ['Senha deve ter pelo menos 6 caracteres']
+        },
+        { status: 400 }
+      );
+    }
+
     // Busca usuário
     const { data: user, error } = await supabase
       .from('users')
@@ -92,9 +120,9 @@ export async function POST(request) {
       return Response.json(
         { 
           data: null,
-          mensagens: ['Email ou senha inválidos']
+          mensagens: ['Usuário não encontrado. Verifique o email ou cadastre-se.']
         },
-        { status: 401 }
+        { status: 404 }
       );
     }
 
