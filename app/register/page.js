@@ -187,7 +187,7 @@ export default function RegisterPage() {
       if (res.ok) {
         toast.success('Cadastro realizado com sucesso! Redirecionando...');
         setTimeout(() => {
-          router.push('/login');
+          router.push('/');
         }, 2000);
       } else {
         // Tratamento específico de erros do backend
@@ -226,7 +226,7 @@ export default function RegisterPage() {
           </h2>
           <p className="mt-2 text-center text-sm text-white/90">
             Ou{' '}
-            <a href="/login" className="font-medium text-white hover:text-yellow-200 transition-colors duration-200">
+            <a href="/" className="font-medium text-white hover:text-yellow-200 transition-colors duration-200">
               faça login na sua conta existente
             </a>
           </p>
