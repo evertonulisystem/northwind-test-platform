@@ -9,8 +9,8 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState({});
   const [formData, setFormData] = useState({
-    email: 'admin@qatest.com',
-    password: 'Teste@123'
+    email: '',
+    password: ''
   });
   const router = useRouter();
 
