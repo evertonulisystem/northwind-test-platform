@@ -102,6 +102,7 @@ export default function LoginPage() {
               spellCheck={false}
               autoCorrect="off"
               autoCapitalize="off"
+              data-testid="email-input"
               className={`w-full px-4 py-3 rounded-xl bg-white/20 backdrop-blur-md border text-white placeholder-pink-200 focus:outline-none focus:ring-2 transition ${
                 errors.email 
                   ? 'border-red-400 focus:ring-red-400' 
@@ -125,6 +126,7 @@ export default function LoginPage() {
               type="password"
               value={formData.password}
               onChange={handleInputChange}
+              data-testid="password-input"
               className={`w-full px-4 py-3 rounded-xl bg-white/20 backdrop-blur-md border text-white placeholder-pink-200 focus:outline-none focus:ring-2 transition ${
                 errors.password 
                   ? 'border-red-400 focus:ring-red-400' 
@@ -144,6 +146,7 @@ export default function LoginPage() {
           <button
             type="submit"
             disabled={loading}
+            data-testid="login-button"
             className="w-full bg-white text-purple-600 font-bold py-3 rounded-xl hover:bg-pink-50 transition transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {loading ? 'Entrando...' : 'Entrar'}
