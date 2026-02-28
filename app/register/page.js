@@ -217,131 +217,171 @@ export default function RegisterPage() {
     );
   };
 
-return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-600 via-pink-500 to-orange-400 flex items-center justify-center p-6">
-    <div className="bg-white/10 backdrop-blur-xl rounded-3xl shadow-2xl p-10 max-w-md w-full border border-white/20">
-      <div className="text-center mb-8">
-        <h1 className="text-4xl font-bold text-white mb-2">QA Automation Shop</h1>
-        <p className="text-pink-100">Criar Nova Conta</p>
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-purple-600 via-pink-500 to-orange-400 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-md w-full space-y-8">
+        <div>
+          <h2 className="mt-6 text-center text-3xl font-extrabold text-white drop-shadow-lg">
+            Criar Conta
+          </h2>
+          <p className="mt-2 text-center text-sm text-white/90">
+            Ou{' '}
+            <a href="/" className="font-medium text-white hover:text-yellow-200 transition-colors duration-200">
+              faça login na sua conta existente
+            </a>
+          </p>
+        </div>
+        
+        <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
+          <div className="space-y-4">
+            {/* Nome Completo */}
+            <div>
+              <label htmlFor="full_name" className="block text-sm font-medium text-white">
+                Nome Completo <span className="text-yellow-300">*</span>
+              </label>
+              <input
+                id="full_name"
+                name="full_name"
+                type="text"
+                required
+                className={`mt-1 block w-full px-3 py-2 border rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-purple-500 focus:border-purple-500 sm:text-sm bg-white/90 backdrop-blur text-gray-900 placeholder-gray-500 ${
+                  errors.full_name ? 'border-red-400 bg-red-50/50' : 'border-white/30'
+                }`}
+                placeholder="João Silva"
+                value={formData.full_name}
+                onChange={handleChange}
+                data-testid="full-name-input"
+              />
+              {errors.full_name && (
+                <p className="mt-1 text-sm text-red-200" data-testid="full-name-error">
+                  {errors.full_name}
+                </p>
+              )}
+            </div>
+
+            {/* Email */}
+            <div>
+              <label htmlFor="email" className="block text-sm font-medium text-white">
+                E-mail <span className="text-yellow-300">*</span>
+              </label>
+              <input
+                id="email"
+                name="email"
+                type="email"
+                required
+                className={`mt-1 block w-full px-3 py-2 border rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-purple-500 focus:border-purple-500 sm:text-sm bg-white/90 backdrop-blur text-gray-900 placeholder-gray-500 ${
+                  errors.email ? 'border-red-400 bg-red-50/50' : 'border-white/30'
+                }`}
+                placeholder="joao@exemplo.com"
+                value={formData.email}
+                onChange={handleChange}
+                data-testid="email-input"
+              />
+              {errors.email && (
+                <p className="mt-1 text-sm text-red-200" data-testid="email-error">
+                  {errors.email}
+                </p>
+              )}
+            </div>
+
+            {/* Senha */}
+            <div>
+              <label htmlFor="password" className="block text-sm font-medium text-white">
+                Senha <span className="text-yellow-300">*</span>
+              </label>
+              <input
+                id="password"
+                name="password"
+                type="password"
+                required
+                className={`mt-1 block w-full px-3 py-2 border rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-purple-500 focus:border-purple-500 sm:text-sm bg-white/90 backdrop-blur text-gray-900 placeholder-gray-500 ${
+                  errors.password ? 'border-red-400 bg-red-50/50' : 'border-white/30'
+                }`}
+                placeholder="SenhaForte@123"
+                value={formData.password}
+                onChange={handleChange}
+                data-testid="password-input"
+              />
+              {errors.password && (
+                <p className="mt-1 text-sm text-red-200" data-testid="password-error">
+                  {errors.password}
+                </p>
+              )}
+              <div className="mt-1 text-xs text-white/80">
+                <p>Requisitos da senha:</p>
+                <ul className="list-disc list-inside space-y-1">
+                  <li className={formData.password.length >= 8 ? 'text-green-300' : 'text-white/60'}>
+                    Mínimo 8 caracteres
+                  </li>
+                  <li className={/(?=.*[a-z])/.test(formData.password) ? 'text-green-300' : 'text-white/60'}>
+                    Uma letra minúscula
+                  </li>
+                  <li className={/(?=.*[A-Z])/.test(formData.password) ? 'text-green-300' : 'text-white/60'}>
+                    Uma letra maiúscula
+                  </li>
+                  <li className={/(?=.*\d)/.test(formData.password) ? 'text-green-300' : 'text-white/60'}>
+                    Um número
+                  </li>
+                  <li className={/(?=.*[@$!%*?&])/.test(formData.password) ? 'text-green-300' : 'text-white/60'}>
+                    Um caractere especial (@$!%*?&)
+                  </li>
+                </ul>
+              </div>
+            </div>
+
+            {/* Confirmação de Senha */}
+            <div>
+              <label htmlFor="confirmPassword" className="block text-sm font-medium text-white">
+                Confirme a Senha <span className="text-yellow-300">*</span>
+              </label>
+              <input
+                id="confirmPassword"
+                name="confirmPassword"
+                type="password"
+                required
+                className={`mt-1 block w-full px-3 py-2 border rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-purple-500 focus:border-purple-500 sm:text-sm bg-white/90 backdrop-blur text-gray-900 placeholder-gray-500 ${
+                  errors.confirmPassword ? 'border-red-400 bg-red-50/50' : 'border-white/30'
+                }`}
+                placeholder="SenhaForte@123"
+                value={formData.confirmPassword}
+                onChange={handleChange}
+                data-testid="confirm-password-input"
+              />
+              {errors.confirmPassword && (
+                <p className="mt-1 text-sm text-red-200" data-testid="confirm-password-error">
+                  {errors.confirmPassword}
+                </p>
+              )}
+            </div>
+          </div>
+
+          {/* Botão de Submit */}
+          <div>
+            <button
+              type="submit"
+              disabled={!isFormValid() || loading}
+              className={`group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white transition-colors duration-200 ${
+                isFormValid() && !loading
+                  ? 'bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 shadow-lg'
+                  : 'bg-gray-500 cursor-not-allowed opacity-50'
+              }`}
+              data-testid="register-button"
+            >
+              {loading ? (
+                <span className="flex items-center">
+                  <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  Cadastrando...
+                </span>
+              ) : (
+                'Cadastrar'
+              )}
+            </button>
+          </div>
+        </form>
       </div>
-      
-      <form className="space-y-6" onSubmit={handleSubmit} noValidate autoComplete="off" spellCheck={false}>
-        <div>
-          <label className="block text-white mb-2">Nome Completo</label>
-          <input
-            name="full_name"
-            type="text"
-            value={formData.full_name}
-            onChange={handleChange}
-            formNoValidate={true}
-            spellCheck={false}
-            autoCorrect="off"
-            data-testid="full-name-input"
-            className={`w-full px-4 py-3 rounded-xl bg-white/20 backdrop-blur-md border text-white placeholder-pink-200 focus:outline-none focus:ring-2 transition ${
-              errors.full_name 
-                ? 'border-red-400 focus:ring-red-400' 
-                : 'border-white/30 focus:ring-white'
-            }`}
-            placeholder="Seu nome completo"
-            autoComplete="off"
-          />
-          {errors.full_name && (
-            <p className="mt-2 text-sm text-red-300 flex items-center gap-1">
-              <span className="w-1 h-1 bg-red-300 rounded-full"></span>
-              {errors.full_name}
-            </p>
-          )}
-        </div>
-
-        <div>
-          <label className="block text-white mb-2">Email</label>
-          <input
-            name="email"
-            type="text"
-            value={formData.email}
-            onChange={handleChange}
-            formNoValidate={true}
-            spellCheck={false}
-            autoCorrect="off"
-            autoCapitalize="off"
-            data-testid="email-input"
-            className={`w-full px-4 py-3 rounded-xl bg-white/20 backdrop-blur-md border text-white placeholder-pink-200 focus:outline-none focus:ring-2 transition ${
-              errors.email 
-                ? 'border-red-400 focus:ring-red-400' 
-                : 'border-white/30 focus:ring-white'
-            }`}
-            placeholder="seu@email.com"
-            autoComplete="off"
-          />
-          {errors.email && (
-            <p className="mt-2 text-sm text-red-300 flex items-center gap-1">
-              <span className="w-1 h-1 bg-red-300 rounded-full"></span>
-              {errors.email}
-            </p>
-          )}
-        </div>
-
-        <div>
-          <label className="block text-white mb-2">Senha</label>
-          <input
-            name="password"
-            type="password"
-            value={formData.password}
-            onChange={handleChange}
-            data-testid="password-input"
-            className={`w-full px-4 py-3 rounded-xl bg-white/20 backdrop-blur-md border text-white placeholder-pink-200 focus:outline-none focus:ring-2 transition ${
-              errors.password 
-                ? 'border-red-400 focus:ring-red-400' 
-                : 'border-white/30 focus:ring-white'
-            }`}
-            placeholder="******"
-            autoComplete="new-password"
-          />
-          {errors.password && (
-            <p className="mt-2 text-sm text-red-300 flex items-center gap-1">
-              <span className="w-1 h-1 bg-red-300 rounded-full"></span>
-              {errors.password}
-            </p>
-          )}
-        </div>
-
-        <div>
-          <label className="block text-white mb-2">Confirmar Senha</label>
-          <input
-            name="confirmPassword"
-            type="password"
-            value={formData.confirmPassword}
-            onChange={handleChange}
-            data-testid="confirm-password-input"
-            className={`w-full px-4 py-3 rounded-xl bg-white/20 backdrop-blur-md border text-white placeholder-pink-200 focus:outline-none focus:ring-2 transition ${
-              errors.confirmPassword 
-                ? 'border-red-400 focus:ring-red-400' 
-                : 'border-white/30 focus:ring-white'
-            }`}
-            placeholder="******"
-            autoComplete="new-password"
-          />
-          {errors.confirmPassword && (
-            <p className="mt-2 text-sm text-red-300 flex items-center gap-1">
-              <span className="w-1 h-1 bg-red-300 rounded-full"></span>
-              {errors.confirmPassword}
-            </p>
-          )}
-        </div>
-
-        <button
-          type="submit"
-          disabled={loading || !isFormValid()}
-          className="w-full bg-white text-purple-600 font-bold py-3 rounded-xl hover:bg-pink-50 transition transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          {loading ? 'Cadastrando...' : 'Criar Conta'}
-        </button>
-      </form>
-
-      <p className="text-center text-pink-200 mt-6 text-sm">
-        Já tem conta? <a href="/" className="text-white underline">Faça login</a>
-      </p>
     </div>
-  </div>
-);
+  );
 }

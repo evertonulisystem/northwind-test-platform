@@ -2,7 +2,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import toast from 'react-hot-toast';
+import { toast } from 'react-toastify';
 import CustomSelect from '@/components/CustomSelect';
 import { Package, DollarSign, Hash, Tag, Building2, Barcode, AlertCircle } from 'lucide-react';
 

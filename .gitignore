@@ -54,6 +54,10 @@ exemplo*
 engenharia*
 ENGENHARIA_*
 prompt*
-US*.md
+US-07.md
 WEB*.md
 ENGENHARIA_REVERSA_PROJECT_ANALYSIS.md
+
+# Laboratorio - nunca comitar
+LABORATORIO/
+LABORATORIO/**
