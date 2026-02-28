@@ -3,7 +3,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useDebounce } from 'use-debounce';
-import toast from 'react-hot-toast';
+import { toast } from 'react-toastify';
 import RulesModal from '@/components/RulesModal.jsx';
 import ConfirmModal from '@/components/ConfirmModal.jsx';
 import AddProductModal from '@/components/AddProductModal.jsx';
@@ -188,7 +188,7 @@ export default function ProductsPage() {
         }
       });
       if (!res.ok) throw new Error();
-      toast.success('Produto excluído!');
+      toast.success('Produto excluído com sucesso!');
       await fetchAllProducts(); // recarrega tudo
     } catch {
       setProducts(prev => [...prev, deleted]);
