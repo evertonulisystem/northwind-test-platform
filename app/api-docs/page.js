@@ -233,18 +233,50 @@ export default function ApiDocsPage() {
       `}</style>
 
       <div className="max-w-7xl mx-auto p-4">
-        <SwaggerUI
+        <div className="flex justify-between items-center mb-4 bg-white p-4 rounded-xl shadow-sm border border-gray-200">
+          <h2 className="text-sm font-semibold text-gray-600 uppercase tracking-wider">Configurações Rápidas</h2>
+          <div className="flex gap-3">
+            <button 
+              onClick={() => window.location.reload()}
+              className="px-4 py-2 bg-blue-50 text-blue-600 rounded-lg border border-blue-200 hover:bg-blue-100 transition text-sm font-bold"
+            >
+              Recarregar
+            </button>
+            <button 
+              onClick={() => {
+                localStorage.removeItem('token');
+                localStorage.removeItem('user');
+                window.location.reload();
+              }}
+              className="px-4 py-2 bg-red-50 text-red-600 rounded-lg border border-red-200 hover:bg-red-100 transition text-sm font-bold"
+            >
+              Limpar Tokens (Zerar Login)
+            </button>
+          </div>
+        </div>
+        <div className="swagger-container-fix">
+          <SwaggerUI
           url="/api/swagger.json"
           requestInterceptor={(request) => {
             const token = localStorage.getItem('token');
             request.credentials = 'omit';
+            
+            // Log para debug no console do navegador do usuário
             if (token) {
+              console.log('📄 Swagger Interceptor: Token encontrado no localStorage');
+            }
+
+            // Se o usuário já usou o botão "Authorize" do Swagger, respeitamos esse token.
+            // Caso contrário, tentamos pegar o do localStorage (login do app).
+            if (!request.headers.Authorization && token) {
               request.headers.Authorization = `Bearer ${token}`;
             }
+            
             return request;
           }}
           persistAuthorization={true}
         />
+        </div>
       </div>
     </div>
   );

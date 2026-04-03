@@ -50,11 +50,13 @@ export async function GET(request) {
     }
 
     const payload = verifyToken(token);
-    if (!payload) {
+    if (!payload || payload.error) {
+      const message = payload?.message || 'Token inválido';
       return NextResponse.json(
         { 
           data: null,
-          mensagens: ['Token inválido'] 
+          mensagens: [message],
+          expires_at: payload?.expires_at || null
         }, 
         { status: 401 }
       );
@@ -191,11 +193,13 @@ export async function POST(request) {
     }
 
     const payload = verifyToken(token);
-    if (!payload) {
+    if (!payload || payload.error) {
+      const message = payload?.message || 'Token inválido';
       return NextResponse.json(
         { 
           data: null,
-          mensagens: ['Token inválido'] 
+          mensagens: [message],
+          expires_at: payload?.expires_at || null
         }, 
         { status: 401 }
       );

@@ -37,17 +37,29 @@ export async function proxy(request) {
   const token = authHeader.substring(7);
 
   try {
-    // Importação dinâmica funciona no Next.js 15
-    const jwt = (await import('jsonwebtoken')).default;
-    const payload = jwt.verify(token, process.env.JWT_SECRET);
+    // Importação dinâmica da nossa lib de jwt para garantir consistência
+    const { verifyToken } = await import('./lib/jwt.js');
+    const payload = verifyToken(token);
     
-    console.log('✅ Token válido:', payload.email);
+    if (payload && payload.error) {
+      console.log('❌ Token inválido via Proxy:', payload.message);
+      return NextResponse.json(
+        { 
+          data: null, 
+          mensagens: [payload.message],
+          expires_at: payload.expires_at || null
+        },
+        { status: 401 }
+      );
+    }
+    
+    console.log('✅ Token válido via Proxy:', payload.email);
     return NextResponse.next();
     
   } catch (error) {
-    console.log('❌ Token inválido:', error.message);
+    console.log('❌ Erro crítico no Proxy Auth:', error.message);
     return NextResponse.json(
-      { data: null, mensagens: ['Token inválido ou expirado'] },
+      { data: null, mensagens: ['Erro na validação do token'] },
       { status: 401 }
     );
   }

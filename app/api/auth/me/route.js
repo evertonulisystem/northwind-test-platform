@@ -23,11 +23,12 @@ export async function GET(request) {
   const payload = verifyToken(token);
   console.log('Payload do token:', payload);
 
-  if (!payload) {
-    console.log('❌ Token inválido - retornando erro 401');
+  if (!payload || payload.error) {
+    const message = payload?.message || 'Token inválido';
+    console.log('❌ Token inválido/expirado - retornando erro 401:', message);
     return Response.json({ 
       data: null,
-      mensagens: ['Token inválido'] 
+      mensagens: [message] 
     }, { status: 401 });
   }
 
