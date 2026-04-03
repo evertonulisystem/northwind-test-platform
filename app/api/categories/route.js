@@ -30,7 +30,7 @@ export async function GET(request) {
     }
 
     const payload = verifyToken(token);
-    if (!payload) {
+    if (!payload || payload.error) {
       return NextResponse.json(
         { 
           data: null,
@@ -109,7 +109,7 @@ export async function POST(request) {
     }
 
     const payload = verifyToken(token);
-    if (!payload) {
+    if (!payload || payload.error) {
       return NextResponse.json(
         { 
           data: null,
