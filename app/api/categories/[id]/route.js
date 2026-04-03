@@ -56,8 +56,28 @@ export async function GET(request, { params }) {
 
     if (isNaN(idNum) || idNum <= 0) {
       return NextResponse.json(
-        { data: null, message: 'ID inválido' },
+        { 
+          data: null, 
+          mensagens: ['ID da categoria inválido. Deve ser um número positivo.'] 
+        },
         { status: 400 }
+      );
+    }
+
+    // Primeiro, verifica se a categoria existe
+    const { data: category, error: catError } = await supabase
+      .from('categories')
+      .select('id, name')
+      .eq('id', idNum)
+      .single();
+
+    if (catError || !category) {
+      return NextResponse.json(
+        { 
+          data: null, 
+          mensagens: [`Categoria com ID ${idNum} não encontrada.`] 
+        },
+        { status: 404 }
       );
     }
 
@@ -70,12 +90,28 @@ export async function GET(request, { params }) {
       .eq('category_id', idNum)
       .order('name');
 
-    if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+    if (error) {
+      return NextResponse.json(
+        { 
+          data: null, 
+          mensagens: [error.message] 
+        }, 
+        { status: 500 }
+      );
+    }
 
-    return NextResponse.json({ products });
+    return NextResponse.json({ 
+      data: products || [],
+      mensagens: products?.length > 0 
+        ? [`${products.length} produtos encontrados para a categoria ${category.name}.`]
+        : [`Nenhum produto cadastrado para a categoria ${category.name}.`]
+    });
   } catch (error) {
     return NextResponse.json(
-      { data: null, message: 'Erro ao buscar produtos da categoria' },
+      { 
+        data: null, 
+        mensagens: ['Erro interno ao buscar produtos da categoria.'] 
+      },
       { status: 500 }
     );
   }
