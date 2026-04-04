@@ -15,6 +15,102 @@ function generateSlug(name) {
     .substring(0, 100);
 }
 
+// === GET (BUSCAR POR ID) ===
+/**
+ * @swagger
+ * /api/products/{id}:
+ *   get:
+ *     summary: Busca um produto pelo ID
+ *     tags: [Products]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Produto encontrado
+ *       404:
+ *         description: Produto não encontrado
+ */
+export async function GET(request, { params }) {
+  try {
+    // Verificar autenticação
+    const token = getTokenFromRequest(request);
+    if (!token) {
+      return NextResponse.json(
+        { 
+          data: null,
+          mensagens: ['Token ausente'] 
+        }, 
+        { status: 401 }
+      );
+    }
+
+    const payload = verifyToken(token);
+    if (!payload || payload.error) {
+      const message = payload?.message || 'Token inválido';
+      return NextResponse.json(
+        { 
+          data: null,
+          mensagens: [message],
+          expires_at: payload?.expires_at || null
+        }, 
+        { status: 401 }
+      );
+    }
+
+    const resolvedParams = await params;
+    const { id } = resolvedParams;
+    const idNum = parseInt(id, 10);
+
+    if (isNaN(idNum) || idNum <= 0) {
+      return NextResponse.json(
+        { 
+          data: null, 
+          mensagens: ['ID do produto inválido. Deve ser um número positivo.'] 
+        },
+        { status: 400 }
+      );
+    }
+
+    const { data: product, error } = await supabase
+      .from('products')
+      .select(`
+        id, name, price, stock_quantity, sku, category_id, supplier_id, slug,
+        categories(name), suppliers(company_name)
+      `)
+      .eq('id', idNum)
+      .single();
+
+    if (error || !product) {
+      return NextResponse.json(
+        { 
+          data: null, 
+          mensagens: [`Produto com ID ${idNum} não encontrado.`] 
+        },
+        { status: 404 }
+      );
+    }
+
+    return NextResponse.json({ 
+      data: product,
+      mensagens: ['Produto carregado com sucesso.']
+    });
+  } catch (error) {
+    return NextResponse.json(
+      { 
+        data: null, 
+        mensagens: ['Erro interno ao buscar produto.'] 
+      },
+      { status: 500 }
+    );
+  }
+}
+
 // === PUT (EDITAR) ===
 export async function PUT(request, { params }) {
   try {
@@ -54,9 +150,12 @@ export async function PUT(request, { params }) {
     const idNum = parseInt(id, 10);
     console.log('ID convertido:', idNum, 'isNaN:', isNaN(idNum));
     
-    if (isNaN(idNum)) {
+    if (isNaN(idNum) || idNum <= 0) {
       return NextResponse.json(
-        { data: null, message: 'ID inválido' },
+        { 
+          data: null, 
+          mensagens: ['ID do produto inválido. Deve ser um número positivo.'] 
+        },
         { status: 400 }
       );
     }
@@ -65,7 +164,10 @@ export async function PUT(request, { params }) {
     const sku = body.sku?.trim();
     if (!sku) {
       return NextResponse.json(
-        { data: null, message: 'SKU é obrigatório' },
+        { 
+          data: null, 
+          mensagens: ['SKU é obrigatório.'] 
+        },
         { status: 400 }
       );
     }
@@ -80,7 +182,10 @@ export async function PUT(request, { params }) {
 
     if (skuExists) {
       return NextResponse.json(
-        { data: null, message: 'Já existe outro produto com esse SKU.' },
+        { 
+          data: null, 
+          mensagens: ['Já existe outro produto com esse SKU.'] 
+        },
         { status: 409 }
       );
     }
@@ -97,7 +202,10 @@ export async function PUT(request, { params }) {
     }
     if (!current || current.length === 0) {
       return NextResponse.json(
-        { data: null, message: 'Produto não encontrado' },
+        { 
+          data: null, 
+          mensagens: [`Produto com ID ${idNum} não encontrado.`] 
+        },
         { status: 404 }
       );
     }
@@ -120,7 +228,10 @@ export async function PUT(request, { params }) {
 
       if (slugExists) {
         return NextResponse.json(
-          { data: null, message: 'Já existe outro produto com esse nome/slug.' },
+          { 
+            data: null, 
+            mensagens: ['Já existe outro produto com esse nome/slug.'] 
+          },
           { status: 409 }
         );
       }
@@ -175,13 +286,19 @@ export async function PUT(request, { params }) {
     console.log('Produto após update:', updated);
 
     return NextResponse.json(
-      { data: updated, message: 'Produto atualizado com sucesso!' },
+      { 
+        data: updated, 
+        mensagens: ['Produto atualizado com sucesso!'] 
+      },
       { status: 200 }
     );
   } catch (error) {
     console.error('Erro fatal no PUT:', error);
     return NextResponse.json(
-      { data: null, message: error.message || 'Erro ao atualizar' },
+      { 
+        data: null, 
+        mensagens: [error.message || 'Erro ao atualizar produto.'] 
+      },
       { status: 500 }
     );
   }
@@ -221,7 +338,10 @@ export async function DELETE(request, { params }) {
 
     if (isNaN(idNum) || idNum <= 0) {
       return NextResponse.json(
-        { data: null, message: 'ID inválido' },
+        { 
+          data: null, 
+          mensagens: ['ID do produto inválido. Deve ser um número positivo.'] 
+        },
         { status: 400 }
       );
     }
@@ -237,7 +357,10 @@ export async function DELETE(request, { params }) {
 
     if (!existing) {
       return NextResponse.json(
-        { data: null, message: 'Produto não encontrado' },
+        { 
+          data: null, 
+          mensagens: [`Produto com ID ${idNum} não encontrado.`] 
+        },
         { status: 404 }
       );
     }
@@ -251,13 +374,19 @@ export async function DELETE(request, { params }) {
     if (deleteError) throw deleteError;
 
     return NextResponse.json(
-      { data: null, message: 'Produto excluído com sucesso!' },
+      { 
+        data: null, 
+        mensagens: ['Produto excluído com sucesso!'] 
+      },
       { status: 200 }
     );
   } catch (error) {
     console.error('Erro no DELETE:', error);
     return NextResponse.json(
-      { data: null, message: error.message || 'Erro ao excluir produto' },
+      { 
+        data: null, 
+        mensagens: [error.message || 'Erro ao excluir produto.'] 
+      },
       { status: 500 }
     );
   }

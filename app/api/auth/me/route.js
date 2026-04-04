@@ -50,6 +50,6 @@ export async function GET(request) {
 
   return Response.json({ 
     data: { user },
-    mensagens: 'Dados do usuário recuperados com sucesso'
+    mensagens: ['Dados do usuário recuperados com sucesso.']
   });
 }

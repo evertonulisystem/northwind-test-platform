@@ -52,18 +52,20 @@ export async function GET(request) {
       return NextResponse.json(
         { 
           data: null,
-          message: 'Token ausente' 
+          mensagens: ['Token ausente'] 
         }, 
         { status: 401 }
       );
     }
 
     const payload = verifyToken(token);
-    if (!payload) {
+    if (!payload || payload.error) {
+      const message = payload?.message || 'Token inválido';
       return NextResponse.json(
         { 
           data: null,
-          message: 'Token inválido' 
+          mensagens: [message],
+          expires_at: payload?.expires_at || null
         }, 
         { status: 401 }
       );
@@ -79,7 +81,7 @@ export async function GET(request) {
       return NextResponse.json(
         { 
           data: null,
-          message: 'Pelo menos um parâmetro deve ser fornecido: id, sku ou slug' 
+          mensagens: ['Pelo menos um parâmetro deve ser fornecido: id, sku ou slug.'] 
         }, 
         { status: 400 }
       );
@@ -109,7 +111,7 @@ export async function GET(request) {
         return NextResponse.json(
           { 
             data: null,
-            message: 'ID deve ser um número positivo válido' 
+            mensagens: ['ID deve ser um número positivo válido.'] 
           }, 
           { status: 400 }
         );
@@ -131,7 +133,7 @@ export async function GET(request) {
         return NextResponse.json(
           { 
             data: null,
-            message: 'Produto não encontrado' 
+            mensagens: ['Produto não encontrado.'] 
           }, 
           { status: 404 }
         );
@@ -144,7 +146,7 @@ export async function GET(request) {
       return NextResponse.json(
         { 
           data: null,
-          message: 'Produto não encontrado' 
+          mensagens: ['Produto não encontrado.'] 
         }, 
         { status: 404 }
       );
@@ -154,14 +156,14 @@ export async function GET(request) {
     
     return NextResponse.json({
       data,
-      message: 'Produto encontrado com sucesso',
+      mensagens: ['Produto encontrado com sucesso.'],
     });
 
   } catch (error) {
     console.error('Erro fatal:', error);
     return NextResponse.json({
       data: null,
-      message: 'Erro interno ao buscar produto'
+      mensagens: ['Erro interno ao buscar produto.']
     }, { status: 500 });
   }
 }

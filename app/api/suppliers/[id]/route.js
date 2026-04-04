@@ -54,8 +54,28 @@ export async function GET(request, { params }) {
 
     if (isNaN(idNum) || idNum <= 0) {
       return NextResponse.json(
-        { data: null, message: 'ID inválido' },
+        { 
+          data: null, 
+          mensagens: ['ID do fornecedor inválido. Deve ser um número positivo.'] 
+        },
         { status: 400 }
+      );
+    }
+
+    // Primeiro, verifica se o fornecedor existe
+    const { data: supplier, error: supError } = await supabase
+      .from('suppliers')
+      .select('id, company_name')
+      .eq('id', idNum)
+      .single();
+
+    if (supError || !supplier) {
+      return NextResponse.json(
+        { 
+          data: null, 
+          mensagens: [`Fornecedor com ID ${idNum} não encontrado.`] 
+        },
+        { status: 404 }
       );
     }
 
@@ -70,15 +90,26 @@ export async function GET(request, { params }) {
 
     if (error) {
       return NextResponse.json(
-        { data: null, message: error.message },
+        { 
+          data: null, 
+          mensagens: [error.message] 
+        },
         { status: 500 }
       );
     }
 
-    return NextResponse.json({ data: products, message: 'Produtos buscados com sucesso' });
+    return NextResponse.json({ 
+      data: products || [],
+      mensagens: products?.length > 0 
+        ? [`${products.length} produtos encontrados para o fornecedor ${supplier.company_name}.`]
+        : [`Nenhum produto cadastrado para o fornecedor ${supplier.company_name}.`]
+    });
   } catch (error) {
     return NextResponse.json(
-      { data: null, message: 'Erro ao buscar produtos do fornecedor' },
+      { 
+        data: null, 
+        mensagens: ['Erro interno ao buscar produtos do fornecedor.'] 
+      },
       { status: 500 }
     );
   }
@@ -181,7 +212,10 @@ export async function PUT(request, { params }) {
 
     if (isNaN(idNum) || idNum <= 0) {
       return NextResponse.json(
-        { data: null, message: 'ID inválido' },
+        { 
+          data: null, 
+          mensagens: ['ID do fornecedor inválido. Deve ser um número positivo.'] 
+        },
         { status: 400 }
       );
     }
@@ -191,14 +225,20 @@ export async function PUT(request, { params }) {
       body = await request.json();
     } catch (jsonError) {
       return NextResponse.json(
-        { data: null, message: 'Dados inválidos. Verifique se todos os campos foram preenchidos corretamente.' },
+        { 
+          data: null, 
+          mensagens: ['Dados inválidos. Verifique se todos os campos foram preenchidos corretamente.'] 
+        },
         { status: 400 }
       );
     }
 
     if (!body || Object.keys(body).length === 0) {
       return NextResponse.json(
-        { data: null, message: 'Nenhum dado informado. Preencha os campos do fornecedor.' },
+        { 
+          data: null, 
+          mensagens: ['Nenhum dado informado. Preencha os campos do fornecedor.'] 
+        },
         { status: 400 }
       );
     }
@@ -208,42 +248,60 @@ export async function PUT(request, { params }) {
     
     if (!company_name || !company_name.trim()) {
       return NextResponse.json(
-        { data: null, message: 'Razão social da empresa é obrigatória.' },
+        { 
+          data: null, 
+          mensagens: ['Razão social da empresa é obrigatória.'] 
+        },
         { status: 400 }
       );
     }
 
     if (!contact_name || !contact_name.trim()) {
       return NextResponse.json(
-        { data: null, message: 'Nome do contato é obrigatório.' },
+        { 
+          data: null, 
+          mensagens: ['Nome do contato é obrigatório.'] 
+        },
         { status: 400 }
       );
     }
 
     if (!email || !email.trim()) {
       return NextResponse.json(
-        { data: null, message: 'E-mail do fornecedor é obrigatório.' },
+        { 
+          data: null, 
+          mensagens: ['E-mail do fornecedor é obrigatório.'] 
+        },
         { status: 400 }
       );
     }
 
     if (!phone || !phone.trim()) {
       return NextResponse.json(
-        { data: null, message: 'Telefone do fornecedor é obrigatório.' },
+        { 
+          data: null, 
+          mensagens: ['Telefone do fornecedor é obrigatório.'] 
+        },
         { status: 400 }
       );
     }
 
     if (!cnpj || !cnpj.trim()) {
       return NextResponse.json(
-        { data: null, message: 'CNPJ do fornecedor é obrigatório.' },
+        { 
+          data: null, 
+          mensagens: ['CNPJ do fornecedor é obrigatório.'] 
+        },
         { status: 400 }
       );
     }
 
     if (!uf || !uf.trim()) {
       return NextResponse.json(
-        { data: null, message: 'UF do fornecedor é obrigatória.' },
+        { 
+          data: null, 
+          mensagens: ['UF do fornecedor é obrigatória.'] 
+        },
         { status: 400 }
       );
     }
@@ -251,28 +309,40 @@ export async function PUT(request, { params }) {
     // Validação de tamanho
     if (company_name.trim().length < 3) {
       return NextResponse.json(
-        { data: null, message: 'Razão social deve ter no mínimo 3 caracteres.' },
+        { 
+          data: null, 
+          mensagens: ['Razão social deve ter no mínimo 3 caracteres.'] 
+        },
         { status: 400 }
       );
     }
 
     if (company_name.trim().length > 100) {
       return NextResponse.json(
-        { data: null, message: 'Razão social deve ter no máximo 100 caracteres.' },
+        { 
+          data: null, 
+          mensagens: ['Razão social deve ter no máximo 100 caracteres.'] 
+        },
         { status: 400 }
       );
     }
 
     if (contact_name.trim().length < 5) {
       return NextResponse.json(
-        { data: null, message: 'Nome do contato deve ter no mínimo 5 caracteres.' },
+        { 
+          data: null, 
+          mensagens: ['Nome do contato deve ter no mínimo 5 caracteres.'] 
+        },
         { status: 400 }
       );
     }
 
     if (contact_name.trim().length > 80) {
       return NextResponse.json(
-        { data: null, message: 'Nome do contato deve ter no máximo 80 caracteres.' },
+        { 
+          data: null, 
+          mensagens: ['Nome do contato deve ter no máximo 80 caracteres.'] 
+        },
         { status: 400 }
       );
     }
@@ -281,7 +351,10 @@ export async function PUT(request, { params }) {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email.trim())) {
       return NextResponse.json(
-        { data: null, message: 'E-mail inválido. Informe um e-mail válido.' },
+        { 
+          data: null, 
+          mensagens: ['E-mail inválido. Informe um e-mail válido.'] 
+        },
         { status: 400 }
       );
     }
@@ -289,7 +362,10 @@ export async function PUT(request, { params }) {
     const phoneRegex = /^\([0-9]{2}\) [0-9]{5}-[0-9]{4}$/;
     if (!phoneRegex.test(phone.trim())) {
       return NextResponse.json(
-        { data: null, message: 'Telefone inválido. Use o formato (XX) XXXXX-XXXX.' },
+        { 
+          data: null, 
+          mensagens: ['Telefone inválido. Use o formato (XX) XXXXX-XXXX.'] 
+        },
         { status: 400 }
       );
     }
@@ -298,7 +374,10 @@ export async function PUT(request, { params }) {
     const cleanCnpj = cnpj.replace(/[^\d]/g, '');
     if (!cnpjRegex.test(cleanCnpj)) {
       return NextResponse.json(
-        { data: null, message: 'CNPJ inválido. Informe apenas os 14 números do CNPJ.' },
+        { 
+          data: null, 
+          mensagens: ['CNPJ inválido. Informe apenas os 14 números do CNPJ.'] 
+        },
         { status: 400 }
       );
     }
@@ -306,7 +385,10 @@ export async function PUT(request, { params }) {
     const ufRegex = /^[A-Z]{2}$/;
     if (!ufRegex.test(uf.trim().toUpperCase())) {
       return NextResponse.json(
-        { data: null, message: 'UF inválida. Informe a sigla de 2 letras do estado (ex: SP, RJ, MG).' },
+        { 
+          data: null, 
+          mensagens: ['UF inválida. Informe a sigla de 2 letras do estado (ex: SP, RJ, MG).'] 
+        },
         { status: 400 }
       );
     }
@@ -322,7 +404,10 @@ export async function PUT(request, { params }) {
 
     if (!existing) {
       return NextResponse.json(
-        { data: null, message: 'Fornecedor não encontrado.' },
+        { 
+          data: null, 
+          mensagens: [`Fornecedor com ID ${idNum} não encontrado.`] 
+        },
         { status: 404 }
       );
     }
@@ -337,7 +422,10 @@ export async function PUT(request, { params }) {
 
     if (emailDuplicate) {
       return NextResponse.json(
-        { data: null, message: 'Já existe um fornecedor com este e-mail.' },
+        { 
+          data: null, 
+          mensagens: ['Já existe um fornecedor com este e-mail.'] 
+        },
         { status: 409 }
       );
     }
@@ -352,7 +440,10 @@ export async function PUT(request, { params }) {
 
     if (cnpjDuplicate) {
       return NextResponse.json(
-        { data: null, message: 'Já existe um fornecedor com este CNPJ.' },
+        { 
+          data: null, 
+          mensagens: ['Já existe um fornecedor com este CNPJ.'] 
+        },
         { status: 409 }
       );
     }
@@ -378,12 +469,18 @@ export async function PUT(request, { params }) {
     }
 
     return NextResponse.json(
-      { data, message: 'Fornecedor atualizado com sucesso!' },
+      { 
+        data, 
+        mensagens: ['Fornecedor atualizado com sucesso!'] 
+      },
       { status: 200 }
     );
   } catch (error) {
     return NextResponse.json(
-      { data: null, message: error.message || 'Erro ao atualizar fornecedor' },
+      { 
+        data: null, 
+        mensagens: [error.message || 'Erro ao atualizar fornecedor.'] 
+      },
       { status: 500 }
     );
   }
@@ -444,7 +541,10 @@ export async function DELETE(request, { params }) {
 
     if (isNaN(idNum) || idNum <= 0) {
       return NextResponse.json(
-        { data: null, message: 'ID inválido' },
+        { 
+          data: null, 
+          mensagens: ['ID do fornecedor inválido. Deve ser um número positivo.'] 
+        },
         { status: 400 }
       );
     }
@@ -460,7 +560,10 @@ export async function DELETE(request, { params }) {
 
     if (!existing) {
       return NextResponse.json(
-        { data: null, message: 'Fornecedor não encontrado.' },
+        { 
+          data: null, 
+          mensagens: [`Fornecedor com ID ${idNum} não encontrado.`] 
+        },
         { status: 404 }
       );
     }
@@ -476,7 +579,10 @@ export async function DELETE(request, { params }) {
 
     if (productsUsing && productsUsing.length > 0) {
       return NextResponse.json(
-        { data: null, message: 'Não é possível excluir. Este fornecedor está sendo usado por produtos.' },
+        { 
+          data: null, 
+          mensagens: ['Não é possível excluir. Este fornecedor está sendo usado por produtos.'] 
+        },
         { status: 400 }
       );
     }
@@ -490,12 +596,18 @@ export async function DELETE(request, { params }) {
     if (deleteError) throw deleteError;
 
     return NextResponse.json(
-      { data: null, message: 'Fornecedor excluído com sucesso!' },
+      { 
+        data: null, 
+        mensagens: ['Fornecedor excluído com sucesso!'] 
+      },
       { status: 200 }
     );
   } catch (error) {
     return NextResponse.json(
-      { data: null, message: error.message || 'Erro ao excluir fornecedor' },
+      { 
+        data: null, 
+        mensagens: [error.message || 'Erro ao excluir fornecedor.'] 
+      },
       { status: 500 }
     );
   }

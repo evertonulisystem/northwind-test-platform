@@ -50,12 +50,18 @@ export async function GET(request) {
     if (error) throw error;
 
     return NextResponse.json(
-      { data, message: 'Categorias carregadas com sucesso!' },
+      { 
+        data, 
+        mensagens: ['Categorias carregadas com sucesso!'] 
+      },
       { status: 200 }
     );
   } catch (error) {
     return NextResponse.json(
-      { data: null, message: 'Erro ao carregar categorias' },
+      { 
+        data: null, 
+        mensagens: ['Erro ao carregar categorias.'] 
+      },
       { status: 500 }
     );
   }
@@ -128,14 +134,20 @@ export async function POST(request) {
       body = await request.json();
     } catch (jsonError) {
       return NextResponse.json(
-        { data: null, message: 'Dados inválidos. Verifique se todos os campos foram preenchidos corretamente.' },
+        { 
+          data: null, 
+          mensagens: ['Dados inválidos. Verifique se todos os campos foram preenchidos corretamente.'] 
+        },
         { status: 400 }
       );
     }
 
     if (!body || Object.keys(body).length === 0) {
       return NextResponse.json(
-        { data: null, message: 'Nenhum dado informado. Preencha os campos da categoria.' },
+        { 
+          data: null, 
+          mensagens: ['Nenhum dado informado. Preencha os campos da categoria.'] 
+        },
         { status: 400 }
       );
     }
@@ -151,7 +163,10 @@ export async function POST(request) {
     if (!name || !name.trim()) {
       console.log('❌ Name falhou na validação');
       return NextResponse.json(
-        { data: null, message: 'Nome da categoria é obrigatório.' },
+        { 
+          data: null, 
+          mensagens: ['Nome da categoria é obrigatório.'] 
+        },
         { status: 400 }
       );
     }
@@ -159,7 +174,10 @@ export async function POST(request) {
     if (!description || !description.trim()) {
       console.log('❌ Description falhou na validação');
       return NextResponse.json(
-        { data: null, message: 'Descrição da categoria é obrigatória.' },
+        { 
+          data: null, 
+          mensagens: ['Descrição da categoria é obrigatória.'] 
+        },
         { status: 400 }
       );
     }
@@ -167,21 +185,30 @@ export async function POST(request) {
     // Validação de tamanho
     if (name.trim().length > 25) {
       return NextResponse.json(
-        { data: null, message: 'Nome da categoria deve ter no máximo 25 caracteres.' },
+        { 
+          data: null, 
+          mensagens: ['Nome da categoria deve ter no máximo 25 caracteres.'] 
+        },
         { status: 400 }
       );
     }
 
     if (description.trim().length < 6) {
       return NextResponse.json(
-        { data: null, message: 'Descrição deve ter no mínimo 6 caracteres.' },
+        { 
+          data: null, 
+          mensagens: ['Descrição deve ter no mínimo 6 caracteres.'] 
+        },
         { status: 400 }
       );
     }
 
     if (description.trim().length > 40) {
       return NextResponse.json(
-        { data: null, message: 'Descrição deve ter no máximo 40 caracteres.' },
+        { 
+          data: null, 
+          mensagens: ['Descrição deve ter no máximo 40 caracteres.'] 
+        },
         { status: 400 }
       );
     }
@@ -195,7 +222,10 @@ export async function POST(request) {
 
     if (existing) {
       return NextResponse.json(
-        { data: null, message: 'Já existe uma categoria com este nome.' },
+        { 
+          data: null, 
+          mensagens: ['Já existe uma categoria com este nome.'] 
+        },
         { status: 409 }
       );
     }
@@ -219,12 +249,18 @@ export async function POST(request) {
     }
 
     return NextResponse.json(
-      { data, message: 'Categoria criada com sucesso!' },
+      { 
+        data, 
+        mensagens: ['Categoria criada com sucesso!'] 
+      },
       { status: 201 }
     );
   } catch (error) {
     return NextResponse.json(
-      { data: null, message: error.message || 'Erro ao criar categoria' },
+      { 
+        data: null, 
+        mensagens: [error.message || 'Erro ao criar categoria.'] 
+      },
       { status: 500 }
     );
   }

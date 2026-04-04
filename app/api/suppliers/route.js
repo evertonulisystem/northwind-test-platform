@@ -50,12 +50,18 @@ export async function GET(request) {
     if (error) throw error;
 
     return NextResponse.json(
-      { data, message: 'Fornecedores carregados com sucesso!' },
+      { 
+        data, 
+        mensagens: ['Fornecedores carregados com sucesso!'] 
+      },
       { status: 200 }
     );
   } catch (error) {
     return NextResponse.json(
-      { data: null, message: 'Erro ao carregar fornecedores' },
+      { 
+        data: null, 
+        mensagens: ['Erro ao carregar fornecedores.'] 
+      },
       { status: 500 }
     );
   }
@@ -149,14 +155,20 @@ export async function POST(request) {
       body = await request.json();
     } catch (jsonError) {
       return NextResponse.json(
-        { data: null, message: 'Dados inválidos. Verifique se todos os campos foram preenchidos corretamente.' },
+        { 
+          data: null, 
+          mensagens: ['Dados inválidos. Verifique se todos os campos foram preenchidos corretamente.'] 
+        },
         { status: 400 }
       );
     }
 
     if (!body || Object.keys(body).length === 0) {
       return NextResponse.json(
-        { data: null, message: 'Nenhum dado informado. Preencha os campos do fornecedor.' },
+        { 
+          data: null, 
+          mensagens: ['Nenhum dado informado. Preencha os campos do fornecedor.'] 
+        },
         { status: 400 }
       );
     }
@@ -169,42 +181,60 @@ export async function POST(request) {
     
     if (!company_name || !company_name.trim()) {
       return NextResponse.json(
-        { data: null, message: 'Razão social da empresa é obrigatória.' },
+        { 
+          data: null, 
+          mensagens: ['Razão social da empresa é obrigatória.'] 
+        },
         { status: 400 }
       );
     }
 
     if (!contact_name || !contact_name.trim()) {
       return NextResponse.json(
-        { data: null, message: 'Nome do contato é obrigatório.' },
+        { 
+          data: null, 
+          mensagens: ['Nome do contato é obrigatório.'] 
+        },
         { status: 400 }
       );
     }
 
     if (!email || !email.trim()) {
       return NextResponse.json(
-        { data: null, message: 'E-mail do fornecedor é obrigatório.' },
+        { 
+          data: null, 
+          mensagens: ['E-mail do fornecedor é obrigatório.'] 
+        },
         { status: 400 }
       );
     }
 
     if (!phone || !phone.trim()) {
       return NextResponse.json(
-        { data: null, message: 'Telefone do fornecedor é obrigatório.' },
+        { 
+          data: null, 
+          mensagens: ['Telefone do fornecedor é obrigatório.'] 
+        },
         { status: 400 }
       );
     }
 
     if (!cnpj || !cnpj.trim()) {
       return NextResponse.json(
-        { data: null, message: 'CNPJ do fornecedor é obrigatório.' },
+        { 
+          data: null, 
+          mensagens: ['CNPJ do fornecedor é obrigatório.'] 
+        },
         { status: 400 }
       );
     }
 
     if (!uf || !uf.trim()) {
       return NextResponse.json(
-        { data: null, message: 'UF do fornecedor é obrigatória.' },
+        { 
+          data: null, 
+          mensagens: ['UF do fornecedor é obrigatória.'] 
+        },
         { status: 400 }
       );
     }
@@ -212,28 +242,40 @@ export async function POST(request) {
     // Validação de tamanho
     if (company_name.trim().length < 3) {
       return NextResponse.json(
-        { data: null, message: 'Razão social deve ter no mínimo 3 caracteres.' },
+        { 
+          data: null, 
+          mensagens: ['Razão social deve ter no mínimo 3 caracteres.'] 
+        },
         { status: 400 }
       );
     }
 
     if (company_name.trim().length > 100) {
       return NextResponse.json(
-        { data: null, message: 'Razão social deve ter no máximo 100 caracteres.' },
+        { 
+          data: null, 
+          mensagens: ['Razão social deve ter no máximo 100 caracteres.'] 
+        },
         { status: 400 }
       );
     }
 
     if (contact_name.trim().length < 5) {
       return NextResponse.json(
-        { data: null, message: 'Nome do contato deve ter no mínimo 5 caracteres.' },
+        { 
+          data: null, 
+          mensagens: ['Nome do contato deve ter no mínimo 5 caracteres.'] 
+        },
         { status: 400 }
       );
     }
 
     if (contact_name.trim().length > 80) {
       return NextResponse.json(
-        { data: null, message: 'Nome do contato deve ter no máximo 80 caracteres.' },
+        { 
+          data: null, 
+          mensagens: ['Nome do contato deve ter no máximo 80 caracteres.'] 
+        },
         { status: 400 }
       );
     }
@@ -242,7 +284,10 @@ export async function POST(request) {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email.trim())) {
       return NextResponse.json(
-        { data: null, message: 'E-mail inválido. Informe um e-mail válido.' },
+        { 
+          data: null, 
+          mensagens: ['E-mail inválido. Informe um e-mail válido.'] 
+        },
         { status: 400 }
       );
     }
@@ -250,7 +295,10 @@ export async function POST(request) {
     const phoneRegex = /^\([0-9]{2}\) [0-9]{5}-[0-9]{4}$/;
     if (!phoneRegex.test(phone.trim())) {
       return NextResponse.json(
-        { data: null, message: 'Telefone inválido. Use o formato (XX) XXXXX-XXXX.' },
+        { 
+          data: null, 
+          mensagens: ['Telefone inválido. Use o formato (XX) XXXXX-XXXX.'] 
+        },
         { status: 400 }
       );
     }
@@ -259,7 +307,10 @@ export async function POST(request) {
     const cleanCnpj = cnpj.replace(/[^\d]/g, '');
     if (!cnpjRegex.test(cleanCnpj)) {
       return NextResponse.json(
-        { data: null, message: 'CNPJ inválido. Informe apenas os 14 números do CNPJ.' },
+        { 
+          data: null, 
+          mensagens: ['CNPJ inválido. Informe apenas os 14 números do CNPJ.'] 
+        },
         { status: 400 }
       );
     }
@@ -267,7 +318,10 @@ export async function POST(request) {
     const ufRegex = /^[A-Z]{2}$/;
     if (!ufRegex.test(uf.trim().toUpperCase())) {
       return NextResponse.json(
-        { data: null, message: 'UF inválida. Informe a sigla de 2 letras do estado (ex: SP, RJ, MG).' },
+        { 
+          data: null, 
+          mensagens: ['UF inválida. Informe a sigla de 2 letras do estado (ex: SP, RJ, MG).'] 
+        },
         { status: 400 }
       );
     }
@@ -281,7 +335,10 @@ export async function POST(request) {
 
     if (emailExisting) {
       return NextResponse.json(
-        { data: null, message: 'Já existe um fornecedor com este e-mail.' },
+        { 
+          data: null, 
+          mensagens: ['Já existe um fornecedor com este e-mail.'] 
+        },
         { status: 409 }
       );
     }
@@ -295,7 +352,10 @@ export async function POST(request) {
 
     if (cnpjExisting) {
       return NextResponse.json(
-        { data: null, message: 'Já existe um fornecedor com este CNPJ.' },
+        { 
+          data: null, 
+          mensagens: ['Já existe um fornecedor com este CNPJ.'] 
+        },
         { status: 409 }
       );
     }
@@ -319,12 +379,18 @@ export async function POST(request) {
     }
 
     return NextResponse.json(
-      { data, message: 'Fornecedor criado com sucesso!' },
+      { 
+        data, 
+        mensagens: ['Fornecedor criado com sucesso!'] 
+      },
       { status: 201 }
     );
   } catch (error) {
     return NextResponse.json(
-      { data: null, message: error.message || 'Erro ao criar fornecedor' },
+      { 
+        data: null, 
+        mensagens: [error.message || 'Erro ao criar fornecedor.'] 
+      },
       { status: 500 }
     );
   }

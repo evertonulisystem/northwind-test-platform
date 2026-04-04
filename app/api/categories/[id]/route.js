@@ -193,7 +193,10 @@ export async function PUT(request, { params }) {
 
     if (isNaN(idNum) || idNum <= 0) {
       return NextResponse.json(
-        { data: null, message: 'ID inválido' },
+        { 
+          data: null, 
+          mensagens: ['ID da categoria inválido. Deve ser um número positivo.'] 
+        },
         { status: 400 }
       );
     }
@@ -203,14 +206,20 @@ export async function PUT(request, { params }) {
       body = await request.json();
     } catch (jsonError) {
       return NextResponse.json(
-        { data: null, message: 'Dados inválidos. Verifique se todos os campos foram preenchidos corretamente.' },
+        { 
+          data: null, 
+          mensagens: ['Dados inválidos. Verifique se todos os campos foram preenchidos corretamente.'] 
+        },
         { status: 400 }
       );
     }
 
     if (!body || Object.keys(body).length === 0) {
       return NextResponse.json(
-        { data: null, message: 'Nenhum dado informado. Preencha os campos da categoria.' },
+        { 
+          data: null, 
+          mensagens: ['Nenhum dado informado. Preencha os campos da categoria.'] 
+        },
         { status: 400 }
       );
     }
@@ -220,14 +229,20 @@ export async function PUT(request, { params }) {
     
     if (!name || !name.trim()) {
       return NextResponse.json(
-        { data: null, message: 'Nome da categoria é obrigatório.' },
+        { 
+          data: null, 
+          mensagens: ['Nome da categoria é obrigatório.'] 
+        },
         { status: 400 }
       );
     }
 
     if (!description || !description.trim()) {
       return NextResponse.json(
-        { data: null, message: 'Descrição da categoria é obrigatória.' },
+        { 
+          data: null, 
+          mensagens: ['Descrição da categoria é obrigatória.'] 
+        },
         { status: 400 }
       );
     }
@@ -235,21 +250,30 @@ export async function PUT(request, { params }) {
     // Validação de tamanho
     if (name.trim().length > 25) {
       return NextResponse.json(
-        { data: null, message: 'Nome da categoria deve ter no máximo 25 caracteres.' },
+        { 
+          data: null, 
+          mensagens: ['Nome da categoria deve ter no máximo 25 caracteres.'] 
+        },
         { status: 400 }
       );
     }
 
     if (description.trim().length < 6) {
       return NextResponse.json(
-        { data: null, message: 'Descrição deve ter no mínimo 6 caracteres.' },
+        { 
+          data: null, 
+          mensagens: ['Descrição deve ter no mínimo 6 caracteres.'] 
+        },
         { status: 400 }
       );
     }
 
     if (description.trim().length > 40) {
       return NextResponse.json(
-        { data: null, message: 'Descrição deve ter no máximo 40 caracteres.' },
+        { 
+          data: null, 
+          mensagens: ['Descrição deve ter no máximo 40 caracteres.'] 
+        },
         { status: 400 }
       );
     }
@@ -265,7 +289,10 @@ export async function PUT(request, { params }) {
 
     if (!existing) {
       return NextResponse.json(
-        { data: null, message: 'Categoria não encontrada.' },
+        { 
+          data: null, 
+          mensagens: [`Categoria com ID ${idNum} não encontrada.`] 
+        },
         { status: 404 }
       );
     }
@@ -280,7 +307,10 @@ export async function PUT(request, { params }) {
 
     if (duplicate) {
       return NextResponse.json(
-        { data: null, message: 'Já existe uma categoria com este nome.' },
+        { 
+          data: null, 
+          mensagens: ['Já existe uma categoria com este nome.'] 
+        },
         { status: 409 }
       );
     }
@@ -299,7 +329,10 @@ export async function PUT(request, { params }) {
     if (error) {
       if (error.message.includes('null value in column')) {
         return NextResponse.json(
-          { data: null, message: 'Campos obrigatórios não foram preenchidos.' },
+          { 
+            data: null, 
+            mensagens: ['Campos obrigatórios não foram preenchidos.'] 
+          },
           { status: 400 }
         );
       }
@@ -307,12 +340,18 @@ export async function PUT(request, { params }) {
     }
 
     return NextResponse.json(
-      { data, message: 'Categoria atualizada com sucesso!' },
+      { 
+        data, 
+        mensagens: ['Categoria atualizada com sucesso!'] 
+      },
       { status: 200 }
     );
   } catch (error) {
     return NextResponse.json(
-      { data: null, message: error.message || 'Erro ao atualizar categoria' },
+      { 
+        data: null, 
+        mensagens: [error.message || 'Erro ao atualizar categoria.'] 
+      },
       { status: 500 }
     );
   }
@@ -413,7 +452,10 @@ export async function PATCH(request, { params }) {
 
     if (isNaN(idNum) || idNum <= 0) {
       return NextResponse.json(
-        { data: null, message: 'ID inválido' },
+        { 
+          data: null, 
+          mensagens: ['ID da categoria inválido. Deve ser um número positivo.'] 
+        },
         { status: 400 }
       );
     }
@@ -423,14 +465,20 @@ export async function PATCH(request, { params }) {
       body = await request.json();
     } catch (jsonError) {
       return NextResponse.json(
-        { data: null, message: 'Dados inválidos. Verifique se todos os campos foram preenchidos corretamente.' },
+        { 
+          data: null, 
+          mensagens: ['Dados inválidos. Verifique se todos os campos foram preenchidos corretamente.'] 
+        },
         { status: 400 }
       );
     }
 
     if (!body || Object.keys(body).length === 0) {
       return NextResponse.json(
-        { data: null, message: 'Nenhum dado informado. Envie pelo menos um campo para atualizar.' },
+        { 
+          data: null, 
+          mensagens: ['Nenhum dado informado. Envie pelo menos um campo para atualizar.'] 
+        },
         { status: 400 }
       );
     }
@@ -446,7 +494,10 @@ export async function PATCH(request, { params }) {
 
     if (!existing) {
       return NextResponse.json(
-        { data: null, message: 'Categoria não encontrada.' },
+        { 
+          data: null, 
+          mensagens: [`Categoria com ID ${idNum} não encontrada.`] 
+        },
         { status: 404 }
       );
     }
@@ -463,14 +514,20 @@ export async function PATCH(request, { params }) {
     if (name !== undefined) {
       if (!name || !name.trim()) {
         return NextResponse.json(
-          { data: null, message: 'Nome da categoria não pode ser vazio.' },
+          { 
+            data: null, 
+            mensagens: ['Nome da categoria não pode ser vazio.'] 
+          },
           { status: 400 }
         );
       }
 
       if (name.trim().length > 25) {
         return NextResponse.json(
-          { data: null, message: 'Nome da categoria deve ter no máximo 25 caracteres.' },
+          { 
+            data: null, 
+            mensagens: ['Nome da categoria deve ter no máximo 25 caracteres.'] 
+          },
           { status: 400 }
         );
       }
@@ -486,7 +543,10 @@ export async function PATCH(request, { params }) {
 
         if (duplicate) {
           return NextResponse.json(
-            { data: null, message: 'Já existe uma categoria com este nome.' },
+            { 
+              data: null, 
+              mensagens: ['Já existe uma categoria com este nome.'] 
+            },
             { status: 409 }
           );
         }
@@ -500,21 +560,30 @@ export async function PATCH(request, { params }) {
     if (description !== undefined) {
       if (!description || !description.trim()) {
         return NextResponse.json(
-          { data: null, message: 'Descrição da categoria não pode ser vazia.' },
+          { 
+            data: null, 
+            mensagens: ['Descrição da categoria não pode ser vazia.'] 
+          },
           { status: 400 }
         );
       }
 
       if (description.trim().length < 6) {
         return NextResponse.json(
-          { data: null, message: 'Descrição deve ter no mínimo 6 caracteres.' },
+          { 
+            data: null, 
+            mensagens: ['Descrição deve ter no mínimo 6 caracteres.'] 
+          },
           { status: 400 }
         );
       }
 
       if (description.trim().length > 40) {
         return NextResponse.json(
-          { data: null, message: 'Descrição deve ter no máximo 40 caracteres.' },
+          { 
+            data: null, 
+            mensagens: ['Descrição deve ter no máximo 40 caracteres.'] 
+          },
           { status: 400 }
         );
       }
@@ -538,12 +607,18 @@ export async function PATCH(request, { params }) {
     console.log('✅ Categoria atualizada com PATCH:', data);
 
     return NextResponse.json(
-      { data, message: 'Categoria atualizada parcialmente com sucesso!' },
+      { 
+        data, 
+        mensagens: ['Categoria atualizada parcialmente com sucesso!'] 
+      },
       { status: 200 }
     );
   } catch (error) {
     return NextResponse.json(
-      { data: null, message: error.message || 'Erro ao atualizar categoria' },
+      { 
+        data: null, 
+        mensagens: [error.message || 'Erro ao atualizar categoria.'] 
+      },
       { status: 500 }
     );
   }
@@ -582,7 +657,10 @@ export async function DELETE(request, { params }) {
 
     if (isNaN(idNum) || idNum <= 0) {
       return NextResponse.json(
-        { data: null, message: 'ID inválido' },
+        { 
+          data: null, 
+          mensagens: ['ID da categoria inválido. Deve ser um número positivo.'] 
+        },
         { status: 400 }
       );
     }
@@ -598,7 +676,10 @@ export async function DELETE(request, { params }) {
 
     if (!existing) {
       return NextResponse.json(
-        { data: null, message: 'Categoria não encontrada.' },
+        { 
+          data: null, 
+          mensagens: [`Categoria com ID ${idNum} não encontrada.`] 
+        },
         { status: 404 }
       );
     }
@@ -614,7 +695,10 @@ export async function DELETE(request, { params }) {
 
     if (productsUsing && productsUsing.length > 0) {
       return NextResponse.json(
-        { data: null, message: 'Não é possível excluir. Esta categoria está sendo usada por produtos.' },
+        { 
+          data: null, 
+          mensagens: ['Não é possível excluir. Esta categoria está sendo usada por produtos.'] 
+        },
         { status: 400 }
       );
     }
@@ -628,12 +712,18 @@ export async function DELETE(request, { params }) {
     if (deleteError) throw deleteError;
 
     return NextResponse.json(
-      { data: null, message: 'Categoria excluída com sucesso!' },
+      { 
+        data: null, 
+        mensagens: ['Categoria excluída com sucesso!'] 
+      },
       { status: 200 }
     );
   } catch (error) {
     return NextResponse.json(
-      { data: null, message: error.message || 'Erro ao excluir categoria' },
+      { 
+        data: null, 
+        mensagens: [error.message || 'Erro ao excluir categoria.'] 
+      },
       { status: 500 }
     );
   }
