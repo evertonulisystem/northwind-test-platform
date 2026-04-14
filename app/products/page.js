@@ -84,6 +84,13 @@ export default function ProductsPage() {
       setLoading(true);
       console.log('🐛 DEBUG PRODUCTS - Buscando produtos...');
       
+      // 🚨 DEBUGGER DEMONSTRATIVO - NUNCA DEIXE EM PRODUÇÃO! 🚨 utiizado na aula sobre debug debugger
+      // debugger;
+      // console.log('🔍 PONTO DE PARADA: Verifique as variáveis no DevTools');
+      // console.log('📊 Estado atual:', { loading, products, pagination });
+      // console.log('🎓 AULA: Este é um exemplo de POR QUE debuggers devem ser removidos!');
+      // console.log('⚠️  PROBLEMAS: Bloqueia execução, expõe dados, afeta UX, causa bugs em produção!');
+      
       const token = localStorage.getItem('token');
       const headers = { 'Content-Type': 'application/json' };
       
