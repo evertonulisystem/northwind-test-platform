@@ -278,7 +278,7 @@ export default function ProductsPage() {
                   >
                     <option value="">Todos os fornecedores</option>
                     {suppliers.map(sup => (
-                      <option key={sup.id || sup.company_name} value={sup.id || sup.company_name}>{sup.company_name}</option>
+                      <option key={sup.id || sup.company_name} value={sup.company_name}>{sup.company_name}</option>
                     ))}
                   </select>
                   <ChevronDown className="absolute right-3 top-4 w-5 h-5 text-slate-400 pointer-events-none" />
