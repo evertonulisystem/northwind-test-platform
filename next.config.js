@@ -3,8 +3,8 @@ const nextConfig = {
   async headers() {
     return [
       {
-        // Configura CORS para todos os endpoints da API
-        source: '/api/(.*)',
+        // Configura CORS e anti-cache APENAS para endpoints da API
+        source: '/api/:path*',
         headers: [
           {
             key: 'Cache-Control',
