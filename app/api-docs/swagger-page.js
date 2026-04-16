@@ -9,7 +9,9 @@ export default function ApiDocs() {
   const [spec, setSpec] = useState(null);
 
   useEffect(() => {
-    fetch('/api/swagger.json')
+    // Forçar reload com timestamp para evitar cache
+    const timestamp = Date.now();
+    fetch(`/api/swagger.json?t=${timestamp}`)
       .then((res) => res.json())
       .then((data) => setSpec(data))
       .catch(() => console.error('Erro ao carregar Swagger'));
@@ -34,6 +36,13 @@ export default function ApiDocs() {
         }
         return request;
       }}
+      tryItOutEnabled={true}
+      docExpansion="list"
+      defaultModelsExpandDepth={2}
+      displayRequestDuration={true}
+      filter={true}
+      persistAuthorization={false}
+      withCredentials={false}
     />
   );
 }
