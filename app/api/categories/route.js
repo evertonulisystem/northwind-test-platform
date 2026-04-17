@@ -16,10 +16,16 @@ import { verifyToken, getTokenFromRequest } from '@/lib/jwt';
  *         description: Lista de categorias
  */
 export async function GET(request) {
+  console.log('=== DEBUG CATEGORIES GET ===');
+  console.log('Headers:', Object.fromEntries(request.headers.entries()));
+  
   try {
     // Verificar autenticação
     const token = getTokenFromRequest(request);
+    console.log('Token categories:', token ? 'RECEBIDO' : 'AUSENTE');
+    
     if (!token) {
+      console.log('Retornando Token ausente - Categories');
       return NextResponse.json(
         { 
           data: null,
