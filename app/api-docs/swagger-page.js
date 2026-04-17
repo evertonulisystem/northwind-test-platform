@@ -26,23 +26,31 @@ export default function ApiDocs() {
   }
 
   return (
-    <SwaggerUI 
-      spec={spec}
-      requestInterceptor={(request) => {
-        // Adiciona automaticamente o token se estiver no localStorage
-        const token = localStorage.getItem('swagger_token');
-        if (token) {
-          request.headers.Authorization = `Bearer ${token}`;
-        }
-        return request;
-      }}
-      tryItOutEnabled={true}
-      docExpansion="list"
-      defaultModelsExpandDepth={2}
-      displayRequestDuration={true}
-      filter={true}
-      persistAuthorization={false}
-      withCredentials={false}
-    />
+    <div>
+      <SwaggerUI 
+        spec={spec}
+        requestInterceptor={(request) => {
+          // Limpar completamente o header Authorization
+          delete request.headers.Authorization;
+          
+          // Adicionar token apenas se existir e não estiver vazio
+          const token = localStorage.getItem('swagger_token');
+          if (token && token.trim() !== '') {
+            console.log('🔑 Adicionando token ao request:', token.substring(0, 20) + '...');
+            request.headers.Authorization = `Bearer ${token}`;
+          } else {
+            console.log('❌ Nenhum token encontrado - request sem Authorization');
+          }
+          return request;
+        }}
+        tryItOutEnabled={true}
+        docExpansion="list"
+        defaultModelsExpandDepth={2}
+        displayRequestDuration={true}
+        filter={true}
+        persistAuthorization={false}
+        withCredentials={false}
+      />
+    </div>
   );
 }
