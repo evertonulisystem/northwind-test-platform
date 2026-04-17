@@ -6,7 +6,7 @@ export const dynamic = "force-dynamic";
 
 /**
  * @swagger
- * /api/auth/login:
+ * /api/v1/auth/login:
  *   post:
  *     summary: Realiza login de usuário
  *     tags: [Autenticação]

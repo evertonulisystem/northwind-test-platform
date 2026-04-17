@@ -39,7 +39,7 @@ export default function ProductsPage() {
         headers['Authorization'] = `Bearer ${token}`;
       }
       
-      const res = await fetch('/api/categories', { headers });
+      const res = await fetch('/api/v1/categories', { headers });
       const result = await res.json();
       setCategories(result.data || []);
       console.log('🐛 DEBUG CATEGORIES - Carregadas:', result.data?.length || 0);
@@ -57,7 +57,7 @@ export default function ProductsPage() {
         headers['Authorization'] = `Bearer ${token}`;
       }
       
-      const res = await fetch('/api/suppliers', { headers });
+      const res = await fetch('/api/v1/suppliers', { headers });
       const result = await res.json();
       setSuppliers(result.data || []);
       console.log('🐛 DEBUG SUPPLIERS - Carregados:', result.data?.length || 0);
@@ -101,7 +101,7 @@ export default function ProductsPage() {
         console.log('🐛 DEBUG PRODUCTS - Nenhum token encontrado');
       }
       
-      const res = await fetch('/api/products?limit=1000', { 
+      const res = await fetch('/api/v1/products?limit=1000', { 
         cache: 'no-store',
         headers
       });
@@ -188,7 +188,7 @@ export default function ProductsPage() {
         return;
       }
       
-      const res = await fetch(`/api/products/${deleteId}`, { 
+      const res = await fetch(`/api/v1/products/${deleteId}`, { 
         method: 'DELETE',
         headers: { 
           'Authorization': `Bearer ${token}`

@@ -1,11 +1,11 @@
-// app/api/categories/route.js
+// app/api/v1/categories/route.js
 import { supabase } from '@/lib/supabase';
 import { NextResponse } from 'next/server';
 import { verifyToken, getTokenFromRequest } from '@/lib/jwt';
 
 /**
  * @swagger
- * /api/categories:
+ * /api/v1/categories:
  *   get:
  *     summary: Lista todas as categorias
  *     tags: [Categories]
@@ -16,7 +16,7 @@ import { verifyToken, getTokenFromRequest } from '@/lib/jwt';
  *         description: Lista de categorias
  */
 export async function GET(request) {
-  console.log('=== DEBUG CATEGORIES GET ===');
+  console.log('=== DEBUG CATEGORIES GET /api/v1/categories ===');
   console.log('Headers:', Object.fromEntries(request.headers.entries()));
   
   try {
@@ -75,7 +75,7 @@ export async function GET(request) {
 
 /**
  * @swagger
- * /api/categories:
+ * /api/v1/categories:
  *   post:
  *     summary: Adiciona uma nova categoria
  *     tags: [Categories]
@@ -161,7 +161,7 @@ export async function POST(request) {
     // Validação de campos obrigatórios
     const { name, description } = body;
     
-    console.log('🐛 DEBUG POST /api/categories');
+    console.log('🐛 DEBUG POST /api/v1/categories');
     console.log('Body recebido:', body);
     console.log('Name:', name, 'Type:', typeof name, 'Length:', name?.length);
     console.log('Description:', description, 'Type:', typeof description, 'Length:', description?.length);

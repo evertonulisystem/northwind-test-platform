@@ -1,11 +1,11 @@
-// app/api/suppliers/route.js
+// app/api/v1/suppliers/route.js
 import { supabase } from '@/lib/supabase';
 import { NextResponse } from 'next/server';
 import { verifyToken, getTokenFromRequest } from '@/lib/jwt';
 
 /**
  * @swagger
- * /api/suppliers:
+ * /api/v1/suppliers:
  *   get:
  *     summary: Lista todos os fornecedores
  *     tags: [Suppliers]
@@ -14,6 +14,8 @@ import { verifyToken, getTokenFromRequest } from '@/lib/jwt';
  *     responses:
  *       200:
  *         description: Lista de fornecedores
+ *       401:
+ *         description: Token ausente
  */
 export async function GET(request) {
   try {
@@ -69,7 +71,7 @@ export async function GET(request) {
 
 /**
  * @swagger
- * /api/suppliers:
+ * /api/v1/suppliers:
  *   post:
  *     summary: Adiciona um novo fornecedor
  *     tags: [Suppliers]
@@ -176,7 +178,7 @@ export async function POST(request) {
     // Validação de campos obrigatórios
     const { company_name, contact_name, email, phone, cnpj, uf } = body;
     
-    console.log('🐛 DEBUG POST /api/suppliers');
+    console.log('🐛 DEBUG POST /api/v1/suppliers');
     console.log('Body recebido:', body);
     
     if (!company_name || !company_name.trim()) {

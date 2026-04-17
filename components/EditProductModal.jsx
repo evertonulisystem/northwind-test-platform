@@ -41,8 +41,8 @@ export default function EditProductModal({ product, onClose, onUpdate }) {
         }
 
         const [catRes, supRes] = await Promise.all([
-          fetch('/api/categories', { headers, cache: 'no-store' }),
-          fetch('/api/suppliers', { headers, cache: 'no-store' }),
+          fetch('/api/v1/categories', { headers, cache: 'no-store' }),
+          fetch('/api/v1/suppliers', { headers, cache: 'no-store' }),
         ]);
 
         const catData = await catRes.json();
@@ -148,7 +148,7 @@ export default function EditProductModal({ product, onClose, onUpdate }) {
         return;
       }
       
-      const res = await fetch(`/api/products/${product.id}`, {
+      const res = await fetch(`/api/v1/products/${product.id}`, {
         method: 'PUT',
         headers: { 
           'Content-Type': 'application/json',

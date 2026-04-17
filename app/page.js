@@ -35,7 +35,7 @@ export default function LoginPage() {
     try {
       console.log('🐛 DEBUG LOGIN - Enviando requisição...');
       
-      const res = await fetch('/api/auth/login', {
+      const res = await fetch('/api/v1/auth/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

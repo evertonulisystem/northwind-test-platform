@@ -41,8 +41,8 @@ export default function AddProductModal({ onClose, onAdd }) {
         }
 
         const [catRes, supRes] = await Promise.all([
-          fetch('/api/categories', { headers, cache: 'no-store' }),
-          fetch('/api/suppliers', { headers, cache: 'no-store' }),
+          fetch('/api/v1/categories', { headers, cache: 'no-store' }),
+          fetch('/api/v1/suppliers', { headers, cache: 'no-store' }),
         ]);
 
         const catData = await catRes.json();
@@ -149,7 +149,7 @@ export default function AddProductModal({ onClose, onAdd }) {
       
       console.log('Token enviado:', token.substring(0, 20) + '...');
       
-      const res = await fetch('/api/products', {
+      const res = await fetch('/api/v1/products', {
         method: 'POST',
         headers: { 
           'Content-Type': 'application/json',

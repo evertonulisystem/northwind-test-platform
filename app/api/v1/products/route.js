@@ -1,11 +1,11 @@
-// app/api/products/route.js
+// app/api/v1/products/route.js
 import { supabase } from '@/lib/supabase';
 import { NextResponse } from 'next/server';
 import { verifyToken, getTokenFromRequest } from '@/lib/jwt';
 
 /**
  * @swagger
- * /api/products:
+ * /api/v1/products:
  *   get:
  *     summary: Lista produtos com paginação, filtros e ordenação
  *     tags: [Products]
@@ -29,11 +29,11 @@ import { verifyToken, getTokenFromRequest } from '@/lib/jwt';
  *       200:
  *         description: Lista paginada
  */
-// app/api/products/route.js → GET ATUALIZADO (O ÚNICO QUE FUNCIONA DE VERDADE COM JOIN)
-// app/api/products/route.js → GET FINAL (FUNCIONA COM TEXTO EM NOME, CATEGORIA E FORNECEDOR)
-// app/api/products/route.js → VERSÃO FINAL QUE FUNCIONA 100%
+// app/api/v1/products/route.js → GET ATUALIZADO (O ÚNICO QUE FUNCIONA DE VERDADE COM JOIN)
+// app/api/v1/products/route.js → GET FINAL (FUNCIONA COM TEXTO EM NOME, CATEGORIA E FORNECEDOR)
+// app/api/v1/products/route.js → VERSÃO FINAL QUE FUNCIONA 100%
 export async function GET(request) {
-  console.log('=== DEBUG GET /api/products ===');
+  console.log('=== DEBUG GET /api/v1/products ===');
   console.log('URL:', request.url);
   console.log('Headers:', Object.fromEntries(request.headers.entries()));
   
