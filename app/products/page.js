@@ -227,11 +227,12 @@ export default function ProductsPage() {
 
           <div className="flex justify-end gap-4 mb-6">
             <button 
-              onClick={() => router.push('/cart')}
-              className="bg-slate-700 hover:bg-slate-600 text-white px-6 py-3 rounded-xl transition font-semibold shadow-lg flex items-center gap-2 border border-slate-600"
+              disabled
+              title="Funcionalidade em manutenção"
+              className="bg-slate-700 opacity-50 cursor-not-allowed text-white px-6 py-3 rounded-xl transition font-semibold shadow-lg flex items-center gap-2 border border-slate-600"
             >
               <ShoppingBag className="w-5 h-5" />
-              Ver Carrinho
+              Ver Carrinho (Manutenção)
             </button>
 
             <button onClick={() => setShowAddModal(true)}
