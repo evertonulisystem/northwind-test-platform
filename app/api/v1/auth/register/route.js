@@ -8,7 +8,7 @@ export const dynamic = "force-dynamic";
 
 /**
  * @swagger
- * /api/auth/register:
+ * /api/v1/auth/register:
  *   post:
  *     summary: Registrar novo usuário
  *     tags: [Autenticação]

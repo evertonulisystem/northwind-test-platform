@@ -18,7 +18,7 @@ function generateSlug(name) {
 // === GET (BUSCAR POR ID) ===
 /**
  * @swagger
- * /api/products/{id}:
+ * /api/v1/products/{id}:
  *   get:
  *     summary: Busca um produto pelo ID
  *     tags: [Products]

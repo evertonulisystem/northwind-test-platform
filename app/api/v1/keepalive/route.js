@@ -7,7 +7,7 @@ import { NextResponse } from 'next/server'
 
 /**
  * @swagger
- * /api/keepalive:
+ * /api/v1/keepalive:
  *   get:
  *     summary: Mantém o projeto Supabase ativo (anti-pause)
  *     tags: [Health]

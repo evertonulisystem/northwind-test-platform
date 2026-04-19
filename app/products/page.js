@@ -8,7 +8,7 @@ import RulesModal from '@/components/RulesModal.jsx';
 import ConfirmModal from '@/components/ConfirmModal.jsx';
 import AddProductModal from '@/components/AddProductModal.jsx';
 import EditProductModal from '@/components/EditProductModal.jsx';
-import { AlertTriangle, Plus, Edit, Trash2, Search, X, ChevronDown } from 'lucide-react';
+import { AlertTriangle, Plus, Edit, Trash2, Search, X, ChevronDown, ShoppingBag } from 'lucide-react';
 import ProductDetailsModal from '@/components/ProductDetailsModal.jsx';
 
 export default function ProductsPage() {
@@ -225,7 +225,15 @@ export default function ProductsPage() {
             </button>
           </div>
 
-          <div className="flex justify-end mb-6">
+          <div className="flex justify-end gap-4 mb-6">
+            <button 
+              onClick={() => router.push('/cart')}
+              className="bg-slate-700 hover:bg-slate-600 text-white px-6 py-3 rounded-xl transition font-semibold shadow-lg flex items-center gap-2 border border-slate-600"
+            >
+              <ShoppingBag className="w-5 h-5" />
+              Ver Carrinho
+            </button>
+
             <button onClick={() => setShowAddModal(true)}
               className="bg-green-600 text-white px-6 py-3 rounded-xl hover:bg-green-700 transition font-semibold shadow-lg flex items-center gap-2">
               <Plus className="w-5 h-5" />

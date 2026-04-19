@@ -3,7 +3,7 @@ import { NextResponse } from 'next/server';
 
 /**
  * @swagger
- * /api/auth/validate:
+ * /api/v1/auth/validate:
  *   post:
  *     summary: Validar campos de formulário via API
  *     tags: [Autenticação]

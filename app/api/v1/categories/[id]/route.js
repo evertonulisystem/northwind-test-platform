@@ -1,4 +1,4 @@
-// app/api/categories/[id]/route.js
+// app/api/v1/categories/[id]/route.js
 import { supabase } from '@/lib/supabase';
 import { NextResponse } from 'next/server';
 import { verifyToken, getTokenFromRequest } from '@/lib/jwt';
@@ -7,7 +7,7 @@ export const dynamic = "force-dynamic";
 
 /**
  * @swagger
- * /api/categories/{id}:
+ * /api/v1/categories/{id}:
  *   get:
  *     summary: Lista produtos de uma categoria
  *     tags: [Categories]
@@ -119,7 +119,7 @@ export async function GET(request, { params }) {
 
 /**
  * @swagger
- * /api/categories/{id}:
+ * /api/v1/categories/{id}:
  *   put:
  *     summary: Atualiza uma categoria existente
  *     tags: [Categories]
@@ -359,7 +359,7 @@ export async function PUT(request, { params }) {
 
 /**
  * @swagger
- * /api/categories/{id}:
+ * /api/v1/categories/{id}:
  *   delete:
  *     summary: Exclui uma categoria
  *     tags: [Categories]
@@ -381,7 +381,7 @@ export async function PUT(request, { params }) {
  */
 /**
  * @swagger
- * /api/categories/{id}:
+ * /api/v1/categories/{id}:
  *   patch:
  *     summary: Atualiza parcialmente uma categoria
  *     tags: [Categories]

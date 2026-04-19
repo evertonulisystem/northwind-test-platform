@@ -5,7 +5,7 @@ import { verifyToken, getTokenFromRequest } from '@/lib/jwt';
 
 /**
  * @swagger
- * /api/suppliers/{id}:
+ * /api/v1/suppliers/{id}:
  *   get:
  *     summary: Lista produtos de um fornecedor
  *     tags: [Suppliers]
@@ -117,7 +117,7 @@ export async function GET(request, { params }) {
 
 /**
  * @swagger
- * /api/suppliers/{id}:
+ * /api/v1/suppliers/{id}:
  *   put:
  *     summary: Atualiza um fornecedor existente
  *     tags: [Suppliers]
@@ -488,7 +488,7 @@ export async function PUT(request, { params }) {
 
 /**
  * @swagger
- * /api/suppliers/{id}:
+ * /api/v1/suppliers/{id}:
  *   delete:
  *     summary: Exclui um fornecedor
  *     tags: [Suppliers]

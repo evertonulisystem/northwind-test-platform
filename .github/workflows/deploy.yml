@@ -28,6 +28,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Call Keepalive endpoint
-        run: curl -X GET https://northwind-test-platform.vercel.app/api/keepalive
+        run: curl -X GET https://northwind-test-platform.vercel.app/api/v1/keepalive
         
         

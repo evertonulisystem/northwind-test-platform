@@ -6,7 +6,7 @@ export const dynamic = "force-dynamic";
 
 /**
  * @swagger
- * /api/debug/error-500:
+ * /api/v1/debug/error-500:
  *   get:
  *     summary: Simula um erro interno (500) com mensagens aleatórias
  *     description: Endpoint didático para testar resiliência em testes de automação.

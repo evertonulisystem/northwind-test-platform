@@ -4,7 +4,7 @@ import { verifyToken, getTokenFromRequest } from '@/lib/jwt';
 
 /**
  * @swagger
- * /api/products/simulate-error:
+ * /api/v1/products/simulate-error:
  *   get:
  *     summary: Simula um erro interno (500) para fins de teste
  *     tags: [Products]

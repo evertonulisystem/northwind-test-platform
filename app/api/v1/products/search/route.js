@@ -5,7 +5,7 @@ import { verifyToken, getTokenFromRequest } from '@/lib/jwt';
 
 /**
  * @swagger
- * /api/products/search:
+ * /api/v1/products/search:
  *   get:
  *     summary: Busca produto por ID ou outros parâmetros
  *     tags: [Products]

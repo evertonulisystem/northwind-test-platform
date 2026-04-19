@@ -5,7 +5,7 @@ import { verifyToken, getTokenFromRequest } from '@/lib/jwt';
 
 /**
  * @swagger
- * /api/products/validate:
+ * /api/v1/products/validate:
  *   post:
  *     summary: Valida dados de produto antes de salvar
  *     tags: [Products]

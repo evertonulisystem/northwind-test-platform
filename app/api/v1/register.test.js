@@ -1,15 +1,15 @@
 // tests/api/register.test.js
-import { POST } from '@/app/api/auth/register/route';
+import { POST } from '@/app/api/v1/auth/register/route';
 import { NextRequest } from 'next/server';
 
-describe('POST /api/auth/register', () => {
+describe('POST /api/v1/auth/register', () => {
   beforeEach(() => {
     // Limpar mock database
-    require('@/app/api/auth/register/route').users = [];
+    require('@/app/api/v1/auth/register/route').users = [];
   });
 
   it('should create user successfully', async () => {
-    const request = new NextRequest('http://localhost/api/auth/register', {
+    const request = new NextRequest('http://localhost/api/v1/auth/register', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({

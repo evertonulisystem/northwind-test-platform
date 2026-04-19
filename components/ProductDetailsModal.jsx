@@ -1,7 +1,12 @@
 // app/components/ProductDetailsModal.jsx
-import { X, Search } from 'lucide-react';
+import { X, Search, ShoppingCart, Plus, Minus, Loader2 } from 'lucide-react';
+import { useState } from 'react';
+import toast from 'react-hot-toast';
 
 export default function ProductDetailsModal({ product, onClose }) {
+  const [quantity, setQuantity] = useState(1);
+  const [addingToCart, setAddingToCart] = useState(false);
+
   if (!product) return null;
 
   const handlePrint = () => {
@@ -40,6 +45,48 @@ export default function ProductDetailsModal({ product, onClose }) {
     printWindow.document.close();
     printWindow.focus();
     setTimeout(() => printWindow.print(), 600);
+  };
+
+  const handleAddToCart = async () => {
+    try {
+      setAddingToCart(true);
+      const token = localStorage.getItem('token');
+      if (!token) {
+        toast.error('Você precisa estar logado para adicionar ao carrinho.');
+        return;
+      }
+
+      const res = await fetch('/api/v1/cart', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          product_id: product.id,
+          quantity: quantity
+        })
+      });
+
+      const result = await res.json();
+      if (res.ok) {
+        toast.success(`${product.name} adicionado ao carrinho!`, {
+          icon: '🛒',
+          style: {
+            borderRadius: '10px',
+            background: '#1e293b',
+            color: '#fff',
+          },
+        });
+        onClose();
+      } else {
+        toast.error(result.mensagens?.[0] || 'Erro ao adicionar ao carrinho');
+      }
+    } catch (error) {
+      toast.error('Erro de conexão ao adicionar ao carrinho');
+    } finally {
+      setAddingToCart(false);
+    }
   };
 
   return (
@@ -102,21 +149,50 @@ export default function ProductDetailsModal({ product, onClose }) {
           <div className="flex justify-center gap-4 mt-10">
             <button
               onClick={handlePrint}
-              className="bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-700 hover:to-blue-700 text-white px-8 py-4 rounded-xl font-bold text-lg shadow-lg transition transform hover:scale-105"
+              className="bg-slate-800 hover:bg-slate-700 text-slate-300 px-6 py-4 rounded-xl font-bold transition flex items-center gap-2 border border-slate-700"
             >
-              Imprimir (PDF/PNG)
+              Imprimir
+            </button>
+            <div className="flex bg-slate-800 rounded-xl border border-slate-700 p-1">
+              <button 
+                onClick={() => setQuantity(q => Math.max(1, q - 1))}
+                data-testid="modal-decrement-qty"
+                className="w-10 h-10 flex items-center justify-center hover:bg-slate-700 rounded-lg text-white transition"
+              >
+                <Minus className="w-4 h-4" />
+              </button>
+              <span 
+                data-testid="modal-quantity-val"
+                className="w-12 flex items-center justify-center font-bold text-white text-lg"
+              >
+                {quantity}
+              </span>
+              <button 
+                onClick={() => setQuantity(q => q + 1)}
+                data-testid="modal-increment-qty"
+                className="w-10 h-10 flex items-center justify-center hover:bg-slate-700 rounded-lg text-white transition"
+              >
+                <Plus className="w-4 h-4" />
+              </button>
+            </div>
+            <button
+              onClick={handleAddToCart}
+              disabled={addingToCart}
+              data-testid="modal-add-to-cart-button"
+              className="bg-gradient-to-r from-emerald-600 to-green-600 hover:from-emerald-700 hover:to-green-700 text-white px-8 py-4 rounded-xl font-black text-lg shadow-lg transition transform hover:scale-105 flex items-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {addingToCart ? (
+                <Loader2 className="w-5 h-5 animate-spin" />
+              ) : (
+                <ShoppingCart className="w-5 h-5" />
+              )}
+              Adicionar ao Carrinho
             </button>
             <button
               onClick={onClose}
-              className="bg-gray-700 hover:bg-gray-600 text-white px-8 py-4 rounded-xl font-bold text-lg transition"
+              className="bg-gray-700 hover:bg-gray-600 text-white px-6 py-4 rounded-xl font-bold transition"
             >
-              Cancelar
-            </button>
-            <button
-              onClick={onClose}
-              className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white px-8 py-4 rounded-xl font-bold text-lg shadow-lg transition transform hover:scale-105"
-            >
-              OK, entendi!
+              Fechar
             </button>
           </div>
         </div>
