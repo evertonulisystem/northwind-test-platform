@@ -27,9 +27,11 @@ export async function GET(request) {
   
   // Retornar com headers CORS
   return new Response(JSON.stringify({
+    timestamp: new Date().toISOString(),
+    path: '/api/v1/debug/token',
     headers: allHeaders,
+    headerKeys: Object.keys(allHeaders),
     authHeader: authHeader,
-    cookies: cookies,
     tokenExtracted: token ? 'SIM' : 'NÃO',
     tokenPreview: token ? token.substring(0, 50) + '...' : null
   }), {
@@ -38,7 +40,7 @@ export async function GET(request) {
       'Content-Type': 'application/json',
       'Access-Control-Allow-Origin': '*',
       'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+      'Access-Control-Allow-Headers': 'Content-Type, Authorization, Origin, Accept',
     }
   });
 }
