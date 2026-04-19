@@ -4,6 +4,7 @@ import { NextResponse } from 'next/server';
 import { verifyToken, getTokenFromRequest } from '@/lib/jwt';
 
 export const dynamic = "force-dynamic";
+/**
  * @swagger
  * /api/v1/categories:
  *   get:
