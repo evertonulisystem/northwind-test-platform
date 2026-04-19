@@ -32,7 +32,13 @@ export async function GET(request) {
           data: null,
           mensagens: ['Token ausente'] 
         }, 
-        { status: 401 }
+        { 
+          status: 401,
+          headers: {
+            'X-Debug-Auth': 'MISSING',
+            'X-Debug-Path': '/api/v1/categories'
+          }
+        }
       );
     }
 
@@ -45,7 +51,14 @@ export async function GET(request) {
           mensagens: [message],
           expires_at: payload?.expires_at || null
         }, 
-        { status: 401 }
+        { 
+          status: 401,
+          headers: {
+            'X-Debug-Auth': 'FOUND',
+            'X-Debug-Error': payload?.error || 'UNKNOWN',
+            'X-Debug-Path': '/api/v1/categories'
+          }
+        }
       );
     }
 
