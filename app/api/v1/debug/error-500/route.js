@@ -25,7 +25,7 @@ export async function GET(request) {
       return NextResponse.json({ data: null, mensagens: ['Token ausente'] }, { status: 401 });
     }
 
-    const payload = verifyToken(token);
+    const payload = await verifyToken(token);
     if (!payload || payload.error) {
       return NextResponse.json({ data: null, mensagens: [payload?.message || 'Token inválido'] }, { status: 401 });
     }

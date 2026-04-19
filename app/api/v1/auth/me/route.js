@@ -23,7 +23,7 @@ export async function GET(request) {
     }, { status: 401 });
   }
 
-  const payload = verifyToken(token);
+  const payload = await verifyToken(token);
   console.log('Payload do token:', payload);
   console.log('ID do usuário no payload:', payload?.id);
   console.log('Email no payload:', payload?.email);

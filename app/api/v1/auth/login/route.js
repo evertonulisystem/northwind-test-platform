@@ -157,7 +157,7 @@ export async function POST(request) {
       .eq('id', user.id);
 
     // Gera token
-    const token = generateToken(user);
+    const token = await generateToken(user);
     console.log('✅ Login successful, token (first 15 chars):', token.substring(0, 15) + '...');
 
     return Response.json({

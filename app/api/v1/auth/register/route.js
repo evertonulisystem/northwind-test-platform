@@ -247,7 +247,7 @@ export async function POST(request) {
     }
 
     // 10. Gerar token JWT
-    const token = generateToken(newUser);
+    const token = await generateToken(newUser);
 
     // 11. Retornar sucesso
     return Response.json({

@@ -63,7 +63,7 @@ export async function POST(request) {
     users.push(newUser);
 
     // 🔥 GERAR TOKEN JWT (ISSO ESTAVA FALTANDO!)
-    const token = generateToken({
+    const token = await generateToken({
       id: newUser.id,
       email: newUser.email,
       role: newUser.role
