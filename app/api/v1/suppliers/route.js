@@ -51,9 +51,17 @@ export async function GET(request) {
 
     if (error) throw error;
 
+    const formattedData = data.map(supplier => ({
+      ...supplier,
+      uf: supplier.state
+    })).map(supplier => {
+      delete supplier.state;
+      return supplier;
+    });
+
     return NextResponse.json(
       { 
-        data, 
+        data: formattedData, 
         mensagens: ['Fornecedores carregados com sucesso!'] 
       },
       { status: 200 }

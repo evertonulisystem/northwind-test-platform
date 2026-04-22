@@ -7,7 +7,7 @@ import { verifyToken, getTokenFromRequest } from '@/lib/jwt';
  * @swagger
  * /api/v1/suppliers/{id}:
  *   get:
- *     summary: Lista produtos de um fornecedor
+ *     summary: Obtém detalhes de um fornecedor
  *     tags: [Suppliers]
  *     security:
  *       - bearerAuth: []
@@ -19,7 +19,13 @@ import { verifyToken, getTokenFromRequest } from '@/lib/jwt';
  *           type: integer
  *     responses:
  *       200:
- *         description: Lista de produtos do fornecedor
+ *         description: Detalhes do fornecedor
+ *       401:
+ *         description: Token ausente ou inválido
+ *       404:
+ *         description: Fornecedor não encontrado
+ *       500:
+ *         description: Erro interno
  */
 export async function GET(request, { params }) {
   try {
@@ -62,14 +68,14 @@ export async function GET(request, { params }) {
       );
     }
 
-    // Primeiro, verifica se o fornecedor existe
-    const { data: supplier, error: supError } = await supabase
+    // Busca detalhes do fornecedor
+    const { data: supplier, error } = await supabase
       .from('suppliers')
-      .select('id, company_name')
+      .select('*')
       .eq('id', idNum)
       .single();
 
-    if (supError || !supplier) {
+    if (error || !supplier) {
       return NextResponse.json(
         { 
           data: null, 
@@ -79,36 +85,22 @@ export async function GET(request, { params }) {
       );
     }
 
-    const { data: products, error } = await supabase
-      .from('products')
-      .select(`
-        id, name, price, stock_quantity, sku,
-        categories (name)
-      `)
-      .eq('supplier_id', idNum)
-      .order('name');
-
-    if (error) {
-      return NextResponse.json(
-        { 
-          data: null, 
-          mensagens: [error.message] 
-        },
-        { status: 500 }
-      );
-    }
+    // Ajustar o campo 'state' para 'uf' para manter consistência com o que o usuário espera e o Swagger define
+    const formattedSupplier = {
+      ...supplier,
+      uf: supplier.state
+    };
+    delete formattedSupplier.state;
 
     return NextResponse.json({ 
-      data: products || [],
-      mensagens: products?.length > 0 
-        ? [`${products.length} produtos encontrados para o fornecedor ${supplier.company_name}.`]
-        : [`Nenhum produto cadastrado para o fornecedor ${supplier.company_name}.`]
+      data: formattedSupplier,
+      mensagens: ['Fornecedor encontrado com sucesso.']
     });
   } catch (error) {
     return NextResponse.json(
       { 
         data: null, 
-        mensagens: ['Erro interno ao buscar produtos do fornecedor.'] 
+        mensagens: ['Erro interno ao buscar detalhes do fornecedor.'] 
       },
       { status: 500 }
     );
