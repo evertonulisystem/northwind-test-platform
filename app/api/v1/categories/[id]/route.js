@@ -5,6 +5,18 @@ import { verifyToken, getTokenFromRequest } from '@/lib/jwt';
 
 export const dynamic = "force-dynamic";
 
+// === FUNÇÃO DE SLUG ===
+function generateSlug(name) {
+  if (!name) return '';
+  return name
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/(^-|-$)/g, '')
+    .substring(0, 100);
+}
+
 /**
  * @swagger
  * /api/v1/categories/{id}:
