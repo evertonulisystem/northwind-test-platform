@@ -159,8 +159,10 @@ export async function GET(request) {
  * @swagger
  * /api/v1/products:
  *   post:
- *     summary: Adiciona um novo produto
+ *     summary: Cria um novo produto no catálogo
  *     tags: [Products]
+ *     security:
+ *       - bearerAuth: []
  *     requestBody:
  *       required: true
  *       content:
@@ -172,28 +174,44 @@ export async function GET(request) {
  *               - price
  *               - stock_quantity
  *               - sku
+ *               - category_id
+ *               - supplier_id
  *             properties:
  *               name:
  *                 type: string
- *                 example: "Mouse Gamer RGB"
+ *                 minLength: 3
+ *                 maxLength: 100
+ *                 description: "Nome completo do produto (obrigatório, entre 3 e 100 caracteres, deve ser descritivo e único)"
+ *                 example: "Mouse Gamer RGB Pro Wireless"
  *               price:
  *                 type: number
+ *                 minimum: 0.01
+ *                 multipleOf: 0.01
+ *                 description: "Preço de venda do produto (obrigatório, deve ser maior que 0, use 2 casas decimais)"
  *                 example: 299.90
  *               stock_quantity:
  *                 type: integer
+ *                 minimum: 0
+ *                 description: "Quantidade em estoque (obrigatório, número inteiro, não pode ser negativo, atualiza automaticamente)"
  *                 example: 50
  *               sku:
  *                 type: string
- *                 example: "MGP-2024"
+ *                 pattern: "^[A-Z0-9]{6,20}$"
+ *                 description: "SKU do produto (obrigatório, código único em maiúsculas, 6-20 caracteres alfanuméricos, sem espaços)"
+ *                 example: "MGP2024W"
  *               category_id:
  *                 type: integer
- *                 nullable: true
+ *                 minimum: 1
+ *                 description: "ID da categoria (obrigatório, deve existir na tabela categories, use 1 para 'Eletrônicos')"
+ *                 example: 1
  *               supplier_id:
  *                 type: integer
- *                 nullable: true
+ *                 minimum: 1
+ *                 description: "ID do fornecedor (obrigatório, deve existir na tabela suppliers, use 1 para fornecedor padrão)"
+ *                 example: 1
  *     responses:
  *       201:
- *         description: Produto criado
+ *         description: Produto criado com sucesso
  *         content:
  *           application/json:
  *             schema:
@@ -201,12 +219,19 @@ export async function GET(request) {
  *               properties:
  *                 data:
  *                   $ref: '#/components/schemas/Product'
- *                 message:
- *                   type: string
- *       409:
- *         description: SKU ou slug duplicado
+ *                 mensagens:
+ *                   type: array
+ *                   items:
+ *                     type: string
+ *                   example: ["Produto criado com sucesso!"]
  *       400:
- *         description: Dados inválidos
+ *         description: Dados inválidos ou campos obrigatórios ausentes
+ *       401:
+ *         description: Não autorizado - token ausente ou inválido
+ *       409:
+ *         description: SKU ou nome do produto já existe
+ *       500:
+ *         description: Erro interno do servidor
  */
 
 // === POST (ADICIONAR) ===
