@@ -38,7 +38,7 @@ async function ensureDir(dirPath) {
  *               file:
  *                 type: string
  *                 format: binary
- *                 description: Arquivo PDF
+ *                 description: Arquivo PDF (máximo 2MB)
  *     responses:
  *       200:
  *         description: Upload realizado com sucesso
@@ -88,6 +88,15 @@ export async function POST(request, { params }) {
     // Validar tipo (PDF)
     if (!file.type.includes('pdf') && !file.name.toLowerCase().endsWith('.pdf')) {
       return NextResponse.json({ data: null, mensagens: ['Apenas arquivos PDF são permitidos para documentos do produto.'] }, { status: 400 });
+    }
+
+    // Validar tamanho (2MB = 2 * 1024 * 1024 bytes)
+    const maxSize = 2 * 1024 * 1024; // 2MB
+    if (file.size > maxSize) {
+      return NextResponse.json({ 
+        data: null, 
+        mensagens: [`Arquivo muito grande. Tamanho máximo permitido: 2MB. Tamanho atual: ${(file.size / 1024 / 1024).toFixed(2)}MB`] 
+      }, { status: 400 });
     }
 
     const bytes = await file.arrayBuffer();
