@@ -307,6 +307,7 @@ export async function PUT(request, { params }) {
 // === PATCH (ATUALIZAÇÃO PARCIAL) ===
 /**
  * @swagger
+ * /api/v1/products/{id}:
  *   patch:
  *     summary: Atualiza parcialmente um produto
  *     tags: [Products]

@@ -21,6 +21,109 @@ function generateSlug(name) {
  * @swagger
  * /api/v1/categories/{id}:
  *   get:
+ *     summary: Busca uma categoria pelo ID
+ *     tags: [Categories]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Categoria encontrada
+ *       404:
+ *         description: Categoria não encontrada
+ */
+export async function GET(request, { params }) {
+  try {
+    // Verificar autenticação
+    const token = getTokenFromRequest(request);
+    if (!token) {
+      return NextResponse.json(
+        { 
+          data: null,
+          mensagens: ['Token ausente'] 
+        }, 
+        { status: 401 }
+      );
+    }
+
+    const payload = await verifyToken(token);
+    if (!payload || payload.error) {
+      const message = payload?.message || 'Token inválido';
+      return NextResponse.json(
+        { 
+          data: null,
+          mensagens: [message],
+          expires_at: payload?.expires_at || null
+        }, 
+        { status: 401 }
+      );
+    }
+
+    const resolvedParams = await params;
+    const { id } = resolvedParams;
+    const idNum = parseInt(id, 10);
+
+    if (isNaN(idNum) || idNum <= 0) {
+      return NextResponse.json(
+        { 
+          data: null, 
+          mensagens: ['ID da categoria inválido. Deve ser um número positivo.'] 
+        },
+        { status: 400 }
+      );
+    }
+
+    // Buscar categoria pelo ID
+    const { data: category, error } = await supabase
+      .from('categories')
+      .select('*')
+      .eq('id', idNum)
+      .single();
+
+    if (error) {
+      return NextResponse.json(
+        { 
+          data: null, 
+          mensagens: [error.message] 
+        }, 
+        { status: 500 }
+      );
+    }
+
+    if (!category) {
+      return NextResponse.json(
+        { 
+          data: null, 
+          mensagens: [`Categoria com ID ${idNum} não encontrada.`] 
+        },
+        { status: 404 }
+      );
+    }
+
+    return NextResponse.json({ 
+      data: category,
+      mensagens: ['Categoria encontrada com sucesso.']
+    });
+  } catch (error) {
+    return NextResponse.json(
+      { 
+        data: null, 
+        mensagens: ['Erro interno ao buscar categoria.'] 
+      },
+      { status: 500 }
+    );
+  }
+}
+
+/**
+ * @swagger
+ * /api/v1/categories/{id}/products:
+ *   get:
  *     summary: Lista produtos de uma categoria
  *     tags: [Categories]
  *     security:
@@ -35,7 +138,7 @@ function generateSlug(name) {
  *       200:
  *         description: Lista de produtos da categoria
  */
-export async function GET(request, { params }) {
+export async function GET_products(request, { params }) {
   try {
     // Verificar autenticação
     const token = getTokenFromRequest(request);
