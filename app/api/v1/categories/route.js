@@ -129,3 +129,113 @@ export async function POST(request) {
     );
   }
 }
+
+/**
+ * @swagger
+ * /api/v1/categories/{id}:
+ *   patch:
+ *     summary: Atualiza uma categoria existente
+ *     tags: [Categories]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               name:
+ *                 type: string
+ *               description:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Categoria atualizada
+ *       404:
+ *         description: Categoria não encontrada
+ */
+export async function PATCH(request, { params }) {
+  try {
+    const token = getTokenFromRequest(request);
+    if (!token) {
+      return NextResponse.json(
+        { data: null, mensagens: ['Token ausente'] }, 
+        { status: 401 }
+      );
+    }
+
+    const payload = await verifyToken(token);
+    if (!payload || payload.error) {
+      return NextResponse.json(
+        { data: null, mensagens: ['Token inválido'] }, 
+        { status: 401 }
+      );
+    }
+
+    const body = await request.json();
+    const { name, description } = body;
+
+    // Para PATCH, pelo menos um campo deve ser fornecido
+    if (!name && !description) {
+      return NextResponse.json(
+        { data: null, mensagens: ['Pelo menos um campo (name ou description) deve ser fornecido.'] },
+        { status: 400 }
+      );
+    }
+
+    // Obter ID da URL
+    const url = new URL(request.url);
+    const pathSegments = url.pathname.split('/');
+    const id = pathSegments[pathSegments.length - 1];
+
+    // Verificar se categoria existe
+    const { data: existingCategory, error: fetchError } = await supabase
+      .from('categories')
+      .select('*')
+      .eq('id', id)
+      .single();
+
+    if (fetchError || !existingCategory) {
+      return NextResponse.json(
+        { data: null, mensagens: ['Categoria não encontrada.'] },
+        { status: 404 }
+      );
+    }
+
+    // Preparar dados de atualização
+    const updateData = {};
+    if (name) updateData.name = name;
+    if (description) updateData.description = description;
+    
+    // Gerar slug apenas se o nome foi alterado
+    if (name) {
+      updateData.slug = name.toLowerCase().replace(/ /g, '-');
+    }
+
+    const { data, error } = await supabase
+      .from('categories')
+      .update(updateData)
+      .eq('id', id)
+      .select()
+      .single();
+
+    if (error) throw error;
+
+    return NextResponse.json(
+      { data, mensagens: ['Categoria atualizada com sucesso!'] },
+      { status: 200 }
+    );
+  } catch (error) {
+    return NextResponse.json(
+      { data: null, mensagens: ['Erro ao atualizar categoria.'] },
+      { status: 500 }
+    );
+  }
+}
