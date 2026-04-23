@@ -328,22 +328,36 @@ export async function PUT(request, { params }) {
  *             properties:
  *               name:
  *                 type: string
- *                 description: Nome do produto
+ *                 minLength: 3
+ *                 maxLength: 100
+ *                 description: "Nome do produto (opcional, entre 3 e 100 caracteres, gera novo slug automaticamente)"
+ *                 example: "Mouse Gamer RGB Pro Wireless"
  *               price:
  *                 type: number
- *                 description: Preço do produto
+ *                 minimum: 0.01
+ *                 multipleOf: 0.01
+ *                 description: "Preço do produto (opcional, deve ser maior que 0, use 2 casas decimais)"
+ *                 example: 299.90
  *               stock_quantity:
  *                 type: integer
- *                 description: Quantidade em estoque
+ *                 minimum: 0
+ *                 description: "Quantidade em estoque (opcional, número inteiro, não pode ser negativo)"
+ *                 example: 50
  *               sku:
  *                 type: string
- *                 description: SKU do produto
+ *                 pattern: "^[A-Z0-9]{6,20}$"
+ *                 description: "SKU do produto (opcional, código único em maiúsculas, 6-20 caracteres alfanuméricos)"
+ *                 example: "MGP2024W"
  *               category_id:
  *                 type: integer
- *                 description: ID da categoria
+ *                 minimum: 1
+ *                 description: "ID da categoria (opcional, deve existir na tabela categories, use null para remover)"
+ *                 example: 1
  *               supplier_id:
  *                 type: integer
- *                 description: ID do fornecedor
+ *                 minimum: 1
+ *                 description: "ID do fornecedor (opcional, deve existir na tabela suppliers, use null para remover)"
+ *                 example: 1
  *     responses:
  *       200:
  *         description: Produto atualizado com sucesso
