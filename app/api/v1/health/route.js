@@ -1,13 +1,14 @@
-// app/api/health/route.js
+// app/api/v1/health/route.js - Health Check completo para QA
 import { supabase } from '@/lib/supabase';
 import { NextResponse } from 'next/server';
+
 export async function GET() {
   const startTime = Date.now();
   
   try {
-    // Testar conexão com Supabase
+    // Keepalive + Health Check: Testar conexão com Supabase
     const dbStartTime = Date.now();
-    const { data, error } = await supabase
+    const { error } = await supabase
       .from('users')
       .select('id')
       .limit(1);
@@ -21,15 +22,20 @@ export async function GET() {
     // Verificar configuração JWT
     const jwtConfigured = !!process.env.JWT_SECRET;
     
-    // Calcular uptime (simplificado)
+    // Calcular uptime
     const uptime = process.uptime();
 
     const healthData = {
-      status: 'healthy',
+      // Keepalive status
+      status: 'ok',
+      message: 'Supabase ativo',
+      
+      // Health check detalhado
       timestamp: new Date().toISOString(),
       uptime: Math.floor(uptime),
       version: '1.0.0',
       environment: process.env.NODE_ENV || 'development',
+      
       services: {
         database: {
           status: 'connected',
@@ -40,11 +46,14 @@ export async function GET() {
           jwt_secret: jwtConfigured ? 'configured' : 'missing'
         }
       },
+      
       endpoints: {
         total: 15,
         protected: 12,
         public: 3
       },
+      
+      // Informações para QA
       testing: {
         sample_data: {
           test_user: {
@@ -53,12 +62,12 @@ export async function GET() {
             role: 'admin'
           },
           test_endpoints: [
-            '/api/auth/login',
-            '/api/auth/register',
-            '/api/products',
-            '/api/categories',
-            '/api/suppliers',
-            '/api/auth/me'
+            '/api/v1/auth/login',
+            '/api/v1/auth/register',
+            '/api/v1/products',
+            '/api/v1/categories',
+            '/api/v1/suppliers',
+            '/api/v1/auth/validate'
           ],
           test_scenarios: [
             'Happy Path Tests',
@@ -71,14 +80,14 @@ export async function GET() {
         },
         test_tips: {
           authentication: {
-            note: 'Use o endpoint /api/auth/login para obter token',
+            note: 'Use o endpoint /api/v1/auth/login para obter token',
             header: 'Authorization: Bearer <token>',
             expires_in: '24 horas'
           },
           testing_strategies: {
             manual: 'Use Swagger UI em /api-docs',
-            automated: 'Importe /api/swagger.json no Postman',
-            programmatic: 'Use /api-docs para baixar especificação'
+            automated: 'Importe /api/v1/swagger.json no Postman',
+            programmatic: 'Use /api/v1/docs para baixar especificação'
           },
           common_pitfalls: [
             'Esquecer de enviar token em endpoints protegidos',
@@ -88,6 +97,33 @@ export async function GET() {
           ]
         }
       },
+      
+      // Sugestões de automação
+      automation: {
+        keepalive: {
+          purpose: 'Evitar desconexão do Supabase após 7 dias',
+          frequency: 'A cada 6 dias',
+          methods: [
+            'GitHub Actions cron job',
+            'Vercel Cron Jobs',
+            'External monitoring service'
+          ]
+        },
+        monitoring: {
+          suggested_tools: [
+            'Uptime Robot',
+            'Pingdom',
+            'New Relic',
+            'DataDog'
+          ],
+          alerts: [
+            'Database disconnection',
+            'High response times',
+            'JWT misconfiguration'
+          ]
+        }
+      },
+      
       metrics: {
         response_time_ms: Date.now() - startTime,
         memory_usage: process.memoryUsage(),
@@ -108,7 +144,8 @@ export async function GET() {
     console.error('Health check failed:', error);
     
     return NextResponse.json({
-      status: 'unhealthy',
+      status: 'error',
+      message: 'Supabase inativo',
       timestamp: new Date().toISOString(),
       error: error.message,
       services: {
