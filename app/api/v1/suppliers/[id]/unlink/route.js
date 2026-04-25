@@ -6,38 +6,52 @@ import { verifyToken, getTokenFromRequest } from '@/lib/jwt';
 export const dynamic = "force-dynamic";
 
 /**
- * @swagger
- * /api/v1/suppliers/{id}/unlink:
- *   post:
- *     summary: Remove fornecedor de múltiplos produtos
- *     tags: [Suppliers]
- *     security:
- *       - bearerAuth: []
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             required:
- *               - product_ids
- *             properties:
- *               product_ids:
- *                 type: array
- *                 items:
- *                   type: integer
- *                 example: [1, 2, 3]
- *     responses:
- *       200:
- *         description: Fornecedor removido dos produtos com sucesso
- *       400:
- *         description: Dados inválidos
- *       401:
- *         description: Não autorizado
- *       404:
- *         description: Fornecedor não encontrado
- *       500:
- *         description: Erro interno
+ * @typedef {Object} UnlinkRequest
+ * @property {number[]} product_ids - Array de IDs dos produtos a serem desvinculados
+ */
+
+/**
+ * @typedef {Object} UnlinkParams
+ * @property {string} id - ID do fornecedor como string
+ */
+
+/**
+ * @typedef {Object} UnlinkResponse
+ * @property {Object} data - Dados da resposta
+ * @property {number} data.updated_count - Quantidade de produtos atualizados
+ * @property {Array} data.updated_products - Lista de produtos atualizados
+ * @property {number} data.supplier_id - ID do fornecedor
+ * @property {string[]} mensagens - Mensagens de status
+ */
+
+/**
+ * Remove fornecedor de múltiplos produtos
+ * @param {Request<UnlinkRequest>} request - Requisição HTTP com product_ids no body
+ * @param {{ params: UnlinkParams }} params - Parâmetros da URL contendo ID do fornecedor
+ * @returns {Promise<NextResponse<UnlinkResponse>>} Resposta com resultado da operação
+ * @example
+ * // Exemplo de requisição
+ * POST /api/v1/suppliers/123/unlink
+ * Content-Type: application/json
+ * Authorization: Bearer token
+ * {
+ *   "product_ids": [1, 2, 3]
+ * }
+ * @example
+ * // Exemplo de resposta de sucesso
+ * HTTP/1.1 200 OK
+ * {
+ *   "data": {
+ *     "updated_count": 3,
+ *     "updated_products": [
+ *       {"id": 1, "name": "Produto A", "supplier_id": null},
+ *       {"id": 2, "name": "Produto B", "supplier_id": null},
+ *       {"id": 3, "name": "Produto C", "supplier_id": null}
+ *     ],
+ *     "supplier_id": 123
+ *   },
+ *   "mensagens": ["3 produto(s) desvinculado(s) do fornecedor com sucesso!"]
+ * }
  */
 export async function POST(request, { params }) {
   try {
