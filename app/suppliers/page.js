@@ -2,7 +2,8 @@
 
 import { useState, useEffect } from 'react';
 import { toast } from 'react-toastify';
-import { Building2, Plus, Edit, Trash2, Search, X, Mail, Phone, User, MapPin, Building } from 'lucide-react';
+import { Building2, Plus, Edit, Trash2, Search, X, Mail, Phone, User, MapPin, Building, Unlink } from 'lucide-react';
+import UnlinkSupplierModal from '@/components/UnlinkSupplierModal.jsx';
 
 export default function SuppliersPage() {
   const [suppliers, setSuppliers] = useState([]);
@@ -13,6 +14,8 @@ export default function SuppliersPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [showConfirm, setShowConfirm] = useState(false);
   const [deleteId, setDeleteId] = useState(null);
+  const [showUnlinkModal, setShowUnlinkModal] = useState(false);
+  const [unlinkingSupplier, setUnlinkingSupplier] = useState(null);
 
   const [formData, setFormData] = useState({
     company_name: '',
@@ -290,7 +293,15 @@ export default function SuppliersPage() {
       if (!res.ok) {
         // Mensagem específica para fornecedor em uso
         if (result.mensagens?.[0]?.includes('usado por produtos')) {
-          toast.error('⚠️ Este fornecedor não pode ser excluído pois está sendo usado por produtos. Primeiro remova ou altere o fornecedor dos produtos.');
+          // Encontrar o fornecedor para abrir modal de desvincular
+          const supplier = suppliers.find(s => s.id === deleteId);
+          if (supplier) {
+            setShowConfirm(false);
+            setDeleteId(null);
+            setUnlinkingSupplier(supplier);
+            setShowUnlinkModal(true);
+            return;
+          }
         } else {
           toast.error(result.mensagens?.[0] || 'Erro ao excluir fornecedor');
         }
@@ -308,6 +319,13 @@ export default function SuppliersPage() {
       setShowConfirm(false);
       setDeleteId(null);
     }
+  };
+
+  const handleUnlinkSuccess = () => {
+    fetchSuppliers();
+    setShowUnlinkModal(false);
+    setUnlinkingSupplier(null);
+    toast.success('Agora você pode excluir o fornecedor!');
   };
 
   const formatCNPJ = (value) => {
@@ -472,6 +490,18 @@ export default function SuppliersPage() {
                     >
                       <Edit className="w-4 h-4" />
                       Editar
+                    </button>
+                    <button
+                      onClick={() => {
+                        setUnlinkingSupplier(supplier);
+                        setShowUnlinkModal(true);
+                      }}
+                      data-testid={`unlink-supplier-${supplier.id}`}
+                      className="flex-1 bg-orange-600 hover:bg-orange-700 text-white px-3 py-2 rounded-lg transition flex items-center justify-center gap-1"
+                      title="Desvincular produtos deste fornecedor"
+                    >
+                      <Unlink className="w-4 h-4" />
+                      Desvincular
                     </button>
                     <button
                       onClick={() => {
@@ -890,6 +920,18 @@ export default function SuppliersPage() {
             </div>
           </div>
         </div>
+      )}
+
+      {/* Unlink Supplier Modal */}
+      {showUnlinkModal && (
+        <UnlinkSupplierModal
+          supplier={unlinkingSupplier}
+          onClose={() => {
+            setShowUnlinkModal(false);
+            setUnlinkingSupplier(null);
+          }}
+          onSuccess={handleUnlinkSuccess}
+        />
       )}
     </>
   );
