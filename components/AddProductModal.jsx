@@ -6,14 +6,14 @@ import { toast } from 'react-toastify';
 import CustomSelect from '@/components/CustomSelect';
 import { Package, DollarSign, Hash, Tag, Building2, Barcode, AlertCircle } from 'lucide-react';
 
-export default function AddProductModal({ onClose, onAdd }) {
+export default function AddProductModal({ onClose, onAdd, preselectedCategory = '', preselectedSupplier = '' }) {
   const [formData, setFormData] = useState({
     name: '',
     price: '',
     stock_quantity: '',
     sku: '',
-    category_id: '',
-    supplier_id: '',
+    category_id: preselectedCategory,
+    supplier_id: preselectedSupplier,
   });
 
   const [errors, setErrors] = useState({
@@ -59,6 +59,17 @@ export default function AddProductModal({ onClose, onAdd }) {
 
     fetchData();
   }, []);
+
+  // Pré-selecionar categoria e fornecedor quando as props mudarem
+  useEffect(() => {
+    if (preselectedCategory || preselectedSupplier) {
+      setFormData(prev => ({
+        ...prev,
+        category_id: preselectedCategory,
+        supplier_id: preselectedSupplier,
+      }));
+    }
+  }, [preselectedCategory, preselectedSupplier]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;

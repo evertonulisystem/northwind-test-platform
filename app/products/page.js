@@ -311,7 +311,19 @@ export default function ProductsPage() {
               <div className="p-12 text-center text-slate-400">Carregando produtos...</div>
             ) : products.length === 0 ? (
               <div className="p-12 text-center text-slate-400">
-                <p className="text-xl">Nenhum produto encontrado.</p>
+                <p className="text-xl mb-6">Nenhum produto encontrado.</p>
+                <button 
+                  onClick={() => setShowAddModal(true)}
+                  className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-8 py-4 rounded-xl font-semibold shadow-lg transition transform hover:scale-105 flex items-center gap-3 mx-auto"
+                >
+                  <Plus className="w-6 h-6" />
+                  Adicionar Primeiro Produto
+                </button>
+                {(selectedCategory || selectedSupplier) && (
+                  <p className="text-sm text-slate-500 mt-4">
+                    Dica: Limpe os filtros para ver todos os produtos ou adicione um novo com os filtros atuais
+                  </p>
+                )}
               </div>
             ) : (
               <>
@@ -397,7 +409,14 @@ export default function ProductsPage() {
           }}
         />
       )}
-      {showAddModal && <AddProductModal onClose={() => setShowAddModal(false)} onAdd={handleAdd} />}
+      {showAddModal && (
+        <AddProductModal 
+          onClose={() => setShowAddModal(false)} 
+          onAdd={handleAdd} 
+          preselectedCategory={categories.find(cat => cat.name === selectedCategory)?.id || ''}
+          preselectedSupplier={suppliers.find(sup => sup.company_name === selectedSupplier)?.id || ''}
+        />
+      )}
       {showEditModal && editingProduct && (
         <EditProductModal product={editingProduct}
           onClose={() => { setShowEditModal(false); setEditingProduct(null); }}
