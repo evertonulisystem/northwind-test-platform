@@ -4,7 +4,7 @@
 import { useState, useEffect } from 'react';
 import { toast } from 'react-toastify';
 import CustomSelect from '@/components/CustomSelect';
-import { Package, DollarSign, Hash, Tag, Building2, Barcode, AlertCircle, Upload, Image as ImageIcon, X } from 'lucide-react';
+import { Package, DollarSign, Hash, Tag, Building2, Barcode, AlertCircle, Upload, Image as ImageIcon, X, Plus } from 'lucide-react';
 
 export default function EditProductModal({ product, onClose, onUpdate }) {
   const [formData, setFormData] = useState({
