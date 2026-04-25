@@ -80,32 +80,29 @@ export default function UnlinkSupplierModal({ supplier, onClose, onSuccess }) {
         return;
       }
 
-      // Atualizar todos os produtos selecionados para remover o fornecedor
-      const updatePromises = selectedProducts.map(productId =>
-        fetch(`/api/v1/products/${productId}`, {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-          },
-          body: JSON.stringify({
-            supplier_id: null
-          })
+      // Usar o novo endpoint otimizado
+      const res = await fetch(`/api/v1/suppliers/${supplier.id}/unlink`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          product_ids: selectedProducts
         })
-      );
+      });
 
-      const results = await Promise.allSettled(updatePromises);
-      
-      // Verificar se todas as atualizações foram bem-sucedidas
-      const failed = results.filter(result => result.status === 'rejected');
-      
-      if (failed.length > 0) {
-        toast.error(`Erro ao atualizar ${failed.length} produto(s)`);
-      } else {
-        toast.success(`${selectedProducts.length} produto(s) desvinculado(s) com sucesso!`);
-        onSuccess?.();
-        onClose();
+      const result = await res.json();
+
+      if (!res.ok) {
+        toast.error(result.mensagens?.[0] || 'Erro ao desvincular produtos');
+        return;
       }
+
+      const { updated_count } = result.data || {};
+      toast.success(`${updated_count} produto(s) desvinculado(s) com sucesso!`);
+      onSuccess?.();
+      onClose();
     } catch (error) {
       toast.error('Erro ao desvincular produtos');
     } finally {
