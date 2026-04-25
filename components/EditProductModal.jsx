@@ -4,7 +4,7 @@
 import { useState, useEffect } from 'react';
 import { toast } from 'react-toastify';
 import CustomSelect from '@/components/CustomSelect';
-import { Package, DollarSign, Hash, Tag, Building2, Barcode, AlertCircle } from 'lucide-react';
+import { Package, DollarSign, Hash, Tag, Building2, Barcode, AlertCircle, Upload, Image as ImageIcon, X } from 'lucide-react';
 
 export default function EditProductModal({ product, onClose, onUpdate }) {
   const [formData, setFormData] = useState({
@@ -21,11 +21,15 @@ export default function EditProductModal({ product, onClose, onUpdate }) {
     price: '',
     stock_quantity: '',
     sku: '',
+    image: '',
   });
 
   const [categories, setCategories] = useState([]);
   const [suppliers, setSuppliers] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [imageFile, setImageFile] = useState(null);
+  const [imagePreview, setImagePreview] = useState('');
+  const [uploadingImage, setUploadingImage] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -50,6 +54,18 @@ export default function EditProductModal({ product, onClose, onUpdate }) {
 
         setCategories(catData.data || []);
         setSuppliers(supData.data || []);
+
+        // Verificar se produto já tem imagem
+        try {
+          const imageRes = await fetch(`/api/v1/products/${product.id}/image`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+          });
+          if (imageRes.ok) {
+            setImagePreview(`/api/v1/products/${product.id}/image`);
+          }
+        } catch (error) {
+          // Produto não tem imagem, tudo bem
+        }
       } catch (error) {
         toast.error('Erro ao carregar dados');
       } finally {
@@ -58,7 +74,7 @@ export default function EditProductModal({ product, onClose, onUpdate }) {
     };
 
     fetchData();
-  }, []);
+  }, [product.id]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -67,6 +83,87 @@ export default function EditProductModal({ product, onClose, onUpdate }) {
     if (errors[name]) {
       setErrors(prev => ({ ...prev, [name]: '' }));
     }
+  };
+
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    // Validar tipo (PNG)
+    if (!file.type.includes('png') && !file.name.toLowerCase().endsWith('.png')) {
+      setErrors(prev => ({ ...prev, image: 'Apenas arquivos PNG são permitidos' }));
+      return;
+    }
+
+    // Validar tamanho (2MB)
+    const maxSize = 2 * 1024 * 1024; // 2MB
+    if (file.size > maxSize) {
+      setErrors(prev => ({ 
+        ...prev, 
+        image: `Arquivo muito grande. Tamanho máximo: 2MB. Atual: ${(file.size / 1024 / 1024).toFixed(2)}MB` 
+      }));
+      return;
+    }
+
+    // Limpar erro anterior
+    setErrors(prev => ({ ...prev, image: '' }));
+    
+    // Criar preview
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setImagePreview(reader.result);
+      setImageFile(file);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleImageUpload = async () => {
+    if (!imageFile) {
+      toast.error('Selecione uma imagem primeiro');
+      return;
+    }
+
+    setUploadingImage(true);
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        toast.error('Você precisa estar logado para fazer upload');
+        return;
+      }
+
+      const formData = new FormData();
+      formData.append('file', imageFile);
+
+      const res = await fetch(`/api/v1/products/${product.id}/image`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        },
+        body: formData
+      });
+
+      const result = await res.json();
+
+      if (!res.ok) {
+        toast.error(result.mensagens?.[0] || 'Erro no upload');
+        return;
+      }
+
+      toast.success('Imagem enviada com sucesso!');
+      setImageFile(null);
+      // Atualiza preview com a URL da imagem salva
+      setImagePreview(`/api/v1/products/${product.id}/image`);
+    } catch (error) {
+      toast.error('Erro de conexão ao fazer upload');
+    } finally {
+      setUploadingImage(false);
+    }
+  };
+
+  const handleRemoveImage = () => {
+    setImageFile(null);
+    setImagePreview('');
+    setErrors(prev => ({ ...prev, image: '' }));
   };
 
   const validateForm = () => {
@@ -178,7 +275,7 @@ export default function EditProductModal({ product, onClose, onUpdate }) {
   return (
     <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
       <div 
-        className="w-full max-w-md mx-auto bg-slate-800 rounded-xl border border-slate-700 shadow-2xl flex flex-col"
+        className="w-full max-w-md max-h-[90vh] mx-auto bg-slate-800 rounded-xl border border-slate-700 shadow-2xl flex flex-col overflow-hidden"
         data-testid="edit-product-modal"
       >
         
@@ -189,7 +286,7 @@ export default function EditProductModal({ product, onClose, onUpdate }) {
           </h2>
         </div>
 
-        <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-6 space-y-4">
+        <form id="edit-form" onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-6 space-y-4 max-h-[60vh]">
           {/* NOME */}
           <div>
             <label className="flex items-center gap-2 text-slate-300 text-sm font-medium mb-1">
@@ -319,12 +416,83 @@ export default function EditProductModal({ product, onClose, onUpdate }) {
               displayField="company_name"
             />
           </div>
+
+          {/* IMAGEM */}
+          <div>
+            <label className="flex items-center gap-2 text-slate-300 text-sm font-medium mb-1">
+              <ImageIcon className="w-4 h-4" />
+              Imagem do Produto <span className="text-slate-400">(PNG, máx 2MB)</span>
+            </label>
+            
+            {/* Preview da imagem */}
+            {imagePreview && (
+              <div className="mb-3 relative">
+                <img 
+                  src={imagePreview} 
+                  alt="Preview do produto" 
+                  className="w-full h-32 object-cover rounded-lg border border-slate-600"
+                />
+                <button
+                  type="button"
+                  onClick={handleRemoveImage}
+                  className="absolute top-2 right-2 bg-red-500 hover:bg-red-600 text-white p-1 rounded-full transition"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+            )}
+
+            {/* Upload */}
+            <div className="flex gap-2">
+              <label className="flex-1 cursor-pointer">
+                <input
+                  type="file"
+                  accept=".png,image/png"
+                  onChange={handleImageChange}
+                  className="hidden"
+                />
+                <div className="flex items-center justify-center gap-2 px-4 py-2.5 bg-orange-500 border-2 border-orange-400 rounded-lg hover:bg-orange-600 transition shadow-lg">
+                  <Upload className="w-4 h-4 text-white" />
+                  <span className="text-white text-sm font-medium">
+                    {imageFile ? imageFile.name : 'Selecionar imagem PNG'}
+                  </span>
+                </div>
+              </label>
+              
+              {imageFile && (
+                <button
+                  type="button"
+                  onClick={handleImageUpload}
+                  disabled={uploadingImage}
+                  className="px-4 py-2.5 bg-green-600 hover:bg-green-700 text-white rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                >
+                  {uploadingImage ? (
+                    <>
+                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                      Enviando...
+                    </>
+                  ) : (
+                    <>
+                      <Upload className="w-4 h-4" />
+                      Enviar
+                    </>
+                  )}
+                </button>
+              )}
+            </div>
+            
+            {errors.image && (
+              <p className="text-red-400 text-xs mt-1 flex items-center gap-1">
+                <AlertCircle className="w-3 h-3" /> {errors.image}
+              </p>
+            )}
+          </div>
         </form>
 
-        <div className="p-5 border-t border-slate-700 flex gap-3 bg-slate-800">
+        <div className="p-6 border-t border-slate-700 flex gap-3">
           <button
             type="submit"
-            onClick={handleSubmit}
+            form="edit-form"
             disabled={loading}
             data-testid="edit-product-submit"
             className="flex-1 bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition font-semibold disabled:opacity-50"
