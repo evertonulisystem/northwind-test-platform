@@ -1,19 +1,18 @@
-// app/products/page.js → VERSÃO FINAL COMPLETA E FUNCIONANDO 100%
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { useDebounce } from 'use-debounce';
 import { toast } from 'react-toastify';
-import RulesModal from '@/components/RulesModal.jsx';
-import ConfirmModal from '@/components/ConfirmModal.jsx';
+import { useDebounce } from 'use-debounce';
 import AddProductModal from '@/components/AddProductModal.jsx';
 import EditProductModal from '@/components/EditProductModal.jsx';
 import { AlertTriangle, Plus, Edit, Trash2, Search, X, ChevronDown, ShoppingBag } from 'lucide-react';
 import ProductDetailsModal from '@/components/ProductDetailsModal.jsx';
+import RulesModal from '@/components/RulesModal.jsx';
+import ConfirmModal from '@/components/ConfirmModal.jsx';
 
 export default function ProductsPage() {
   const [products, setProducts] = useState([]);
-  const [allProducts, setAllProducts] = useState([]); // todos os produtos carregados
+  const [allProducts, setAllProducts] = useState([]);
   const [pagination, setPagination] = useState({ page: 1, totalPages: 1, total: 0 });
   const [loading, setLoading] = useState(true);
   const [isFiltering, setIsFiltering] = useState(false);
@@ -83,13 +82,6 @@ export default function ProductsPage() {
     try {
       setLoading(true);
       console.log('🐛 DEBUG PRODUCTS - Buscando produtos...');
-      
-      // 🚨 DEBUGGER DEMONSTRATIVO - NUNCA DEIXE EM PRODUÇÃO! 🚨 utiizado na aula sobre debug debugger
-      // debugger;
-      // console.log('🔍 PONTO DE PARADA: Verifique as variáveis no DevTools');
-      // console.log('📊 Estado atual:', { loading, products, pagination });
-      // console.log('🎓 AULA: Este é um exemplo de POR QUE debuggers devem ser removidos!');
-      // console.log('⚠️  PROBLEMAS: Bloqueia execução, expõe dados, afeta UX, causa bugs em produção!');
       
       const token = localStorage.getItem('token');
       const headers = { 'Content-Type': 'application/json' };
@@ -240,6 +232,24 @@ export default function ProductsPage() {
               <Plus className="w-5 h-5" />
               Adicionar Produto
             </button>
+
+            <button
+              onClick={() => window.open('/categories', '_blank')}
+              className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-xl transition font-semibold shadow-lg flex items-center gap-2"
+              title="Cadastrar nova categoria"
+            >
+              <Plus className="w-5 h-5" />
+              Nova Categoria
+            </button>
+
+            <button
+              onClick={() => window.open('/suppliers', '_blank')}
+              className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-xl transition font-semibold shadow-lg flex items-center gap-2"
+              title="Cadastrar novo fornecedor"
+            >
+              <Plus className="w-5 h-5" />
+              Novo Fornecedor
+            </button>
           </div>
 
           {/* FILTRO EM CASCATA LINDO */}
@@ -360,10 +370,10 @@ export default function ProductsPage() {
                                 <Trash2 className="w-4 h-4" /> Delete
                               </button>
                               <button 
-  onClick={() => { setSelectedProduct(p); setShowDetails(true); }}
-  className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition flex items-center gap-1.5 shadow-md">
-  <Search className="w-4 h-4" /> Detalhes
-</button>
+                                onClick={() => { setSelectedProduct(p); setShowDetails(true); }}
+                                className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition flex items-center gap-1.5 shadow-md">
+                                <Search className="w-4 h-4" /> Detalhes
+                              </button>
                             </div>
                           </td>
                         </tr>

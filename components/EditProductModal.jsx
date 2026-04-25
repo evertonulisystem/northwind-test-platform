@@ -389,15 +389,28 @@ export default function EditProductModal({ product, onClose, onUpdate }) {
               <Hash className="w-4 h-4" />
               Categoria <span className="text-red-500">*</span>
             </label>
-            <CustomSelect
-              data-testid="edit-product-category"
-              name="category_id"
-              options={categories}
-              value={formData.category_id}
-              onChange={handleChange}
-              placeholder="Selecione"
-              displayField="name"
-            />
+            <div className="flex gap-2">
+              <div className="flex-1">
+                <CustomSelect
+                  data-testid="edit-product-category"
+                  name="category_id"
+                  options={categories}
+                  value={formData.category_id}
+                  onChange={handleChange}
+                  placeholder="Selecione"
+                  displayField="name"
+                />
+              </div>
+              <button
+                type="button"
+                onClick={() => window.open('/categories', '_blank')}
+                className="px-3 py-2.5 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition flex items-center gap-1 text-sm font-medium"
+                title="Cadastrar nova categoria"
+              >
+                <Plus className="w-4 h-4" />
+                Nova
+              </button>
+            </div>
           </div>
 
           {/* FORNECEDOR */}
@@ -406,15 +419,28 @@ export default function EditProductModal({ product, onClose, onUpdate }) {
               <Building2 className="w-4 h-4" />
               Fornecedor <span className="text-red-500">*</span>
             </label>
-            <CustomSelect
-              data-testid="edit-product-supplier"
-              name="supplier_id"
-              options={suppliers}
-              value={formData.supplier_id}
-              onChange={handleChange}
-              placeholder="Selecione"
-              displayField="company_name"
-            />
+            <div className="flex gap-2">
+              <div className="flex-1">
+                <CustomSelect
+                  data-testid="edit-product-supplier"
+                  name="supplier_id"
+                  options={suppliers}
+                  value={formData.supplier_id}
+                  onChange={handleChange}
+                  placeholder="Selecione"
+                  displayField="company_name"
+                />
+              </div>
+              <button
+                type="button"
+                onClick={() => window.open('/suppliers', '_blank')}
+                className="px-3 py-2.5 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition flex items-center gap-1 text-sm font-medium"
+                title="Cadastrar novo fornecedor"
+              >
+                <Plus className="w-4 h-4" />
+                Novo
+              </button>
+            </div>
           </div>
 
           {/* IMAGEM */}
