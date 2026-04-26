@@ -299,6 +299,30 @@ export async function POST(request) {
       );
     }
 
+    // Validação de preço
+    const price = parseFloat(body.price);
+    if (isNaN(price) || price <= 0) {
+      return NextResponse.json(
+        { 
+          data: null, 
+          mensagens: ['O preço deve ser um valor positivo maior que zero.'] 
+        },
+        { status: 400 }
+      );
+    }
+
+    // Validação de estoque
+    const stockQuantity = parseInt(body.stock_quantity);
+    if (isNaN(stockQuantity) || stockQuantity < 0) {
+      return NextResponse.json(
+        { 
+          data: null, 
+          mensagens: ['A quantidade em estoque deve ser um número inteiro maior ou igual a zero.'] 
+        },
+        { status: 400 }
+      );
+    }
+
     const slug = body.slug || generateSlug(body.name);
 
     // VERIFICA DUPLICIDADE
@@ -339,8 +363,8 @@ export async function POST(request) {
       .from('products')
       .insert({
         name: body.name,
-        price: body.price,
-        stock_quantity: body.stock_quantity,
+        price: price, // Usar valor validado
+        stock_quantity: stockQuantity, // Usar valor validado
         sku: body.sku,
         category_id: body.category_id,
         supplier_id: body.supplier_id,
@@ -360,10 +384,26 @@ export async function POST(request) {
     );
   } catch (error) {
     console.error('Erro no POST:', error);
+    
+    // Tratamento específico para constraint violations
+    let errorMessage = 'Erro ao criar produto.';
+    
+    if (error.message) {
+      if (error.message.includes('products_price_check')) {
+        errorMessage = 'O preço deve ser um valor positivo maior que zero.';
+      } else if (error.message.includes('products_stock_quantity_check')) {
+        errorMessage = 'A quantidade em estoque deve ser um número inteiro maior ou igual a zero.';
+      } else if (error.message.includes('violates check constraint')) {
+        errorMessage = 'Dados inválidos. Verifique se preço e estoque são valores válidos.';
+      } else {
+        errorMessage = error.message;
+      }
+    }
+    
     return NextResponse.json(
       { 
         data: null, 
-        mensagens: [error.message || 'Erro ao criar produto.'] 
+        mensagens: [errorMessage] 
       },
       { status: 500 }
     );
