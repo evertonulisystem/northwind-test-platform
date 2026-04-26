@@ -430,7 +430,7 @@ export async function POST(request) {
         data: null, 
         mensagens: [errorMessage] 
       },
-      { status: 500 }
+      { status: 400 }
     );
   }
 }
