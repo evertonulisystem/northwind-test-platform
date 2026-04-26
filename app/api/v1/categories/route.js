@@ -123,8 +123,34 @@ export async function POST(request) {
       { status: 201 }
     );
   } catch (error) {
+    console.error('Erro no POST categories:', error);
+    
+    // Tratamento específico para constraint violations
+    let errorMessage = 'Erro ao criar categoria.';
+    
+    if (error.message) {
+      if (error.message.includes('categories_name_check')) {
+        errorMessage = 'Nome da categoria deve ter entre 3 e 100 caracteres.';
+      } else if (error.message.includes('categories_description_check')) {
+        errorMessage = 'Descrição da categoria deve ter no máximo 500 caracteres.';
+      } else if (error.message.includes('violates check constraint')) {
+        errorMessage = 'Dados inválidos. Verifique nome e descrição.';
+      } else if (error.message.includes('duplicate key') || error.message.includes('unique constraint')) {
+        if (error.message.includes('name')) {
+          errorMessage = 'Já existe uma categoria com este nome.';
+        } else {
+          errorMessage = 'Categoria com dados duplicados.';
+        }
+      } else {
+        errorMessage = error.message;
+      }
+    }
+    
     return NextResponse.json(
-      { data: null, mensagens: ['Erro ao criar categoria.'] },
+      { 
+        data: null, 
+        mensagens: [errorMessage] 
+      },
       { status: 500 }
     );
   }

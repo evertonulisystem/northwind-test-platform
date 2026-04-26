@@ -396,10 +396,39 @@ export async function POST(request) {
       { status: 201 }
     );
   } catch (error) {
+    console.error('Erro no POST suppliers:', error);
+    
+    // Tratamento específico para constraint violations
+    let errorMessage = 'Erro ao criar fornecedor.';
+    
+    if (error.message) {
+      if (error.message.includes('suppliers_cnpj_check')) {
+        errorMessage = 'CNPJ deve ter 14 dígitos numéricos.';
+      } else if (error.message.includes('suppliers_email_check')) {
+        errorMessage = 'Email inválido.';
+      } else if (error.message.includes('suppliers_phone_check')) {
+        errorMessage = 'Telefone deve estar no formato (XX) XXXXX-XXXX.';
+      } else if (error.message.includes('suppliers_uf_check')) {
+        errorMessage = 'UF deve ter 2 letras maiúsculas.';
+      } else if (error.message.includes('violates check constraint')) {
+        errorMessage = 'Dados inválidos. Verifique todos os campos.';
+      } else if (error.message.includes('duplicate key') || error.message.includes('unique constraint')) {
+        if (error.message.includes('cnpj')) {
+          errorMessage = 'Já existe um fornecedor com este CNPJ.';
+        } else if (error.message.includes('email')) {
+          errorMessage = 'Já existe um fornecedor com este email.';
+        } else {
+          errorMessage = 'Dados duplicados. Verifique CNPJ e email.';
+        }
+      } else {
+        errorMessage = error.message;
+      }
+    }
+    
     return NextResponse.json(
       { 
         data: null, 
-        mensagens: [error.message || 'Erro ao criar fornecedor.'] 
+        mensagens: [errorMessage] 
       },
       { status: 500 }
     );
