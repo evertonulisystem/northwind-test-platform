@@ -393,6 +393,18 @@ export async function POST(request) {
         errorMessage = 'O preço deve ser um valor positivo maior que zero.';
       } else if (error.message.includes('products_stock_quantity_check')) {
         errorMessage = 'A quantidade em estoque deve ser um número inteiro maior ou igual a zero.';
+      } else if (error.message.includes('products_supplier_id_fkey')) {
+        errorMessage = 'Fornecedor selecionado não existe. Escolha um fornecedor válido.';
+      } else if (error.message.includes('products_category_id_fkey')) {
+        errorMessage = 'Categoria selecionada não existe. Escolha uma categoria válida.';
+      } else if (error.message.includes('violates foreign key constraint')) {
+        if (error.message.includes('supplier_id')) {
+          errorMessage = 'Fornecedor selecionado não existe. Escolha um fornecedor válido.';
+        } else if (error.message.includes('category_id')) {
+          errorMessage = 'Categoria selecionada não existe. Escolha uma categoria válida.';
+        } else {
+          errorMessage = 'Referência inválida. Verifique se fornecedor e categoria existem.';
+        }
       } else if (error.message.includes('violates check constraint')) {
         errorMessage = 'Dados inválidos. Verifique se preço e estoque são valores válidos.';
       } else {

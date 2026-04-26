@@ -834,10 +834,29 @@ export async function DELETE(request, { params }) {
       { status: 200 }
     );
   } catch (error) {
+    console.error('Erro no DELETE categories:', error);
+    
+    // Tratamento específico para constraint violations
+    let errorMessage = 'Erro ao excluir categoria.';
+    
+    if (error.message) {
+      if (error.message.includes('violates foreign key constraint')) {
+        if (error.message.includes('products')) {
+          errorMessage = 'Não é possível excluir esta categoria pois existem produtos vinculados a ela.';
+        } else {
+          errorMessage = 'Não é possível excluir esta categoria pois existem dados vinculados a ela.';
+        }
+      } else if (error.message.includes('is still referenced')) {
+        errorMessage = 'Não é possível excluir esta categoria pois existem produtos vinculados a ela.';
+      } else {
+        errorMessage = error.message;
+      }
+    }
+    
     return NextResponse.json(
       { 
         data: null, 
-        mensagens: [error.message || 'Erro ao excluir categoria.'] 
+        mensagens: [errorMessage] 
       },
       { status: 500 }
     );

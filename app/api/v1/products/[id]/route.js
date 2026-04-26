@@ -294,10 +294,38 @@ export async function PUT(request, { params }) {
     );
   } catch (error) {
     console.error('Erro fatal no PUT:', error);
+    
+    // Tratamento específico para constraint violations
+    let errorMessage = 'Erro ao atualizar produto.';
+    
+    if (error.message) {
+      if (error.message.includes('products_price_check')) {
+        errorMessage = 'O preço deve ser um valor positivo maior que zero.';
+      } else if (error.message.includes('products_stock_quantity_check')) {
+        errorMessage = 'A quantidade em estoque deve ser um número inteiro maior ou igual a zero.';
+      } else if (error.message.includes('products_supplier_id_fkey')) {
+        errorMessage = 'Fornecedor selecionado não existe. Escolha um fornecedor válido.';
+      } else if (error.message.includes('products_category_id_fkey')) {
+        errorMessage = 'Categoria selecionada não existe. Escolha uma categoria válida.';
+      } else if (error.message.includes('violates foreign key constraint')) {
+        if (error.message.includes('supplier_id')) {
+          errorMessage = 'Fornecedor selecionado não existe. Escolha um fornecedor válido.';
+        } else if (error.message.includes('category_id')) {
+          errorMessage = 'Categoria selecionada não existe. Escolha uma categoria válida.';
+        } else {
+          errorMessage = 'Referência inválida. Verifique se fornecedor e categoria existem.';
+        }
+      } else if (error.message.includes('violates check constraint')) {
+        errorMessage = 'Dados inválidos. Verifique se preço e estoque são valores válidos.';
+      } else {
+        errorMessage = error.message;
+      }
+    }
+    
     return NextResponse.json(
       { 
         data: null, 
-        mensagens: [error.message || 'Erro ao atualizar produto.'] 
+        mensagens: [errorMessage] 
       },
       { status: 500 }
     );
@@ -615,10 +643,38 @@ export async function PATCH(request, { params }) {
     );
   } catch (error) {
     console.error('Erro fatal no PATCH:', error);
+    
+    // Tratamento específico para constraint violations
+    let errorMessage = 'Erro ao atualizar produto.';
+    
+    if (error.message) {
+      if (error.message.includes('products_price_check')) {
+        errorMessage = 'O preço deve ser um valor positivo maior que zero.';
+      } else if (error.message.includes('products_stock_quantity_check')) {
+        errorMessage = 'A quantidade em estoque deve ser um número inteiro maior ou igual a zero.';
+      } else if (error.message.includes('products_supplier_id_fkey')) {
+        errorMessage = 'Fornecedor selecionado não existe. Escolha um fornecedor válido.';
+      } else if (error.message.includes('products_category_id_fkey')) {
+        errorMessage = 'Categoria selecionada não existe. Escolha uma categoria válida.';
+      } else if (error.message.includes('violates foreign key constraint')) {
+        if (error.message.includes('supplier_id')) {
+          errorMessage = 'Fornecedor selecionado não existe. Escolha um fornecedor válido.';
+        } else if (error.message.includes('category_id')) {
+          errorMessage = 'Categoria selecionada não existe. Escolha uma categoria válida.';
+        } else {
+          errorMessage = 'Referência inválida. Verifique se fornecedor e categoria existem.';
+        }
+      } else if (error.message.includes('violates check constraint')) {
+        errorMessage = 'Dados inválidos. Verifique se preço e estoque são valores válidos.';
+      } else {
+        errorMessage = error.message;
+      }
+    }
+    
     return NextResponse.json(
       { 
         data: null, 
-        mensagens: [error.message || 'Erro ao atualizar produto.'] 
+        mensagens: [errorMessage] 
       },
       { status: 500 }
     );
@@ -703,10 +759,28 @@ export async function DELETE(request, { params }) {
     );
   } catch (error) {
     console.error('Erro no DELETE:', error);
+    
+    // Tratamento específico para constraint violations
+    let errorMessage = 'Erro ao excluir produto.';
+    
+    if (error.message) {
+      if (error.message.includes('violates foreign key constraint')) {
+        if (error.message.includes('order_items') || error.message.includes('cart')) {
+          errorMessage = 'Não é possível excluir este produto pois existem pedidos ou itens no carrinho vinculados a ele.';
+        } else {
+          errorMessage = 'Não é possível excluir este produto pois existem dados vinculados a ele.';
+        }
+      } else if (error.message.includes('is still referenced')) {
+        errorMessage = 'Não é possível excluir este produto pois existem pedidos ou itens no carrinho vinculados a ele.';
+      } else {
+        errorMessage = error.message;
+      }
+    }
+    
     return NextResponse.json(
       { 
         data: null, 
-        mensagens: [error.message || 'Erro ao excluir produto.'] 
+        mensagens: [errorMessage] 
       },
       { status: 500 }
     );
