@@ -68,6 +68,8 @@ export async function GET(request) {
     const search = searchParams.get('search')?.trim();
     const category_id = searchParams.get('category_id');
     const supplier_id = searchParams.get('supplier_id');
+    const sortBy = searchParams.get('sortBy') || 'name';
+    const order = searchParams.get('order') || 'asc';
     
     // Debug dos parâmetros
     console.log('📋 GET /products - Parâmetros recebidos:');
@@ -76,6 +78,8 @@ export async function GET(request) {
     console.log('  - search:', search);
     console.log('  - category_id:', category_id);
     console.log('  - supplier_id:', supplier_id);
+    console.log('  - sortBy:', sortBy);
+    console.log('  - order:', order);
     console.log('  - URL completa:', request.url);
 
     const start = (page - 1) * limit;
@@ -120,9 +124,35 @@ export async function GET(request) {
     }
 
     // Ordenação e Paginação
+    // Validar campos permitidos para ordenação
+    const allowedSortFields = ['id', 'name', 'price', 'stock_quantity', 'sku', 'created_at'];
+    const allowedOrders = ['asc', 'desc'];
+    
+    if (!allowedSortFields.includes(sortBy)) {
+      return NextResponse.json(
+        { 
+          data: null, 
+          mensagens: [`Campo de ordenação '${sortBy}' não é permitido. Use: ${allowedSortFields.join(', ')}.`] 
+        },
+        { status: 400 }
+      );
+    }
+    
+    if (!allowedOrders.includes(order.toLowerCase())) {
+      return NextResponse.json(
+        { 
+          data: null, 
+          mensagens: [`Ordem '${order}' não é permitida. Use: asc ou desc.`] 
+        },
+        { status: 400 }
+      );
+    }
+    
+    const ascending = order.toLowerCase() === 'asc';
+    
     query = query
       .range(start, start + limit - 1)
-      .order('name', { ascending: true });
+      .order(sortBy, { ascending });
 
     const { data, error, count } = await query;
 
@@ -149,6 +179,10 @@ export async function GET(request) {
     console.log('  - page:', page);
     console.log('  - limit:', limit);
     console.log('  - totalPages:', Math.ceil((count || 0) / limit));
+    console.log('🔀 Ordenação aplicada:');
+    console.log('  - sortBy:', sortBy);
+    console.log('  - order:', order);
+    console.log('  - ascending:', ascending);
 
     return NextResponse.json({
       data: data || [],
