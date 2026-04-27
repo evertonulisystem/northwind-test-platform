@@ -133,6 +133,10 @@ export async function POST(request) {
         errorMessage = 'Nome da categoria deve ter entre 3 e 100 caracteres.';
       } else if (error.message.includes('categories_description_check')) {
         errorMessage = 'Descrição da categoria deve ter no máximo 500 caracteres.';
+      } else if (error.message.includes('value too long for type character varying(100)')) {
+        errorMessage = 'Nome da categoria deve ter no máximo 100 caracteres.';
+      } else if (error.message.includes('value too long for type character varying(500)')) {
+        errorMessage = 'Descrição da categoria deve ter no máximo 500 caracteres.';
       } else if (error.message.includes('violates check constraint')) {
         errorMessage = 'Dados inválidos. Verifique nome e descrição.';
       } else if (error.message.includes('duplicate key') || error.message.includes('unique constraint')) {
