@@ -13,21 +13,93 @@ import { verifyToken, getTokenFromRequest } from '@/lib/jwt';
  *       - in: query
  *         name: page
  *         schema: { type: integer, default: 1 }
+ *         description: Número da página (inicia em 1)
  *       - in: query
  *         name: limit
  *         schema: { type: integer, default: 10 }
+ *         description: Quantidade de itens por página
  *       - in: query
  *         name: search
  *         schema: { type: string }
+ *         description: Busca por nome, SKU ou ID do produto
  *       - in: query
  *         name: category_id
  *         schema: { type: integer }
+ *         description: Filtrar por ID da categoria
  *       - in: query
  *         name: supplier_id
  *         schema: { type: integer }
+ *         description: Filtrar por ID do fornecedor
+ *       - in: query
+ *         name: sortBy
+ *         schema: { type: string, enum: [id, name, price, stock_quantity, sku, created_at], default: name }
+ *         description: Campo de ordenação
+ *       - in: query
+ *         name: order
+ *         schema: { type: string, enum: [asc, desc], default: asc }
+ *         description: Ordem de ordenação (asc = crescente, desc = decrescente)
  *     responses:
  *       200:
- *         description: Lista paginada
+ *         description: Lista paginada de produtos
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       id:
+ *                         type: integer
+ *                       name:
+ *                         type: string
+ *                       price:
+ *                         type: number
+ *                       stock_quantity:
+ *                         type: integer
+ *                       sku:
+ *                         type: string
+ *                       category_id:
+ *                         type: integer
+ *                       supplier_id:
+ *                         type: integer
+ *                       slug:
+ *                         type: string
+ *                       categories:
+ *                         type: object
+ *                         properties:
+ *                           name:
+ *                             type: string
+ *                       suppliers:
+ *                         type: object
+ *                         properties:
+ *                           company_name:
+ *                             type: string
+ *                 pagination:
+ *                   type: object
+ *                   properties:
+ *                     page:
+ *                       type: integer
+ *                     limit:
+ *                       type: integer
+ *                     total:
+ *                       type: integer
+ *                     totalPages:
+ *                       type: integer
+ *                 mensagens:
+ *                   type: array
+ *                   items:
+ *                     type: string
+ *       400:
+ *         description: Parâmetros inválidos
+ *       401:
+ *         description: Não autorizado
+ *       404:
+ *         description: Nenhum produto encontrado com os filtros
+ *       500:
+ *         description: Erro interno do servidor
  */
 // app/api/v1/products/route.js → GET ATUALIZADO (O ÚNICO QUE FUNCIONA DE VERDADE COM JOIN)
 // app/api/v1/products/route.js → GET FINAL (FUNCIONA COM TEXTO EM NOME, CATEGORIA E FORNECEDOR)
