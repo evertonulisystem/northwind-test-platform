@@ -68,6 +68,15 @@ export async function GET(request) {
     const search = searchParams.get('search')?.trim();
     const category_id = searchParams.get('category_id');
     const supplier_id = searchParams.get('supplier_id');
+    
+    // Debug dos parâmetros
+    console.log('📋 GET /products - Parâmetros recebidos:');
+    console.log('  - page:', page);
+    console.log('  - limit:', limit);
+    console.log('  - search:', search);
+    console.log('  - category_id:', category_id);
+    console.log('  - supplier_id:', supplier_id);
+    console.log('  - URL completa:', request.url);
 
     const start = (page - 1) * limit;
 
@@ -134,6 +143,12 @@ export async function GET(request) {
     }
 
     console.log('Dados retornados:', data?.length || 0, 'produtos');
+    console.log('📊 Paginação final:');
+    console.log('  - data.length:', data?.length || 0);
+    console.log('  - count:', count || 0);
+    console.log('  - page:', page);
+    console.log('  - limit:', limit);
+    console.log('  - totalPages:', Math.ceil((count || 0) / limit));
 
     return NextResponse.json({
       data: data || [],

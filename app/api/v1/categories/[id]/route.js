@@ -693,11 +693,11 @@ export async function PATCH(request, { params }) {
         );
       }
 
-      if (description.trim().length > 40) {
+      if (description.trim().length > 200) {
         return NextResponse.json(
           { 
             data: null, 
-            mensagens: ['Descrição deve ter no máximo 40 caracteres.'] 
+            mensagens: ['Descrição deve ter no máximo 200 caracteres.'] 
           },
           { status: 400 }
         );

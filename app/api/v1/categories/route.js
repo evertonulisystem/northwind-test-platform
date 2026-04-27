@@ -110,6 +110,16 @@ export async function POST(request) {
       );
     }
 
+    if (description.trim().length > 200) {
+      return NextResponse.json(
+        { 
+          data: null, 
+          mensagens: ['Descrição deve ter no máximo 200 caracteres.'] 
+        },
+        { status: 400 }
+      );
+    }
+
     const { data, error } = await supabase
       .from('categories')
       .insert({ name, description, slug: name.toLowerCase().replace(/ /g, '-') })
