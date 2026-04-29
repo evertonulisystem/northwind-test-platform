@@ -35,9 +35,17 @@ async function getOrderDetail(request, { params, user }) {
       `)
       .eq('id', id)
       .eq('user_id', user.id) // Segurança
-      .single();
+      .maybeSingle();
 
-    if (orderError || !order) {
+    if (orderError) {
+      console.error('Erro ao buscar pedido:', orderError);
+      return NextResponse.json(
+        { data: null, mensagens: ['Erro interno ao buscar detalhes do pedido.'] },
+        { status: 500 }
+      );
+    }
+
+    if (!order) {
       return NextResponse.json(
         { data: null, mensagens: ['Pedido não encontrado.'] },
         { status: 404 }

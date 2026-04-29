@@ -73,9 +73,20 @@ export async function GET(request, { params }) {
       .from('suppliers')
       .select('*')
       .eq('id', idNum)
-      .single();
+      .maybeSingle();
 
-    if (error || !supplier) {
+    if (error) {
+      console.error('Erro ao buscar fornecedor:', error);
+      return NextResponse.json(
+        { 
+          data: null, 
+          mensagens: ['Erro interno ao buscar detalhes do fornecedor.'] 
+        },
+        { status: 500 }
+      );
+    }
+
+    if (!supplier) {
       return NextResponse.json(
         { 
           data: null, 

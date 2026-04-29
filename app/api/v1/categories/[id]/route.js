@@ -83,13 +83,14 @@ export async function GET(request, { params }) {
       .from('categories')
       .select('*')
       .eq('id', idNum)
-      .single();
+      .maybeSingle();
 
     if (error) {
+      console.error('Erro ao buscar categoria:', error);
       return NextResponse.json(
         { 
           data: null, 
-          mensagens: [error.message] 
+          mensagens: ['Erro interno ao buscar categoria.'] 
         }, 
         { status: 500 }
       );
@@ -184,7 +185,7 @@ export async function GET_products(request, { params }) {
       .from('categories')
       .select('id, name')
       .eq('id', idNum)
-      .single();
+      .maybeSingle();
 
     if (catError || !category) {
       return NextResponse.json(
@@ -439,7 +440,7 @@ export async function PUT(request, { params }) {
       })
       .eq('id', idNum)
       .select()
-      .single();
+      .maybeSingle();
 
     if (error) {
       if (error.message.includes('null value in column')) {
@@ -712,7 +713,7 @@ export async function PATCH(request, { params }) {
       .update(updateData)
       .eq('id', idNum)
       .select()
-      .single();
+      .maybeSingle();
 
     if (error) {
       console.log('❌ Erro Supabase PATCH:', error);

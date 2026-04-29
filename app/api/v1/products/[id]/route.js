@@ -84,9 +84,20 @@ export async function GET(request, { params }) {
         categories(name), suppliers(company_name)
       `)
       .eq('id', idNum)
-      .single();
+      .maybeSingle();
 
-    if (error || !product) {
+    if (error) {
+      console.error('Erro ao buscar produto:', error);
+      return NextResponse.json(
+        { 
+          data: null, 
+          mensagens: ['Erro interno ao buscar produto.'] 
+        },
+        { status: 500 }
+      );
+    }
+
+    if (!product) {
       return NextResponse.json(
         { 
           data: null, 
