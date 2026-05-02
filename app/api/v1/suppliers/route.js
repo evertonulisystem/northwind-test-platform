@@ -302,12 +302,15 @@ export async function POST(request) {
       );
     }
 
-    const phoneRegex = /^\([0-9]{2}\) [0-9]{5}-[0-9]{4}$/;
-    if (!phoneRegex.test(phone.trim())) {
+    // Validação de telefone - aceita apenas números (backend puro)
+    const cleanPhone = phone.replace(/[^\d]/g, '');
+    const phoneRegex = /^[0-9]{10,11}$/; // 10 ou 11 dígitos
+    
+    if (!phoneRegex.test(cleanPhone)) {
       return NextResponse.json(
         { 
           data: null, 
-          mensagens: ['Telefone inválido. Use o formato (XX) XXXXX-XXXX.'] 
+          mensagens: ['Telefone inválido. Informe apenas os números (10 ou 11 dígitos).'] 
         },
         { status: 400 }
       );
@@ -376,7 +379,7 @@ export async function POST(request) {
         company_name: company_name.trim(),
         contact_name: contact_name.trim(),
         email: email.trim().toLowerCase(),
-        phone: phone.trim(),
+        phone: cleanPhone, // Salva apenas números limpos
         cnpj: cleanCnpj,
         state: uf.trim().toUpperCase()
       })
@@ -407,7 +410,7 @@ export async function POST(request) {
       } else if (error.message.includes('suppliers_email_check')) {
         errorMessage = 'Email inválido.';
       } else if (error.message.includes('suppliers_phone_check')) {
-        errorMessage = 'Telefone deve estar no formato (XX) XXXXX-XXXX.';
+        errorMessage = 'Telefone deve ter 10 ou 11 dígitos numéricos.';
       } else if (error.message.includes('suppliers_uf_check')) {
         errorMessage = 'UF deve ter 2 letras maiúsculas.';
       } else if (error.message.includes('violates check constraint')) {
