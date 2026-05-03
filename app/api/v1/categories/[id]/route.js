@@ -125,7 +125,7 @@ export async function GET(request, { params }) {
  * @swagger
  * /api/v1/categories/{id}/products:
  *   get:
- *     summary: Lista produtos de uma categoria
+ *     summary: Lista produtos de uma categoria (ID e Nome apenas)
  *     tags: [Categories]
  *     security:
  *       - bearerAuth: []
@@ -135,9 +135,37 @@ export async function GET(request, { params }) {
  *         required: true
  *         schema:
  *           type: integer
+ *         description: ID da categoria
  *     responses:
  *       200:
- *         description: Lista de produtos da categoria
+ *         description: Lista de produtos da categoria com ID e nome
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       id:
+ *                         type: integer
+ *                         example: 1
+ *                       name:
+ *                         type: string
+ *                         example: "Notebook Dell"
+ *                 mensagens:
+ *                   type: array
+ *                   items:
+ *                     type: string
+ *                   example: ["3 produtos encontrados para a categoria Livros."]
+ *       404:
+ *         description: Categoria não encontrada
+ *       401:
+ *         description: Não autorizado
+ *       500:
+ *         description: Erro interno
  */
 export async function GET_products(request, { params }) {
   try {

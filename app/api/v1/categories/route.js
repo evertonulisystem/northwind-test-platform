@@ -9,13 +9,70 @@ export const dynamic = "force-dynamic";
  * @swagger
  * /api/v1/categories:
  *   get:
- *     summary: Lista todas as categorias
+ *     summary: Lista categorias com paginação
  *     tags: [Categories]
  *     security:
  *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *           minimum: 1
+ *           default: 1
+ *         description: Número da página (padrão: 1)
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           minimum: 1
+ *           maximum: 100
+ *           default: 10
+ *         description: Quantidade de itens por página (padrão: 10, máximo: 100)
  *     responses:
  *       200:
- *         description: Lista de categorias
+ *         description: Lista de categorias com informações de paginação
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/Category'
+ *                 pagination:
+ *                   type: object
+ *                   properties:
+ *                     currentPage:
+ *                       type: integer
+ *                       example: 1
+ *                     totalPages:
+ *                       type: integer
+ *                       example: 3
+ *                     totalItems:
+ *                       type: integer
+ *                       example: 25
+ *                     itemsPerPage:
+ *                       type: integer
+ *                       example: 10
+ *                     hasNextPage:
+ *                       type: boolean
+ *                       example: true
+ *                     hasPreviousPage:
+ *                       type: boolean
+ *                       example: false
+ *                 mensagens:
+ *                   type: array
+ *                   items:
+ *                     type: string
+ *                   example: ["10 categorias carregadas com sucesso! (Página 1 de 3)"]
+ *       400:
+ *         description: Parâmetros de paginação inválidos
+ *       401:
+ *         description: Não autorizado
+ *       500:
+ *         description: Erro interno
  */
 export async function GET(request) {
   try {
