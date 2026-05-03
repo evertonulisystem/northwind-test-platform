@@ -199,10 +199,7 @@ export async function GET_products(request, { params }) {
 
     const { data: products, error } = await supabase
       .from('products')
-      .select(`
-        id, name, price, stock_quantity, sku,
-        suppliers (company_name)
-      `)
+      .select('id, name')
       .eq('category_id', idNum)
       .order('name');
 

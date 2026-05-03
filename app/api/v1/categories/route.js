@@ -37,15 +37,63 @@ export async function GET(request) {
       );
     }
 
+    // Extrair parâmetros de paginação da URL
+    const { searchParams } = new URL(request.url);
+    const page = parseInt(searchParams.get('page') || '1');
+    const limit = parseInt(searchParams.get('limit') || '10');
+    
+    // Validação dos parâmetros
+    if (page < 1) {
+      return NextResponse.json(
+        { data: null, mensagens: ['Página deve ser maior que 0.'] }, 
+        { status: 400 }
+      );
+    }
+    
+    if (limit < 1 || limit > 100) {
+      return NextResponse.json(
+        { data: null, mensagens: ['Limite deve estar entre 1 e 100.'] }, 
+        { status: 400 }
+      );
+    }
+
+    // Calcular offset
+    const offset = (page - 1) * limit;
+
+    // Buscar total de categorias
+    const { count, error: countError } = await supabase
+      .from('categories')
+      .select('*', { count: 'exact', head: true });
+
+    if (countError) throw countError;
+
+    // Buscar categorias com paginação
     const { data, error } = await supabase
       .from('categories')
       .select('*')
-      .order('name', { ascending: true });
+      .order('name', { ascending: true })
+      .range(offset, offset + limit - 1);
 
     if (error) throw error;
 
+    // Calcular informações de paginação
+    const totalPages = Math.ceil(count / limit);
+    const hasNextPage = page < totalPages;
+    const hasPreviousPage = page > 1;
+
     return NextResponse.json(
-      { data, mensagens: ['Categorias carregadas com sucesso!'] },
+      { 
+        data: data || [],
+        pagination: {
+          currentPage: page,
+          totalPages: totalPages,
+          totalItems: count,
+          itemsPerPage: limit,
+          hasNextPage: hasNextPage,
+          hasPreviousPage: hasPreviousPage
+        },
+        mensagens: [`${data?.length || 0} categorias carregadas com sucesso! (Página ${page} de ${totalPages})`]
+      },
       { status: 200 }
     );
   } catch (error) {
