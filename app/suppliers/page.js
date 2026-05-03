@@ -346,10 +346,19 @@ export default function SuppliersPage() {
       .slice(0, 15);
   };
 
+  const ITEMS_PER_PAGE = 8;
+  const [currentPage, setCurrentPage] = useState(1);
+
   const filteredSuppliers = suppliers.filter(supplier =>
     supplier.company_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     supplier.contact_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     supplier.email?.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  const totalPages = Math.ceil(filteredSuppliers.length / ITEMS_PER_PAGE);
+  const paginatedSuppliers = filteredSuppliers.slice(
+    (currentPage - 1) * ITEMS_PER_PAGE,
+    currentPage * ITEMS_PER_PAGE
   );
 
   return (
@@ -390,7 +399,10 @@ export default function SuppliersPage() {
                 <input
                   type="text"
                   value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
+                  onChange={(e) => {
+                    setSearchTerm(e.target.value);
+                    setCurrentPage(1);
+                  }}
                   placeholder="Buscar fornecedores..."
                   data-testid="supplier-search"
                   className="w-full pl-11 pr-4 py-3 bg-slate-800/50 backdrop-blur border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -421,103 +433,128 @@ export default function SuppliersPage() {
               )}
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {filteredSuppliers.map((supplier) => (
-                <div
-                  key={supplier.id}
-                  data-testid={`supplier-card-${supplier.id}`}
-                  className="bg-slate-800/50 backdrop-blur rounded-xl border border-slate-700 p-6 hover:border-blue-500 transition-all hover:shadow-xl hover:shadow-blue-500/20"
-                >
-                  <div className="flex items-start justify-between mb-4">
-                    <div className="flex items-center gap-3">
-                      <div className="bg-blue-500/20 p-3 rounded-lg">
-                        <Building2 className="w-6 h-6 text-blue-400" />
+            <>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {paginatedSuppliers.map((supplier) => (
+                  <div
+                    key={supplier.id}
+                    data-testid={`supplier-card-${supplier.id}`}
+                    className="bg-slate-800/50 backdrop-blur rounded-xl border border-slate-700 p-6 hover:border-blue-500 transition-all hover:shadow-xl hover:shadow-blue-500/20 flex flex-col h-full"
+                  >
+                    <div className="flex items-start justify-between mb-4">
+                      <div className="flex items-center gap-3">
+                        <div className="bg-blue-500/20 p-3 rounded-lg">
+                          <Building2 className="w-6 h-6 text-blue-400" />
+                        </div>
+                        <div>
+                          <h3 className="text-white font-semibold text-lg line-clamp-1" data-testid={`supplier-name-${supplier.id}`} title={supplier.company_name}>
+                            {supplier.company_name}
+                          </h3>
+                          <p className="text-slate-400 text-sm line-clamp-1" data-testid={`supplier-contact-${supplier.id}`} title={supplier.contact_name}>
+                            {supplier.contact_name}
+                          </p>
+                        </div>
                       </div>
-                      <div>
-                        <h3 className="text-white font-semibold text-lg" data-testid={`supplier-name-${supplier.id}`}>
-                          {supplier.company_name}
-                        </h3>
-                        <p className="text-slate-400 text-sm" data-testid={`supplier-contact-${supplier.id}`}>
-                          {supplier.contact_name}
-                        </p>
+                    </div>
+
+                    <div className="space-y-3 mb-4 flex-grow">
+                      <div className="flex items-center gap-2 text-slate-300">
+                        <Mail className="w-4 h-4 shrink-0" />
+                        <span className="text-sm truncate" data-testid={`supplier-email-${supplier.id}`} title={supplier.email}>
+                          {supplier.email}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-2 text-slate-300">
+                        <Phone className="w-4 h-4 shrink-0" />
+                        <span className="text-sm" data-testid={`supplier-phone-${supplier.id}`}>
+                          {supplier.phone}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-2 text-slate-300">
+                        <MapPin className="w-4 h-4 shrink-0" />
+                        <span className="text-sm" data-testid={`supplier-uf-${supplier.id}`}>
+                          {supplier.uf}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-2 text-slate-300">
+                        <Building className="w-4 h-4 shrink-0" />
+                        <span className="text-sm" data-testid={`supplier-cnpj-${supplier.id}`}>
+                          {supplier.cnpj}
+                        </span>
                       </div>
                     </div>
-                  </div>
 
-                  <div className="space-y-3 mb-4">
-                    <div className="flex items-center gap-2 text-slate-300">
-                      <Mail className="w-4 h-4" />
-                      <span className="text-sm" data-testid={`supplier-email-${supplier.id}`}>
-                        {supplier.email}
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-2 text-slate-300">
-                      <Phone className="w-4 h-4" />
-                      <span className="text-sm" data-testid={`supplier-phone-${supplier.id}`}>
-                        {supplier.phone}
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-2 text-slate-300">
-                      <MapPin className="w-4 h-4" />
-                      <span className="text-sm" data-testid={`supplier-uf-${supplier.id}`}>
-                        {supplier.uf}
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-2 text-slate-300">
-                      <Building className="w-4 h-4" />
-                      <span className="text-sm" data-testid={`supplier-cnpj-${supplier.id}`}>
-                        {supplier.cnpj}
-                      </span>
+                    <div className="flex gap-2 pt-4 border-t border-slate-700 mt-auto">
+                      <button
+                        onClick={() => {
+                          setEditingSupplier(supplier);
+                          setFormData({
+                            company_name: supplier.company_name,
+                            contact_name: supplier.contact_name,
+                            email: supplier.email,
+                            phone: supplier.phone,
+                            cnpj: supplier.cnpj,
+                            uf: supplier.uf
+                          });
+                          setShowEditModal(true);
+                        }}
+                        data-testid={`edit-supplier-${supplier.id}`}
+                        className="flex-1 bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-lg transition flex items-center justify-center gap-1"
+                      >
+                        <Edit className="w-4 h-4" />
+                        Editar
+                      </button>
+                      <button
+                        onClick={() => {
+                          setUnlinkingSupplier(supplier);
+                          setShowUnlinkModal(true);
+                        }}
+                        data-testid={`unlink-supplier-${supplier.id}`}
+                        className="flex-1 bg-orange-600 hover:bg-orange-700 text-white px-3 py-2 rounded-lg transition flex items-center justify-center gap-1"
+                        title="Desvincular produtos deste fornecedor"
+                      >
+                        <Unlink className="w-4 h-4" />
+                        Desvincular
+                      </button>
+                      <button
+                        onClick={() => {
+                          setDeleteId(supplier.id);
+                          setShowConfirm(true);
+                        }}
+                        data-testid={`delete-supplier-${supplier.id}`}
+                        className="flex-1 bg-red-600 hover:bg-red-700 text-white px-3 py-2 rounded-lg transition flex items-center justify-center gap-1"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                        Excluir
+                      </button>
                     </div>
                   </div>
+                ))}
+              </div>
 
-                  <div className="flex gap-2 pt-4 border-t border-slate-700">
-                    <button
-                      onClick={() => {
-                        setEditingSupplier(supplier);
-                        setFormData({
-                          company_name: supplier.company_name,
-                          contact_name: supplier.contact_name,
-                          email: supplier.email,
-                          phone: supplier.phone,
-                          cnpj: supplier.cnpj,
-                          uf: supplier.uf
-                        });
-                        setShowEditModal(true);
-                      }}
-                      data-testid={`edit-supplier-${supplier.id}`}
-                      className="flex-1 bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-lg transition flex items-center justify-center gap-1"
-                    >
-                      <Edit className="w-4 h-4" />
-                      Editar
-                    </button>
-                    <button
-                      onClick={() => {
-                        setUnlinkingSupplier(supplier);
-                        setShowUnlinkModal(true);
-                      }}
-                      data-testid={`unlink-supplier-${supplier.id}`}
-                      className="flex-1 bg-orange-600 hover:bg-orange-700 text-white px-3 py-2 rounded-lg transition flex items-center justify-center gap-1"
-                      title="Desvincular produtos deste fornecedor"
-                    >
-                      <Unlink className="w-4 h-4" />
-                      Desvincular
-                    </button>
-                    <button
-                      onClick={() => {
-                        setDeleteId(supplier.id);
-                        setShowConfirm(true);
-                      }}
-                      data-testid={`delete-supplier-${supplier.id}`}
-                      className="flex-1 bg-red-600 hover:bg-red-700 text-white px-3 py-2 rounded-lg transition flex items-center justify-center gap-1"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                      Excluir
-                    </button>
-                  </div>
+              {/* Pagination Controls */}
+              {totalPages > 1 && (
+                <div className="flex justify-center items-center gap-4 mt-8">
+                  <button
+                    onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                    disabled={currentPage === 1}
+                    className="px-4 py-2 rounded-lg bg-slate-800 border border-slate-600 text-white hover:bg-slate-700 disabled:opacity-50 disabled:cursor-not-allowed transition"
+                  >
+                    Anterior
+                  </button>
+                  <span className="text-slate-300">
+                    Página <span className="font-bold text-white">{currentPage}</span> de <span className="font-bold text-white">{totalPages}</span>
+                  </span>
+                  <button
+                    onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                    disabled={currentPage === totalPages}
+                    className="px-4 py-2 rounded-lg bg-slate-800 border border-slate-600 text-white hover:bg-slate-700 disabled:opacity-50 disabled:cursor-not-allowed transition"
+                  >
+                    Próxima
+                  </button>
                 </div>
-              ))}
-            </div>
+              )}
+            </>
           )}
         </div>
       </div>

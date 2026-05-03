@@ -34,7 +34,7 @@ export default function CategoriesPage() {
         headers['Authorization'] = `Bearer ${token}`;
       }
       
-      const res = await fetch('/api/v1/categories', { headers });
+      const res = await fetch('/api/v1/categories?limit=100', { headers });
       const result = await res.json();
       
       if (!res.ok) {
@@ -227,9 +227,18 @@ export default function CategoriesPage() {
     }
   };
 
+  const ITEMS_PER_PAGE = 8;
+  const [currentPage, setCurrentPage] = useState(1);
+
   const filteredCategories = categories.filter(category =>
     category.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     category.description?.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  const totalPages = Math.ceil(filteredCategories.length / ITEMS_PER_PAGE);
+  const paginatedCategories = filteredCategories.slice(
+    (currentPage - 1) * ITEMS_PER_PAGE,
+    currentPage * ITEMS_PER_PAGE
   );
 
   return (
@@ -270,7 +279,10 @@ export default function CategoriesPage() {
                 <input
                   type="text"
                   value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
+                  onChange={(e) => {
+                    setSearchTerm(e.target.value);
+                    setCurrentPage(1);
+                  }}
                   placeholder="Buscar categorias..."
                   data-testid="category-search"
                   className="w-full pl-11 pr-4 py-3 bg-slate-800/50 backdrop-blur border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500"
@@ -301,67 +313,92 @@ export default function CategoriesPage() {
               )}
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {filteredCategories.map((category) => (
-                <div
-                  key={category.id}
-                  data-testid={`category-card-${category.id}`}
-                  className="bg-slate-800/50 backdrop-blur rounded-xl border border-slate-700 p-6 hover:border-emerald-500 transition-all hover:shadow-xl hover:shadow-emerald-500/20 group"
-                >
-                  <div className="flex items-start justify-between mb-4">
-                    <div className="flex items-center gap-3">
-                      <div className="bg-emerald-500/20 p-3 rounded-lg group-hover:bg-emerald-500/30 transition">
-                        <Tag className="w-6 h-6 text-emerald-400" />
-                      </div>
-                      <div className="flex-1">
-                        <h3 className="text-white font-semibold text-lg mb-1" data-testid={`category-name-${category.id}`}>
-                          {category.name}
-                        </h3>
-                        <div className="flex items-center gap-2 text-emerald-400 text-xs">
-                          <Package className="w-3 h-3" />
-                          <span>Produtos</span>
+            <>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                {paginatedCategories.map((category) => (
+                  <div
+                    key={category.id}
+                    data-testid={`category-card-${category.id}`}
+                    className="bg-slate-800/50 backdrop-blur rounded-xl border border-slate-700 p-6 hover:border-emerald-500 transition-all hover:shadow-xl hover:shadow-emerald-500/20 group flex flex-col h-full"
+                  >
+                    <div className="flex items-start justify-between mb-4">
+                      <div className="flex items-center gap-3">
+                        <div className="bg-emerald-500/20 p-3 rounded-lg group-hover:bg-emerald-500/30 transition">
+                          <Tag className="w-6 h-6 text-emerald-400" />
+                        </div>
+                        <div className="flex-1">
+                          <h3 className="text-white font-semibold text-lg mb-1 line-clamp-1" data-testid={`category-name-${category.id}`} title={category.name}>
+                            {category.name}
+                          </h3>
+                          <div className="flex items-center gap-2 text-emerald-400 text-xs">
+                            <Package className="w-3 h-3" />
+                            <span>Produtos</span>
+                          </div>
                         </div>
                       </div>
                     </div>
-                  </div>
 
-                  <div className="mb-4">
-                    <p className="text-slate-300 text-sm leading-relaxed" data-testid={`category-description-${category.id}`}>
-                      {category.description}
-                    </p>
-                  </div>
+                    <div className="mb-4 flex-grow">
+                      <p className="text-slate-300 text-sm leading-relaxed line-clamp-3" data-testid={`category-description-${category.id}`} title={category.description}>
+                        {category.description}
+                      </p>
+                    </div>
 
-                  <div className="flex gap-2 pt-4 border-t border-slate-700">
-                    <button
-                      onClick={() => {
-                        setEditingCategory(category);
-                        setFormData({
-                          name: category.name,
-                          description: category.description
-                        });
-                        setShowEditModal(true);
-                      }}
-                      data-testid={`edit-category-${category.id}`}
-                      className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-2 rounded-lg transition flex items-center justify-center gap-1"
-                    >
-                      <Edit className="w-4 h-4" />
-                      Editar
-                    </button>
-                    <button
-                      onClick={() => {
-                        setDeleteId(category.id);
-                        setShowConfirm(true);
-                      }}
-                      data-testid={`delete-category-${category.id}`}
-                      className="flex-1 bg-red-600 hover:bg-red-700 text-white px-3 py-2 rounded-lg transition flex items-center justify-center gap-1"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                      Excluir
-                    </button>
+                    <div className="flex gap-2 pt-4 border-t border-slate-700 mt-auto">
+                      <button
+                        onClick={() => {
+                          setEditingCategory(category);
+                          setFormData({
+                            name: category.name,
+                            description: category.description
+                          });
+                          setShowEditModal(true);
+                        }}
+                        data-testid={`edit-category-${category.id}`}
+                        className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-2 rounded-lg transition flex items-center justify-center gap-1"
+                      >
+                        <Edit className="w-4 h-4" />
+                        Editar
+                      </button>
+                      <button
+                        onClick={() => {
+                          setDeleteId(category.id);
+                          setShowConfirm(true);
+                        }}
+                        data-testid={`delete-category-${category.id}`}
+                        className="flex-1 bg-red-600 hover:bg-red-700 text-white px-3 py-2 rounded-lg transition flex items-center justify-center gap-1"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                        Excluir
+                      </button>
+                    </div>
                   </div>
+                ))}
+              </div>
+
+              {/* Pagination Controls */}
+              {totalPages > 1 && (
+                <div className="flex justify-center items-center gap-4 mt-8">
+                  <button
+                    onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                    disabled={currentPage === 1}
+                    className="px-4 py-2 rounded-lg bg-slate-800 border border-slate-600 text-white hover:bg-slate-700 disabled:opacity-50 disabled:cursor-not-allowed transition"
+                  >
+                    Anterior
+                  </button>
+                  <span className="text-slate-300">
+                    Página <span className="font-bold text-white">{currentPage}</span> de <span className="font-bold text-white">{totalPages}</span>
+                  </span>
+                  <button
+                    onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                    disabled={currentPage === totalPages}
+                    className="px-4 py-2 rounded-lg bg-slate-800 border border-slate-600 text-white hover:bg-slate-700 disabled:opacity-50 disabled:cursor-not-allowed transition"
+                  >
+                    Próxima
+                  </button>
                 </div>
-              ))}
-            </div>
+              )}
+            </>
           )}
         </div>
       </div>
