@@ -115,7 +115,7 @@ export async function POST(request, { params }) {
 
       if (uploadError) {
         console.error('Supabase upload error:', uploadError);
-        return NextResponse.json({ data: null, mensagens: ['Erro ao fazer upload para o storage na nuvem.'] }, { status: 500 });
+        return NextResponse.json({ data: null, mensagens: ['Erro ao fazer upload para o storage na nuvem.', uploadError.message || JSON.stringify(uploadError)] }, { status: 500 });
       }
     } else {
       // Caminho destino local (fallback)
@@ -138,7 +138,7 @@ export async function POST(request, { params }) {
 
   } catch (error) {
     console.error('Erro no upload de PDF:', error);
-    return NextResponse.json({ data: null, mensagens: ['Erro interno ao processar upload.'] }, { status: 500 });
+    return NextResponse.json({ data: null, mensagens: ['Erro interno ao processar upload.', error.message || String(error)] }, { status: 500 });
   }
 }
 
@@ -203,6 +203,6 @@ export async function GET(request, { params }) {
 
   } catch (error) {
     console.error('Erro no download de PDF:', error);
-    return NextResponse.json({ data: null, mensagens: ['Erro ao buscar PDF.'] }, { status: 500 });
+    return NextResponse.json({ data: null, mensagens: ['Erro ao buscar PDF.', error.message || String(error)] }, { status: 500 });
   }
 }
