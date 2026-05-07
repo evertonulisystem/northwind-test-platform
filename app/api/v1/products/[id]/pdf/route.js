@@ -102,12 +102,28 @@ export async function POST(request, { params }) {
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
 
-    // Caminho destino
-    const productDir = path.join(UPLOAD_DIR, id.toString());
-    await ensureDir(productDir);
-    const filePath = path.join(productDir, 'manual.pdf');
+    const isVercel = !!process.env.VERCEL;
 
-    await fs.writeFile(filePath, buffer);
+    if (isVercel) {
+      // Usar Supabase Storage
+      const { error: uploadError } = await supabase.storage
+        .from('products')
+        .upload(`${idNum}/manual.pdf`, buffer, {
+          contentType: file.type,
+          upsert: true
+        });
+
+      if (uploadError) {
+        console.error('Supabase upload error:', uploadError);
+        return NextResponse.json({ data: null, mensagens: ['Erro ao fazer upload para o storage na nuvem.'] }, { status: 500 });
+      }
+    } else {
+      // Caminho destino local (fallback)
+      const productDir = path.join(UPLOAD_DIR, id.toString());
+      await ensureDir(productDir);
+      const filePath = path.join(productDir, 'manual.pdf');
+      await fs.writeFile(filePath, buffer);
+    }
 
     return NextResponse.json({
       data: {
@@ -154,13 +170,29 @@ export async function POST(request, { params }) {
 export async function GET(request, { params }) {
   try {
     const { id } = await params;
-    const filePath = path.join(UPLOAD_DIR, id.toString(), 'manual.pdf');
+    const idNum = parseInt(id, 10);
+    const isVercel = !!process.env.VERCEL;
 
-    if (!existsSync(filePath)) {
-      return NextResponse.json({ data: null, mensagens: ['PDF não encontrado para este produto. Realize o upload primeiro.'] }, { status: 404 });
+    let fileBuffer;
+
+    if (isVercel) {
+      const { data, error } = await supabase.storage
+        .from('products')
+        .download(`${idNum}/manual.pdf`);
+
+      if (error || !data) {
+        return NextResponse.json({ data: null, mensagens: ['PDF não encontrado para este produto. Realize o upload primeiro.'] }, { status: 404 });
+      }
+      fileBuffer = Buffer.from(await data.arrayBuffer());
+    } else {
+      const filePath = path.join(UPLOAD_DIR, id.toString(), 'manual.pdf');
+
+      if (!existsSync(filePath)) {
+        return NextResponse.json({ data: null, mensagens: ['PDF não encontrado para este produto. Realize o upload primeiro.'] }, { status: 404 });
+      }
+
+      fileBuffer = await fs.readFile(filePath);
     }
-
-    const fileBuffer = await fs.readFile(filePath);
 
     return new NextResponse(fileBuffer, {
       headers: {
