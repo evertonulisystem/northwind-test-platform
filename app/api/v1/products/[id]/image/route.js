@@ -18,7 +18,7 @@ async function ensureDir(dirPath) {
  * @swagger
  * /api/v1/products/{id}/image:
  *   post:
- *     summary: Realiza o upload de uma imagem PNG para o produto
+ *     summary: Realiza o upload de uma imagem PNG para o produto (gera nome único)
  *     tags: [Products]
  *     security:
  *       - bearerAuth: []
@@ -99,6 +99,10 @@ export async function POST(request, { params }) {
       }, { status: 400 });
     }
 
+    const timestamp = Date.now();
+    const safeName = file.name ? file.name.replace(/[^a-zA-Z0-9.\-]/g, '_') : 'image.png';
+    const filename = `${timestamp}_${safeName}`;
+
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
 
@@ -108,9 +112,9 @@ export async function POST(request, { params }) {
       // Usar Supabase Storage
       const { error: uploadError } = await supabase.storage
         .from('products')
-        .upload(`${idNum}/image.png`, buffer, {
+        .upload(`${idNum}/${filename}`, buffer, {
           contentType: file.type,
-          upsert: true
+          upsert: false
         });
 
       if (uploadError) {
@@ -121,17 +125,17 @@ export async function POST(request, { params }) {
       // Caminho destino local (fallback)
       const productDir = path.join(UPLOAD_DIR, id.toString());
       await ensureDir(productDir);
-      const filePath = path.join(productDir, 'image.png');
+      const filePath = path.join(productDir, filename);
       await fs.writeFile(filePath, buffer);
     }
 
     return NextResponse.json({
       data: {
-        filename: 'image.png',
+        filename: filename,
         size: file.size,
         mimetype: file.type,
         productId: idNum,
-        url: `/api/v1/products/${id}/image`
+        url: `/api/v1/products/${id}/image?file=${filename}`
       },
       mensagens: ['Upload da imagem realizado com sucesso!']
     });
@@ -146,7 +150,7 @@ export async function POST(request, { params }) {
  * @swagger
  * /api/v1/products/{id}/image:
  *   get:
- *     summary: Realiza o download da imagem PNG do produto
+ *     summary: Lista as imagens PNG do produto ou realiza o download de uma específica
  *     tags: [Products]
  *     security:
  *       - bearerAuth: []
@@ -156,14 +160,15 @@ export async function POST(request, { params }) {
  *         required: true
  *         schema:
  *           type: integer
+ *       - in: query
+ *         name: file
+ *         required: false
+ *         schema:
+ *           type: string
+ *         description: Nome do arquivo para download. Se omitido, retorna a lista de imagens do produto.
  *     responses:
  *       200:
- *         description: Arquivo de imagem
- *         content:
- *           image/png:
- *             schema:
- *               type: string
- *               format: binary
+ *         description: Lista de arquivos (se sem query `file`) ou o arquivo de imagem binário (se com query `file`)
  *       404:
  *         description: Imagem não encontrada
  */
@@ -173,22 +178,52 @@ export async function GET(request, { params }) {
     const idNum = parseInt(id, 10);
     const isVercel = !!process.env.VERCEL;
 
+    // Obter o nome do arquivo pela query string
+    const url = new URL(request.url);
+    const fileName = url.searchParams.get('file');
+
+    if (!fileName) {
+      // Retornar lista de imagens se não especificar o arquivo
+      let filesList = [];
+      if (isVercel) {
+        const { data, error } = await supabase.storage.from('products').list(id.toString());
+        if (data) {
+          filesList = data.filter(f => f.name.endsWith('.png')).map(f => ({
+            filename: f.name,
+            url: `/api/v1/products/${id}/image?file=${f.name}`
+          }));
+        }
+      } else {
+        const productDir = path.join(UPLOAD_DIR, id.toString());
+        if (existsSync(productDir)) {
+          const files = await fs.readdir(productDir);
+          filesList = files.filter(f => f.endsWith('.png')).map(f => ({
+            filename: f,
+            url: `/api/v1/products/${id}/image?file=${f}`
+          }));
+        }
+      }
+      return NextResponse.json({ data: filesList, mensagens: ['Lista de imagens recuperada com sucesso.'] });
+    }
+
+    // Se informou fileName, realiza o download
+    const safeFileName = path.basename(fileName); // Evitar path traversal
     let fileBuffer;
 
     if (isVercel) {
       const { data, error } = await supabase.storage
         .from('products')
-        .download(`${idNum}/image.png`);
+        .download(`${idNum}/${safeFileName}`);
 
       if (error || !data) {
-        return NextResponse.json({ data: null, mensagens: ['Imagem não encontrada para este produto. Realize o upload primeiro.'] }, { status: 404 });
+        return NextResponse.json({ data: null, mensagens: ['Imagem não encontrada para este produto.'] }, { status: 404 });
       }
       fileBuffer = Buffer.from(await data.arrayBuffer());
     } else {
-      const filePath = path.join(UPLOAD_DIR, id.toString(), 'image.png');
+      const filePath = path.join(UPLOAD_DIR, id.toString(), safeFileName);
 
       if (!existsSync(filePath)) {
-        return NextResponse.json({ data: null, mensagens: ['Imagem não encontrada para este produto. Realize o upload primeiro.'] }, { status: 404 });
+        return NextResponse.json({ data: null, mensagens: ['Imagem não encontrada para este produto.'] }, { status: 404 });
       }
 
       fileBuffer = await fs.readFile(filePath);
@@ -197,12 +232,12 @@ export async function GET(request, { params }) {
     return new NextResponse(fileBuffer, {
       headers: {
         'Content-Type': 'image/png',
-        'Content-Disposition': `attachment; filename="product-image-${id}.png"`,
+        'Content-Disposition': `attachment; filename="${safeFileName}"`,
       },
     });
 
   } catch (error) {
-    console.error('Erro no download de imagem:', error);
+    console.error('Erro no download/listagem de imagem:', error);
     return NextResponse.json({ data: null, mensagens: ['Erro ao buscar imagem.', error.message || String(error)] }, { status: 500 });
   }
 }
