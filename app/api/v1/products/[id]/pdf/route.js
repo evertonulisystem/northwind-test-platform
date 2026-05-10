@@ -4,6 +4,7 @@ import { verifyToken, getTokenFromRequest } from '@/lib/jwt';
 import fs from 'fs/promises';
 import path from 'path';
 import { existsSync } from 'fs';
+import crypto from 'crypto';
 
 const UPLOAD_DIR = path.join(process.cwd(), 'storage', 'uploads', 'products');
 
@@ -99,9 +100,9 @@ export async function POST(request, { params }) {
       }, { status: 400 });
     }
 
-    const timestamp = Date.now();
+    const fileId = crypto.randomUUID();
     const safeName = file.name ? file.name.replace(/[^a-zA-Z0-9.\-]/g, '_') : 'manual.pdf';
-    const filename = `${timestamp}_${safeName}`;
+    const filename = `${fileId}_${safeName}`;
 
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
@@ -131,11 +132,12 @@ export async function POST(request, { params }) {
 
     return NextResponse.json({
       data: {
+        id: fileId,
         filename: filename,
         size: file.size,
         mimetype: file.type,
         productId: idNum,
-        url: `/api/v1/products/${id}/pdf?file=${filename}`
+        url: `/api/v1/products/${id}/pdf/${fileId}`
       },
       mensagens: ['Upload do PDF realizado com sucesso!']
     });
@@ -150,7 +152,7 @@ export async function POST(request, { params }) {
  * @swagger
  * /api/v1/products/{id}/pdf:
  *   get:
- *     summary: Lista os PDFs do produto ou realiza o download de um específico
+ *     summary: Lista os PDFs do produto
  *     tags: [Products]
  *     security:
  *       - bearerAuth: []
@@ -160,17 +162,11 @@ export async function POST(request, { params }) {
  *         required: true
  *         schema:
  *           type: integer
- *       - in: query
- *         name: file
- *         required: false
- *         schema:
- *           type: string
- *         description: Nome do arquivo para download. Se omitido, retorna a lista de PDFs do produto.
  *     responses:
  *       200:
- *         description: Lista de arquivos (se sem query `file`) ou o arquivo PDF binário (se com query `file`)
+ *         description: Lista de PDFs com seus respectivos IDs
  *       404:
- *         description: PDF não encontrado
+ *         description: Produto não encontrado
  */
 export async function GET(request, { params }) {
   try {
@@ -178,66 +174,37 @@ export async function GET(request, { params }) {
     const idNum = parseInt(id, 10);
     const isVercel = !!process.env.VERCEL;
 
-    // Obter o nome do arquivo pela query string
-    const url = new URL(request.url);
-    const fileName = url.searchParams.get('file');
-
-    if (!fileName) {
-      // Retornar lista de PDFs se não especificar o arquivo
-      let filesList = [];
-      if (isVercel) {
-        const { data, error } = await supabase.storage.from('products').list(id.toString());
-        if (data) {
-          filesList = data.filter(f => f.name.endsWith('.pdf')).map(f => ({
-            filename: f.name,
-            url: `/api/v1/products/${id}/pdf?file=${f.name}`
-          }));
-        }
-      } else {
-        const productDir = path.join(UPLOAD_DIR, id.toString());
-        if (existsSync(productDir)) {
-          const files = await fs.readdir(productDir);
-          filesList = files.filter(f => f.endsWith('.pdf')).map(f => ({
-            filename: f,
-            url: `/api/v1/products/${id}/pdf?file=${f}`
-          }));
-        }
-      }
-      return NextResponse.json({ data: filesList, mensagens: ['Lista de PDFs recuperada com sucesso.'] });
-    }
-
-    // Se informou fileName, realiza o download
-    const safeFileName = path.basename(fileName); // Evitar path traversal
-    let fileBuffer;
-
+    let filesList = [];
     if (isVercel) {
-      const { data, error } = await supabase.storage
-        .from('products')
-        .download(`${idNum}/${safeFileName}`);
-
-      if (error || !data) {
-        return NextResponse.json({ data: null, mensagens: ['PDF não encontrado para este produto.'] }, { status: 404 });
+      const { data, error } = await supabase.storage.from('products').list(id.toString());
+      if (data) {
+        filesList = data.filter(f => f.name.endsWith('.pdf')).map(f => {
+          const fileId = f.name.split('_')[0];
+          return {
+            id: fileId,
+            filename: f.name,
+            url: `/api/v1/products/${id}/pdf/${fileId}`
+          };
+        });
       }
-      fileBuffer = Buffer.from(await data.arrayBuffer());
     } else {
-      const filePath = path.join(UPLOAD_DIR, id.toString(), safeFileName);
-
-      if (!existsSync(filePath)) {
-        return NextResponse.json({ data: null, mensagens: ['PDF não encontrado para este produto.'] }, { status: 404 });
+      const productDir = path.join(UPLOAD_DIR, id.toString());
+      if (existsSync(productDir)) {
+        const files = await fs.readdir(productDir);
+        filesList = files.filter(f => f.endsWith('.pdf')).map(f => {
+          const fileId = f.split('_')[0];
+          return {
+            id: fileId,
+            filename: f,
+            url: `/api/v1/products/${id}/pdf/${fileId}`
+          };
+        });
       }
-
-      fileBuffer = await fs.readFile(filePath);
     }
-
-    return new NextResponse(fileBuffer, {
-      headers: {
-        'Content-Type': 'application/pdf',
-        'Content-Disposition': `attachment; filename="${safeFileName}"`,
-      },
-    });
+    return NextResponse.json({ data: filesList, mensagens: ['Lista de PDFs recuperada com sucesso.'] });
 
   } catch (error) {
-    console.error('Erro no download/listagem de PDF:', error);
-    return NextResponse.json({ data: null, mensagens: ['Erro ao buscar PDF.', error.message || String(error)] }, { status: 500 });
+    console.error('Erro na listagem de PDFs:', error);
+    return NextResponse.json({ data: null, mensagens: ['Erro ao buscar PDFs.', error.message || String(error)] }, { status: 500 });
   }
 }

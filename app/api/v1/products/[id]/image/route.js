@@ -4,6 +4,7 @@ import { verifyToken, getTokenFromRequest } from '@/lib/jwt';
 import fs from 'fs/promises';
 import path from 'path';
 import { existsSync } from 'fs';
+import crypto from 'crypto';
 
 const UPLOAD_DIR = path.join(process.cwd(), 'storage', 'uploads', 'products');
 
@@ -99,9 +100,9 @@ export async function POST(request, { params }) {
       }, { status: 400 });
     }
 
-    const timestamp = Date.now();
+    const fileId = crypto.randomUUID();
     const safeName = file.name ? file.name.replace(/[^a-zA-Z0-9.\-]/g, '_') : 'image.png';
-    const filename = `${timestamp}_${safeName}`;
+    const filename = `${fileId}_${safeName}`;
 
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
@@ -131,11 +132,12 @@ export async function POST(request, { params }) {
 
     return NextResponse.json({
       data: {
+        id: fileId,
         filename: filename,
         size: file.size,
         mimetype: file.type,
         productId: idNum,
-        url: `/api/v1/products/${id}/image?file=${filename}`
+        url: `/api/v1/products/${id}/image/${fileId}`
       },
       mensagens: ['Upload da imagem realizado com sucesso!']
     });
@@ -150,7 +152,7 @@ export async function POST(request, { params }) {
  * @swagger
  * /api/v1/products/{id}/image:
  *   get:
- *     summary: Lista as imagens PNG do produto ou realiza o download de uma específica
+ *     summary: Lista as imagens PNG do produto
  *     tags: [Products]
  *     security:
  *       - bearerAuth: []
@@ -160,17 +162,11 @@ export async function POST(request, { params }) {
  *         required: true
  *         schema:
  *           type: integer
- *       - in: query
- *         name: file
- *         required: false
- *         schema:
- *           type: string
- *         description: Nome do arquivo para download. Se omitido, retorna a lista de imagens do produto.
  *     responses:
  *       200:
- *         description: Lista de arquivos (se sem query `file`) ou o arquivo de imagem binário (se com query `file`)
+ *         description: Lista de imagens com seus respectivos IDs
  *       404:
- *         description: Imagem não encontrada
+ *         description: Produto não encontrado
  */
 export async function GET(request, { params }) {
   try {
@@ -178,66 +174,37 @@ export async function GET(request, { params }) {
     const idNum = parseInt(id, 10);
     const isVercel = !!process.env.VERCEL;
 
-    // Obter o nome do arquivo pela query string
-    const url = new URL(request.url);
-    const fileName = url.searchParams.get('file');
-
-    if (!fileName) {
-      // Retornar lista de imagens se não especificar o arquivo
-      let filesList = [];
-      if (isVercel) {
-        const { data, error } = await supabase.storage.from('products').list(id.toString());
-        if (data) {
-          filesList = data.filter(f => f.name.endsWith('.png')).map(f => ({
-            filename: f.name,
-            url: `/api/v1/products/${id}/image?file=${f.name}`
-          }));
-        }
-      } else {
-        const productDir = path.join(UPLOAD_DIR, id.toString());
-        if (existsSync(productDir)) {
-          const files = await fs.readdir(productDir);
-          filesList = files.filter(f => f.endsWith('.png')).map(f => ({
-            filename: f,
-            url: `/api/v1/products/${id}/image?file=${f}`
-          }));
-        }
-      }
-      return NextResponse.json({ data: filesList, mensagens: ['Lista de imagens recuperada com sucesso.'] });
-    }
-
-    // Se informou fileName, realiza o download
-    const safeFileName = path.basename(fileName); // Evitar path traversal
-    let fileBuffer;
-
+    let filesList = [];
     if (isVercel) {
-      const { data, error } = await supabase.storage
-        .from('products')
-        .download(`${idNum}/${safeFileName}`);
-
-      if (error || !data) {
-        return NextResponse.json({ data: null, mensagens: ['Imagem não encontrada para este produto.'] }, { status: 404 });
+      const { data, error } = await supabase.storage.from('products').list(id.toString());
+      if (data) {
+        filesList = data.filter(f => f.name.endsWith('.png')).map(f => {
+          const fileId = f.name.split('_')[0];
+          return {
+            id: fileId,
+            filename: f.name,
+            url: `/api/v1/products/${id}/image/${fileId}`
+          };
+        });
       }
-      fileBuffer = Buffer.from(await data.arrayBuffer());
     } else {
-      const filePath = path.join(UPLOAD_DIR, id.toString(), safeFileName);
-
-      if (!existsSync(filePath)) {
-        return NextResponse.json({ data: null, mensagens: ['Imagem não encontrada para este produto.'] }, { status: 404 });
+      const productDir = path.join(UPLOAD_DIR, id.toString());
+      if (existsSync(productDir)) {
+        const files = await fs.readdir(productDir);
+        filesList = files.filter(f => f.endsWith('.png')).map(f => {
+          const fileId = f.split('_')[0];
+          return {
+            id: fileId,
+            filename: f,
+            url: `/api/v1/products/${id}/image/${fileId}`
+          };
+        });
       }
-
-      fileBuffer = await fs.readFile(filePath);
     }
-
-    return new NextResponse(fileBuffer, {
-      headers: {
-        'Content-Type': 'image/png',
-        'Content-Disposition': `attachment; filename="${safeFileName}"`,
-      },
-    });
+    return NextResponse.json({ data: filesList, mensagens: ['Lista de imagens recuperada com sucesso.'] });
 
   } catch (error) {
-    console.error('Erro no download/listagem de imagem:', error);
-    return NextResponse.json({ data: null, mensagens: ['Erro ao buscar imagem.', error.message || String(error)] }, { status: 500 });
+    console.error('Erro na listagem de imagens:', error);
+    return NextResponse.json({ data: null, mensagens: ['Erro ao buscar imagens.', error.message || String(error)] }, { status: 500 });
   }
 }
