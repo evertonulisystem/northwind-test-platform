@@ -34,7 +34,10 @@ export default function CategoriesPage() {
         headers['Authorization'] = `Bearer ${token}`;
       }
       
-      const res = await fetch('/api/v1/categories?limit=100', { headers });
+      const res = await fetch('/api/v1/categories?limit=100', { 
+        headers,
+        cache: 'no-store'
+      });
       const result = await res.json();
       
       if (!res.ok) {
@@ -123,6 +126,7 @@ export default function CategoriesPage() {
 
       toast.success('Categoria cadastrada com sucesso!');
       fetchCategories();
+      setCurrentPage(1); // Volta para a primeira página para ver a nova categoria
       setShowAddModal(false);
       setFormData({
         name: '',
@@ -230,10 +234,12 @@ export default function CategoriesPage() {
   const ITEMS_PER_PAGE = 8;
   const [currentPage, setCurrentPage] = useState(1);
 
-  const filteredCategories = categories.filter(category =>
-    category.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    category.description?.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredCategories = categories.filter(category => {
+    const name = category.name?.toLowerCase() || '';
+    const description = category.description?.toLowerCase() || '';
+    const search = searchTerm.toLowerCase();
+    return name.includes(search) || description.includes(search);
+  });
 
   const totalPages = Math.ceil(filteredCategories.length / ITEMS_PER_PAGE);
   const paginatedCategories = filteredCategories.slice(

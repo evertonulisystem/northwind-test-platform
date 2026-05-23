@@ -120,16 +120,25 @@ export async function GET(request) {
     // Buscar total de categorias
     const { count, error: countError } = await supabase
       .from('categories')
-      .select('*', { count: 'exact', head: true });
+      .select('id', { count: 'exact', head: true });
 
     if (countError) throw countError;
 
-    // Buscar categorias com paginação
-    const { data, error } = await supabase
-      .from('categories')
-      .select('*')
-      .order('name', { ascending: true })
-      .range(offset, offset + limit - 1);
+    let data = [];
+    let error = null;
+
+    if (count > 0) {
+      // Buscar categorias com paginação
+      const query = supabase
+        .from('categories')
+        .select('*')
+        .order('name', { ascending: true });
+      
+      // Só aplica range se o count for maior que 0 para evitar erros de range
+      const { data: categoriesData, error: categoriesError } = await query.range(offset, offset + limit - 1);
+      data = categoriesData;
+      error = categoriesError;
+    }
 
     if (error) throw error;
 
@@ -154,8 +163,9 @@ export async function GET(request) {
       { status: 200 }
     );
   } catch (error) {
+    console.error('❌ Erro no GET categories:', error);
     return NextResponse.json(
-      { data: null, mensagens: ['Erro ao carregar categorias.'] },
+      { data: null, mensagens: ['Erro ao carregar categorias.', error.message] },
       { status: 500 }
     );
   }
