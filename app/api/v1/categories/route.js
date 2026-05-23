@@ -107,9 +107,9 @@ export async function GET(request) {
       );
     }
     
-    if (limit < 1 || limit > 100) {
+    if (limit < 1 || limit > 1000) {
       return NextResponse.json(
-        { data: null, mensagens: ['Limite deve estar entre 1 e 100.'] }, 
+        { data: null, mensagens: ['Limite deve estar entre 1 e 1000.'] }, 
         { status: 400 }
       );
     }

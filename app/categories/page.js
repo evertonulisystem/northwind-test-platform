@@ -34,7 +34,7 @@ export default function CategoriesPage() {
         headers['Authorization'] = `Bearer ${token}`;
       }
       
-      const res = await fetch('/api/v1/categories?limit=100', { 
+      const res = await fetch('/api/v1/categories?limit=1000', { 
         headers,
         cache: 'no-store'
       });

@@ -45,8 +45,8 @@ export default function EditProductModal({ product, onClose, onUpdate }) {
         }
 
         const [catRes, supRes] = await Promise.all([
-          fetch('/api/v1/categories?limit=100', { headers, cache: 'no-store' }),
-          fetch('/api/v1/suppliers?limit=100', { headers, cache: 'no-store' }),
+          fetch('/api/v1/categories?limit=1000', { headers, cache: 'no-store' }),
+          fetch('/api/v1/suppliers?limit=1000', { headers, cache: 'no-store' }),
         ]);
 
         const catData = await catRes.json();
