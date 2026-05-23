@@ -496,10 +496,17 @@ export async function POST(request) {
 
     if (error) throw error;
 
+    // Debug para o usuário verificar o projeto
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
+    const projectHost = supabaseUrl ? new URL(supabaseUrl).host : 'desconhecido';
+
     return NextResponse.json(
       { 
         data: newProduct, 
-        mensagens: ['Produto criado com sucesso!'] 
+        mensagens: [
+          'Produto criado com sucesso!',
+          `Verificado: Salvo no banco Supabase (${projectHost})`
+        ] 
       },
       { status: 201 }
     );
