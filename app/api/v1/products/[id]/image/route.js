@@ -87,8 +87,18 @@ export async function POST(request, { params }) {
     }
 
     // Validar tipo (PNG)
-    if (!file.type.includes('png') && !file.name.toLowerCase().endsWith('.png')) {
-      return NextResponse.json({ data: null, mensagens: ['Apenas arquivos PNG são permitidos para imagem do produto.'] }, { status: 400 });
+    const isPngType = file.type === 'image/png' || file.type === 'image/x-png';
+    const isPngExt = file.name.toLowerCase().endsWith('.png');
+
+    if (!isPngType || !isPngExt) {
+      return NextResponse.json({ 
+        data: null, 
+        mensagens: [
+          'Apenas arquivos PNG são permitidos para imagem do produto.',
+          `Recebido: nome="${file.name}", tipo="${file.type}".`,
+          'Certifique-se de que o arquivo tem a extensão .png e o tipo image/png.'
+        ] 
+      }, { status: 400 });
     }
 
     // Validar tamanho (2MB = 2 * 1024 * 1024 bytes)
