@@ -41,8 +41,8 @@ export default function AddProductModal({ onClose, onAdd, preselectedCategory = 
         }
 
         const [catRes, supRes] = await Promise.all([
-          fetch('/api/v1/categories', { headers, cache: 'no-store' }),
-          fetch('/api/v1/suppliers', { headers, cache: 'no-store' }),
+          fetch('/api/v1/categories?limit=100', { headers, cache: 'no-store' }),
+          fetch('/api/v1/suppliers?limit=100', { headers, cache: 'no-store' }),
         ]);
 
         const catData = await catRes.json();

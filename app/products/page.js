@@ -38,7 +38,7 @@ export default function ProductsPage() {
         headers['Authorization'] = `Bearer ${token}`;
       }
       
-      const res = await fetch('/api/v1/categories', { headers });
+      const res = await fetch('/api/v1/categories?limit=100', { headers });
       const result = await res.json();
       setCategories(result.data || []);
       console.log('🐛 DEBUG CATEGORIES - Carregadas:', result.data?.length || 0);
@@ -56,7 +56,7 @@ export default function ProductsPage() {
         headers['Authorization'] = `Bearer ${token}`;
       }
       
-      const res = await fetch('/api/v1/suppliers', { headers });
+      const res = await fetch('/api/v1/suppliers?limit=100', { headers });
       const result = await res.json();
       setSuppliers(result.data || []);
       console.log('🐛 DEBUG SUPPLIERS - Carregados:', result.data?.length || 0);

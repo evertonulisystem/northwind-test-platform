@@ -27,7 +27,7 @@ export default function UnlinkSupplierModal({ supplier, onClose, onSuccess }) {
       }
       
       // Buscar produtos vinculados ao fornecedor
-      const res = await fetch(`/api/v1/products?supplier_id=${supplier.id}`, { headers });
+      const res = await fetch(`/api/v1/products?supplier_id=${supplier.id}&limit=100`, { headers });
       const result = await res.json();
       
       if (!res.ok) {
