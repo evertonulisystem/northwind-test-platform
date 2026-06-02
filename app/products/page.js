@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import { useRouter } from 'next/navigation';
 import { toast } from 'react-toastify';
 import { useDebounce } from 'use-debounce';
 import AddProductModal from '@/components/AddProductModal.jsx';
@@ -11,6 +12,7 @@ import RulesModal from '@/components/RulesModal.jsx';
 import ConfirmModal from '@/components/ConfirmModal.jsx';
 
 export default function ProductsPage() {
+  const router = useRouter();
   const [products, setProducts] = useState([]);
   const [allProducts, setAllProducts] = useState([]);
   const [pagination, setPagination] = useState({ page: 1, totalPages: 1, total: 0 });
@@ -225,12 +227,11 @@ export default function ProductsPage() {
 
           <div className="flex justify-end gap-4 mb-6">
             <button 
-              disabled
-              title="Funcionalidade em manutenção"
-              className="bg-slate-700 opacity-50 cursor-not-allowed text-white px-6 py-3 rounded-xl transition font-semibold shadow-lg flex items-center gap-2 border border-slate-600"
+              onClick={() => router.push('/cart')}
+              className="bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-3 rounded-xl transition font-semibold shadow-lg flex items-center gap-2 border border-emerald-500/20"
             >
               <ShoppingBag className="w-5 h-5" />
-              Ver Carrinho (Manutenção)
+              Ver Carrinho
             </button>
 
             <button onClick={() => setShowAddModal(true)}
