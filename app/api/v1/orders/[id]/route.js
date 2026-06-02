@@ -24,7 +24,7 @@ import { requireAuth } from '@/lib/auth';
  */
 async function getOrderDetail(request, { params, user }) {
   try {
-    const { id } = params;
+    const { id } = await params;
 
     // 1. Buscar o pedido
     const { data: order, error: orderError } = await supabase

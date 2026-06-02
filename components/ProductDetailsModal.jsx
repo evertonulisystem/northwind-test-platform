@@ -1,7 +1,7 @@
 // app/components/ProductDetailsModal.jsx
 import { X, Search, ShoppingCart, Plus, Minus, Loader2 } from 'lucide-react';
 import { useState } from 'react';
-import toast from 'react-hot-toast';
+import { toast } from 'react-toastify';
 
 export default function ProductDetailsModal({ product, onClose }) {
   const [quantity, setQuantity] = useState(1);
@@ -72,11 +72,6 @@ export default function ProductDetailsModal({ product, onClose }) {
       if (res.ok) {
         toast.success(`${product.name} adicionado ao carrinho!`, {
           icon: '🛒',
-          style: {
-            borderRadius: '10px',
-            background: '#1e293b',
-            color: '#fff',
-          },
         });
         onClose();
       } else {

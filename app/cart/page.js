@@ -13,7 +13,7 @@ import {
   Loader2,
   Package
 } from 'lucide-react';
-import toast from 'react-hot-toast';
+import { toast } from 'react-toastify';
 
 export default function CartPage() {
   const [cartItems, setCartItems] = useState([]);
@@ -136,7 +136,7 @@ export default function CartPage() {
       const result = await res.json();
       if (res.ok) {
         toast.success('Pedido finalizado com sucesso!', {
-          duration: 5000,
+          autoClose: 5000,
           icon: '🎉',
         });
         setCartItems([]);

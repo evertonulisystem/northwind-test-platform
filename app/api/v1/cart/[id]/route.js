@@ -37,7 +37,7 @@ export const dynamic = "force-dynamic";
  */
 async function updateCartItem(request, { params, user }) {
   try {
-    const { id } = params;
+    const { id } = await params;
     const body = await request.json();
     const { quantity } = body;
 
@@ -119,7 +119,7 @@ async function updateCartItem(request, { params, user }) {
  */
 async function deleteCartItem(request, { params, user }) {
   try {
-    const { id } = params;
+    const { id } = await params;
 
     // Verificar se o item pertence ao usuário antes de deletar
     const { data: item, error: fetchError } = await supabase
