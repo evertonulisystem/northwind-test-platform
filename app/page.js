@@ -112,7 +112,7 @@ export default function LoginPage() {
               autoComplete="off"
             />
             {errors.email && (
-              <p className="mt-2 text-sm text-red-300 flex items-center gap-1">
+              <p data-testid="email-error" className="mt-2 text-sm text-red-300 flex items-center gap-1">
                 <span className="w-1 h-1 bg-red-300 rounded-full"></span>
                 {errors.email}
               </p>
@@ -136,7 +136,7 @@ export default function LoginPage() {
               autoComplete="new-password"
             />
             {errors.password && (
-              <p className="mt-2 text-sm text-red-300 flex items-center gap-1">
+              <p data-testid="password-error" className="mt-2 text-sm text-red-300 flex items-center gap-1">
                 <span className="w-1 h-1 bg-red-300 rounded-full"></span>
                 {errors.password}
               </p>

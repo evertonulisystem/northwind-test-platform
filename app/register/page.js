@@ -356,7 +356,7 @@ export default function RegisterPage() {
           </div>
 
           {/* Botão de Submit */}
-          <div>
+          <div className="flex flex-col gap-2">
             <button
               type="submit"
               disabled={!isFormValid() || loading}
@@ -378,6 +378,15 @@ export default function RegisterPage() {
               ) : (
                 'Cadastrar'
               )}
+            </button>
+
+            <button
+              type="button"
+              onClick={() => router.push('/')}
+              className="group relative w-full flex justify-center py-2 px-4 border border-white/30 text-sm font-medium rounded-md text-white bg-white/10 hover:bg-white/20 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 shadow-sm"
+              data-testid="back-button"
+            >
+              Voltar
             </button>
           </div>
         </form>
