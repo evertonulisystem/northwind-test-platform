@@ -1,0 +1,1065 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Especificações de Validação: API de Login | Azure DevOps Wiki Model</title>
+  <style>
+    :root {
+      --primary-color: #0078d4;
+      --primary-hover: #106ebe;
+      --bg-color: #f3f2f1;
+      --card-bg: #ffffff;
+      --text-color: #323130;
+      --text-secondary: #605e5c;
+      --border-color: #edebe9;
+      --table-header-bg: #f3f2f1;
+      --badge-success-bg: #dff6dd;
+      --badge-success-text: #107c41;
+      --badge-error-bg: #fde7e9;
+      --badge-error-text: #a80000;
+      --badge-warning-bg: #fff4ce;
+      --badge-warning-text: #794500;
+      --badge-info-bg: #deecf9;
+      --badge-info-text: #038387;
+      --code-bg: #faf9f8;
+      --code-text: #a19f9d;
+      --code-syntax-keyword: #0078d4;
+      --code-syntax-string: #107c41;
+      --code-syntax-number: #b4009e;
+      --transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    [data-theme="dark"] {
+      --bg-color: #11100f;
+      --card-bg: #201f1e;
+      --text-color: #f3f2f1;
+      --text-secondary: #c8c6c4;
+      --border-color: #3b3a39;
+      --table-header-bg: #292827;
+      --badge-success-bg: #104a1b;
+      --badge-success-text: #4df67b;
+      --badge-error-bg: #5f1118;
+      --badge-error-text: #fbb6bb;
+      --badge-warning-bg: #5a3e00;
+      --badge-warning-text: #ffd880;
+      --badge-info-bg: #00375a;
+      --badge-info-text: #80c6ff;
+      --code-bg: #1b1a19;
+      --code-text: #aeaaf8;
+    }
+
+    body {
+      font-family: "Segoe UI", -apple-system, BlinkMacSystemFont, Roboto, "Helvetica Neue", sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-color);
+      margin: 0;
+      padding: 0;
+      transition: var(--transition);
+      line-height: 1.5;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 30px 15px;
+    }
+
+    /* Azure DevOps Header Navigation */
+    .header {
+      background-color: var(--card-bg);
+      border-bottom: 1px solid var(--border-color);
+      padding: 20px 24px;
+      margin-bottom: 30px;
+      border-radius: 8px;
+      box-shadow: 0 1.6px 3.6px 0 rgba(0,0,0,0.1), 0 0.3px 0.9px 0 rgba(0,0,0,0.05);
+      position: relative;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 15px;
+    }
+
+    .header-info {
+      flex: 1;
+    }
+
+    .header-info h1 {
+      margin: 0 0 8px 0;
+      font-size: 24px;
+      font-weight: 600;
+      color: var(--text-color);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .header-info h1 .logo {
+      color: var(--primary-color);
+      font-weight: 800;
+    }
+
+    .header-info p {
+      margin: 0;
+      color: var(--text-secondary);
+      font-size: 14px;
+    }
+
+    .endpoint-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-family: monospace;
+      font-size: 14px;
+      background: var(--code-bg);
+      padding: 6px 12px;
+      border-radius: 4px;
+      border: 1px solid var(--border-color);
+      margin-top: 10px;
+    }
+
+    .method-post {
+      background-color: #107c41;
+      color: white;
+      padding: 2px 6px;
+      border-radius: 3px;
+      font-size: 11px;
+      font-weight: bold;
+    }
+
+    /* Theme Toggle */
+    .theme-toggle {
+      background: transparent;
+      border: 1px solid var(--border-color);
+      color: var(--text-color);
+      padding: 8px 16px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: var(--transition);
+    }
+
+    .theme-toggle:hover {
+      background-color: var(--border-color);
+    }
+
+    /* Controls Bar */
+    .controls-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+      gap: 15px;
+    }
+
+    .search-container {
+      position: relative;
+      flex: 1;
+      max-width: 400px;
+    }
+
+    .search-input {
+      width: 100%;
+      box-sizing: border-box;
+      padding: 10px 16px;
+      border: 1px solid var(--border-color);
+      background-color: var(--card-bg);
+      color: var(--text-color);
+      border-radius: 4px;
+      font-size: 14px;
+      outline: none;
+      transition: var(--transition);
+    }
+
+    .search-input:focus {
+      border-color: var(--primary-color);
+      box-shadow: 0 0 0 2px rgba(0, 120, 212, 0.2);
+    }
+
+    .stats {
+      font-size: 14px;
+      color: var(--text-secondary);
+    }
+
+    /* Badges */
+    .badge {
+      display: inline-block;
+      padding: 4px 8px;
+      font-size: 12px;
+      font-weight: 600;
+      border-radius: 4px;
+    }
+
+    .badge-success {
+      background-color: var(--badge-success-bg);
+      color: var(--badge-success-text);
+    }
+
+    .badge-error {
+      background-color: var(--badge-error-bg);
+      color: var(--badge-error-text);
+    }
+
+    .badge-warning {
+      background-color: var(--badge-warning-bg);
+      color: var(--badge-warning-text);
+    }
+
+    .badge-info {
+      background-color: var(--badge-info-bg);
+      color: var(--badge-info-text);
+    }
+
+    /* Summary Table Card */
+    .card {
+      background-color: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      box-shadow: 0 1.6px 3.6px 0 rgba(0,0,0,0.1), 0 0.3px 0.9px 0 rgba(0,0,0,0.05);
+      margin-bottom: 30px;
+      overflow: hidden;
+      transition: var(--transition);
+    }
+
+    .table-container {
+      width: 100%;
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: 14px;
+    }
+
+    th {
+      background-color: var(--table-header-bg);
+      color: var(--text-color);
+      font-weight: 600;
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    td {
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--border-color);
+      color: var(--text-color);
+    }
+
+    tr:last-child td {
+      border-bottom: none;
+    }
+
+    tr:hover td {
+      background-color: rgba(0, 120, 212, 0.03);
+    }
+
+    /* Accordion Section */
+    .section-title {
+      font-size: 20px;
+      font-weight: 600;
+      margin: 40px 0 20px 0;
+      color: var(--text-color);
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 8px;
+    }
+
+    .accordion-list {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+
+    .accordion-item {
+      background-color: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 1.2px 2.4px 0 rgba(0,0,0,0.08);
+      transition: var(--transition);
+    }
+
+    .accordion-item:hover {
+      box-shadow: 0 2px 8px 0 rgba(0,0,0,0.15);
+      border-color: var(--primary-color);
+    }
+
+    .accordion-header {
+      padding: 16px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
+      user-select: none;
+      background-color: var(--card-bg);
+    }
+
+    .accordion-header h3 {
+      margin: 0;
+      font-size: 15px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .accordion-header .status-info {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .accordion-content {
+      padding: 0 20px;
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.25s ease-out, padding 0.25s ease-out;
+      border-top: 0 solid var(--border-color);
+    }
+
+    .accordion-item.active .accordion-content {
+      padding: 20px;
+      max-height: 1000px;
+      border-top: 1px solid var(--border-color);
+    }
+
+    .arrow-icon {
+      width: 16px;
+      height: 16px;
+      fill: currentColor;
+      transition: transform 0.2s ease;
+    }
+
+    .accordion-item.active .arrow-icon {
+      transform: rotate(180deg);
+    }
+
+    /* BDD Block UI */
+    .bdd-container {
+      margin-top: 10px;
+      position: relative;
+    }
+
+    .bdd-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background-color: var(--table-header-bg);
+      padding: 8px 16px;
+      border-top-left-radius: 6px;
+      border-top-right-radius: 6px;
+      border: 1px solid var(--border-color);
+      border-bottom: none;
+    }
+
+    .bdd-header span {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .copy-btn {
+      background-color: var(--card-bg);
+      border: 1px solid var(--border-color);
+      color: var(--text-color);
+      padding: 4px 8px;
+      font-size: 12px;
+      border-radius: 4px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      transition: var(--transition);
+    }
+
+    .copy-btn:hover {
+      background-color: var(--border-color);
+      border-color: var(--text-secondary);
+    }
+
+    .bdd-code {
+      margin: 0;
+      background-color: var(--code-bg);
+      padding: 16px;
+      border-bottom-left-radius: 6px;
+      border-bottom-right-radius: 6px;
+      border: 1px solid var(--border-color);
+      overflow-x: auto;
+      font-family: Consolas, Monaco, "Courier New", Courier, monospace;
+      font-size: 13.5px;
+      color: var(--text-color);
+      white-space: pre-wrap;
+    }
+
+    /* Syntax Highlighting */
+    .keyword { color: #0078d4; font-weight: bold; }
+    .scenario-title { color: #005a9e; font-weight: bold; }
+    .step { color: #a19f9d; }
+    .step-name { color: var(--text-color); }
+    .string { color: #107c41; }
+    .number { color: #b4009e; }
+
+    /* Code Excerpt style */
+    .code-excerpt-container {
+      margin-top: 15px;
+    }
+    
+    .code-excerpt-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      margin-bottom: 6px;
+    }
+
+    .code-excerpt {
+      margin: 0;
+      background-color: var(--code-bg);
+      border: 1px dashed var(--border-color);
+      border-radius: 6px;
+      padding: 12px;
+      font-family: Consolas, Monaco, monospace;
+      font-size: 12px;
+      overflow-x: auto;
+      color: var(--text-color);
+    }
+
+    .toast {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background-color: #323130;
+      color: #f3f2f1;
+      padding: 10px 18px;
+      border-radius: 4px;
+      font-size: 13px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      z-index: 9999;
+      transform: translateY(100px);
+      opacity: 0;
+      transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    .toast.show {
+      transform: translateY(0);
+      opacity: 1;
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+      .header {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      
+      .controls-bar {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .search-container {
+        max-width: 100%;
+      }
+      
+      .accordion-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+      }
+
+      .accordion-header .status-info {
+        align-self: flex-end;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <!-- Header Card -->
+  <div class="header">
+    <div class="header-info">
+      <h1><span class="logo">Azure DevOps</span> | Wiki de Especificações</h1>
+      <p>Mapeamento das Regras de Validação e Critérios de Aceite no formato BDD da API de Autenticação (Login).</p>
+      <div class="endpoint-badge">
+        <span class="method-post">POST</span>
+        <span>/api/v1/auth/login</span>
+      </div>
+    </div>
+    <button class="theme-toggle" id="theme-toggle">
+      <svg style="width: 16px; height: 16px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+      </svg>
+      Tema Escuro
+    </button>
+  </div>
+
+  <!-- Controls -->
+  <div class="controls-bar">
+    <div class="search-container">
+      <input type="text" class="search-input" id="search-input" placeholder="Buscar cenários ou mensagens...">
+    </div>
+    <div class="stats" id="stats-label">
+      Exibindo 8 de 8 especificações.
+    </div>
+  </div>
+
+  <!-- Summary Table -->
+  <div class="card">
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th>Código</th>
+            <th>Cenário de Teste</th>
+            <th>Status HTTP</th>
+            <th>Campos Alvo</th>
+            <th>Mensagem Explicativa de Erro/Sucesso</th>
+          </tr>
+        </thead>
+        <tbody id="table-body">
+          <tr onclick="openAccordion('CEN-L01')">
+            <td><strong>CEN-L01</strong></td>
+            <td>Campos obrigatórios vazios</td>
+            <td><span class="badge badge-error">400 Bad Request</span></td>
+            <td><code>email</code>, <code>password</code></td>
+            <td>"Email e senha são obrigatórios"</td>
+          </tr>
+          <tr onclick="openAccordion('CEN-L02')">
+            <td><strong>CEN-L02</strong></td>
+            <td>Formato de email inválido</td>
+            <td><span class="badge badge-error">400 Bad Request</span></td>
+            <td><code>email</code></td>
+            <td>"Formato de email inválido. Use: nome@dominio.com"</td>
+          </tr>
+          <tr onclick="openAccordion('CEN-L03')">
+            <td><strong>CEN-L03</strong></td>
+            <td>Senha curta (&lt; 6 caracteres)</td>
+            <td><span class="badge badge-error">400 Bad Request</span></td>
+            <td><code>password</code></td>
+            <td>"Senha deve ter pelo menos 6 caracteres"</td>
+          </tr>
+          <tr onclick="openAccordion('CEN-L04')">
+            <td><strong>CEN-L04</strong></td>
+            <td>Usuário não cadastrado</td>
+            <td><span class="badge badge-error">404 Not Found</span></td>
+            <td><code>email</code></td>
+            <td>"Usuário não encontrado. Verifique o email ou cadastre-se."</td>
+          </tr>
+          <tr onclick="openAccordion('CEN-L05')">
+            <td><strong>CEN-L05</strong></td>
+            <td>Conta de usuário inativa</td>
+            <td><span class="badge badge-warning">403 Forbidden</span></td>
+            <td><code>is_active</code></td>
+            <td>"Usuário inativo"</td>
+          </tr>
+          <tr onclick="openAccordion('CEN-L06')">
+            <td><strong>CEN-L06</strong></td>
+            <td>Credenciais inválidas / Senha incorreta</td>
+            <td><span class="badge badge-error">401 Unauthorized</span></td>
+            <td><code>password</code></td>
+            <td>"Email ou senha inválidos"</td>
+          </tr>
+          <tr onclick="openAccordion('CEN-L07')">
+            <td><strong>CEN-L07</strong></td>
+            <td>Login realizado com sucesso</td>
+            <td><span class="badge badge-success">200 OK</span></td>
+            <td>Nenhum (Tudo ok)</td>
+            <td>"Login realizado com sucesso"</td>
+          </tr>
+          <tr onclick="openAccordion('CEN-L08')">
+            <td><strong>CEN-L08</strong></td>
+            <td>Erro interno do servidor</td>
+            <td><span class="badge badge-error">500 Internal Error</span></td>
+            <td>N/A</td>
+            <td>"Erro interno do servidor"</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- BDD Details Section -->
+  <div class="section-title">Critérios de Aceite em Formato BDD</div>
+  
+  <div class="accordion-list" id="accordion-list">
+    
+    <!-- CEN-L01 -->
+    <div class="accordion-item" id="CEN-L01" data-search="campos obrigatorios vazios email senha sao obrigatorios 400">
+      <div class="accordion-header" onclick="toggleAccordion('CEN-L01')">
+        <h3>CEN-L01: Campos Obrigatórios Vazios</h3>
+        <div class="status-info">
+          <span class="badge badge-error">400 Bad Request</span>
+          <svg class="arrow-icon" viewBox="0 0 24 24"><path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"/></svg>
+        </div>
+      </div>
+      <div class="accordion-content">
+        <div class="bdd-container">
+          <div class="bdd-header">
+            <span>Gherkin (BDD)</span>
+            <button class="copy-btn" onclick="copyBDD('bdd-code-l01', event)">
+              <svg style="width: 12px; height: 12px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+              Copiar BDD
+            </button>
+          </div>
+          <pre class="bdd-code" id="bdd-code-l01"><span class="keyword">Funcionalidade:</span> Validação da API de Login
+
+  <span class="scenario-title">Cenário: Tentativa de login sem fornecer email ou senha</span>
+    <span class="keyword">Dado que</span> o cliente envia uma requisição POST para a API de login
+    <span class="keyword">Quando</span> o corpo da requisição for vazio
+    <span class="keyword">Ou</span> omitir o campo <span class="string">"email"</span>
+    <span class="keyword">Ou</span> omitir o campo <span class="string">"password"</span>
+    <span class="keyword">Então</span> a API deve responder com o código de status HTTP <span class="number">400</span> Bad Request
+    <span class="keyword">E</span> o corpo da resposta deve conter na lista de mensagens: <span class="string">"Email e senha são obrigatórios"</span></pre>
+        </div>
+        
+        <div class="code-excerpt-container">
+          <div class="code-excerpt-title">Trecho do Código na API:</div>
+          <pre class="code-excerpt">if (!email || !password) {
+  return Response.json(
+    { data: null, mensagens: ['Email e senha são obrigatórios'] },
+    { status: 400 }
+  );
+}</pre>
+        </div>
+      </div>
+    </div>
+
+    <!-- CEN-L02 -->
+    <div class="accordion-item" id="CEN-L02" data-search="formato email invalido nome dominio com 400">
+      <div class="accordion-header" onclick="toggleAccordion('CEN-L02')">
+        <h3>CEN-L02: Formato de Email Inválido</h3>
+        <div class="status-info">
+          <span class="badge badge-error">400 Bad Request</span>
+          <svg class="arrow-icon" viewBox="0 0 24 24"><path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"/></svg>
+        </div>
+      </div>
+      <div class="accordion-content">
+        <div class="bdd-container">
+          <div class="bdd-header">
+            <span>Gherkin (BDD)</span>
+            <button class="copy-btn" onclick="copyBDD('bdd-code-l02', event)">
+              <svg style="width: 12px; height: 12px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+              Copiar BDD
+            </button>
+          </div>
+          <pre class="bdd-code" id="bdd-code-l02"><span class="keyword">Funcionalidade:</span> Validação da API de Login
+
+  <span class="scenario-title">Cenário: Tentativa de login com email em formato incorreto</span>
+    <span class="keyword">Dado que</span> o cliente envia uma requisição POST para a API de login
+    <span class="keyword">Quando</span> o campo <span class="string">"email"</span> for fornecido com formato inválido (ex: <span class="string">"joaosilva"</span> ou <span class="string">"joao@silva"</span>)
+    <span class="keyword">E</span> a senha for informada
+    <span class="keyword">Então</span> a API deve responder com o código de status HTTP <span class="number">400</span> Bad Request
+    <span class="keyword">E</span> o corpo da resposta deve conter na lista de mensagens: <span class="string">"Formato de email inválido. Use: nome@dominio.com"</span></pre>
+        </div>
+        
+        <div class="code-excerpt-container">
+          <div class="code-excerpt-title">Trecho do Código na API:</div>
+          <pre class="code-excerpt">const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+if (!emailRegex.test(email.trim())) {
+  return Response.json(
+    { data: null, mensagens: ['Formato de email inválido. Use: nome@dominio.com'] },
+    { status: 400 }
+  );
+}</pre>
+        </div>
+      </div>
+    </div>
+
+    <!-- CEN-L03 -->
+    <div class="accordion-item" id="CEN-L03" data-search="senha curta pelo menos 6 caracteres 400">
+      <div class="accordion-header" onclick="toggleAccordion('CEN-L03')">
+        <h3>CEN-L03: Senha Curta (&lt; 6 caracteres)</h3>
+        <div class="status-info">
+          <span class="badge badge-error">400 Bad Request</span>
+          <svg class="arrow-icon" viewBox="0 0 24 24"><path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"/></svg>
+        </div>
+      </div>
+      <div class="accordion-content">
+        <div class="bdd-container">
+          <div class="bdd-header">
+            <span>Gherkin (BDD)</span>
+            <button class="copy-btn" onclick="copyBDD('bdd-code-l03', event)">
+              <svg style="width: 12px; height: 12px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+              Copiar BDD
+            </button>
+          </div>
+          <pre class="bdd-code" id="bdd-code-l03"><span class="keyword">Funcionalidade:</span> Validação da API de Login
+
+  <span class="scenario-title">Cenário: Tentativa de login com senha de comprimento menor do que o mínimo permitido</span>
+    <span class="keyword">Dado que</span> o cliente envia uma requisição POST para a API de login
+    <span class="keyword">Quando</span> o campo <span class="string">"email"</span> for fornecido em formato válido
+    <span class="keyword">E</span> o campo <span class="string">"password"</span> contiver menos de <span class="number">6</span> caracteres (ex: <span class="string">"12345"</span>)
+    <span class="keyword">Então</span> a API deve responder com o código de status HTTP <span class="number">400</span> Bad Request
+    <span class="keyword">E</span> o corpo da resposta deve conter na lista de mensagens: <span class="string">"Senha deve ter pelo menos 6 caracteres"</span></pre>
+        </div>
+        
+        <div class="code-excerpt-container">
+          <div class="code-excerpt-title">Trecho do Código na API:</div>
+          <pre class="code-excerpt">if (password.length &lt; 6) {
+  return Response.json(
+    { data: null, mensagens: ['Senha deve ter pelo menos 6 caracteres'] },
+    { status: 400 }
+  );
+}</pre>
+        </div>
+      </div>
+    </div>
+
+    <!-- CEN-L04 -->
+    <div class="accordion-item" id="CEN-L04" data-search="usuario nao cadastrado encontado cadastre se 404">
+      <div class="accordion-header" onclick="toggleAccordion('CEN-L04')">
+        <h3>CEN-L04: Usuário Não Cadastrado</h3>
+        <div class="status-info">
+          <span class="badge badge-error">404 Not Found</span>
+          <svg class="arrow-icon" viewBox="0 0 24 24"><path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"/></svg>
+        </div>
+      </div>
+      <div class="accordion-content">
+        <div class="bdd-container">
+          <div class="bdd-header">
+            <span>Gherkin (BDD)</span>
+            <button class="copy-btn" onclick="copyBDD('bdd-code-l04', event)">
+              <svg style="width: 12px; height: 12px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+              Copiar BDD
+            </button>
+          </div>
+          <pre class="bdd-code" id="bdd-code-l04"><span class="keyword">Funcionalidade:</span> Validação da API de Login
+
+  <span class="scenario-title">Cenário: Tentativa de login com e-mail não registrado no sistema</span>
+    <span class="keyword">Dado que</span> o cliente envia uma requisição POST para a API de login
+    <span class="keyword">Quando</span> o email <span class="string">"naoexiste@exemplo.com"</span> não estiver cadastrado no banco de dados
+    <span class="keyword">E</span> a senha for informada
+    <span class="keyword">Então</span> a API deve responder com o código de status HTTP <span class="number">404</span> Not Found
+    <span class="keyword">E</span> o corpo da resposta deve conter na lista de mensagens: <span class="string">"Usuário não encontrado. Verifique o email ou cadastre-se."</span></pre>
+        </div>
+        
+        <div class="code-excerpt-container">
+          <div class="code-excerpt-title">Trecho do Código na API:</div>
+          <pre class="code-excerpt">const { data: user, error } = await supabase
+  .from('users')
+  .select('id, email, password_hash, full_name, role, is_active')
+  .eq('email', email)
+  .single();
+
+if (error || !user) {
+  return Response.json(
+    { data: null, mensagens: ['Usuário não encontrado. Verifique o email ou cadastre-se.'] },
+    { status: 404 }
+  );
+}</pre>
+        </div>
+      </div>
+    </div>
+
+    <!-- CEN-L05 -->
+    <div class="accordion-item" id="CEN-L05" data-search="conta de usuario inativa inativo 403">
+      <div class="accordion-header" onclick="toggleAccordion('CEN-L05')">
+        <h3>CEN-L05: Conta de Usuário Inativa</h3>
+        <div class="status-info">
+          <span class="badge badge-warning">403 Forbidden</span>
+          <svg class="arrow-icon" viewBox="0 0 24 24"><path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"/></svg>
+        </div>
+      </div>
+      <div class="accordion-content">
+        <div class="bdd-container">
+          <div class="bdd-header">
+            <span>Gherkin (BDD)</span>
+            <button class="copy-btn" onclick="copyBDD('bdd-code-l05', event)">
+              <svg style="width: 12px; height: 12px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+              Copiar BDD
+            </button>
+          </div>
+          <pre class="bdd-code" id="bdd-code-l05"><span class="keyword">Funcionalidade:</span> Validação da API de Login
+
+  <span class="scenario-title">Cenário: Tentativa de login por um usuário que possui a conta desativada</span>
+    <span class="keyword">Dado que</span> existe um usuário cadastrado com e-mail <span class="string">"inativo@qatest.com"</span>
+    <span class="keyword">E</span> a conta desse usuário possui a flag <span class="keyword">"is_active"</span> definida como <span class="keyword">false</span>
+    <span class="keyword">Quando</span> o usuário envia uma requisição POST de login com a senha correta
+    <span class="keyword">Então</span> a API deve responder com o código de status HTTP <span class="number">403</span> Forbidden
+    <span class="keyword">E</span> o corpo da resposta deve conter na lista de mensagens: <span class="string">"Usuário inativo"</span></pre>
+        </div>
+        
+        <div class="code-excerpt-container">
+          <div class="code-excerpt-title">Trecho do Código na API:</div>
+          <pre class="code-excerpt">if (!user.is_active) {
+  return Response.json(
+    { data: null, mensagens: ['Usuário inativo'] },
+    { status: 403 }
+  );
+}</pre>
+        </div>
+      </div>
+    </div>
+
+    <!-- CEN-L06 -->
+    <div class="accordion-item" id="CEN-L06" data-search="credenciais invalidas senha incorreta email ou senha invalidos 401">
+      <div class="accordion-header" onclick="toggleAccordion('CEN-L06')">
+        <h3>CEN-L06: Credenciais Inválidas / Senha Incorreta</h3>
+        <div class="status-info">
+          <span class="badge badge-error">401 Unauthorized</span>
+          <svg class="arrow-icon" viewBox="0 0 24 24"><path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"/></svg>
+        </div>
+      </div>
+      <div class="accordion-content">
+        <div class="bdd-container">
+          <div class="bdd-header">
+            <span>Gherkin (BDD)</span>
+            <button class="copy-btn" onclick="copyBDD('bdd-code-l06', event)">
+              <svg style="width: 12px; height: 12px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+              Copiar BDD
+            </button>
+          </div>
+          <pre class="bdd-code" id="bdd-code-l06"><span class="keyword">Funcionalidade:</span> Validação da API de Login
+
+  <span class="scenario-title">Cenário: Tentativa de login com senha incorreta para e-mail cadastrado</span>
+    <span class="keyword">Dado que</span> existe um usuário cadastrado com e-mail <span class="string">"admin@qatest.com"</span>
+    <span class="keyword">Quando</span> o cliente envia uma requisição POST de login informando este e-mail
+    <span class="keyword">E</span> preenche a senha com um valor incorreto
+    <span class="keyword">Então</span> a API deve responder com o código de status HTTP <span class="number">401</span> Unauthorized
+    <span class="keyword">E</span> o corpo da resposta deve conter na lista de mensagens: <span class="string">"Email ou senha inválidos"</span></pre>
+        </div>
+        
+        <div class="code-excerpt-container">
+          <div class="code-excerpt-title">Trecho do Código na API:</div>
+          <pre class="code-excerpt">const validPassword = await bcrypt.compare(password, user.password_hash);
+if (!validPassword) {
+  return Response.json(
+    { data: null, mensagens: ['Email ou senha inválidos'] },
+    { status: 401 }
+  );
+}</pre>
+        </div>
+      </div>
+    </div>
+
+    <!-- CEN-L07 -->
+    <div class="accordion-item" id="CEN-L07" data-search="login realizado com sucesso 200 ok">
+      <div class="accordion-header" onclick="toggleAccordion('CEN-L07')">
+        <h3>CEN-L07: Login Realizado com Sucesso</h3>
+        <div class="status-info">
+          <span class="badge badge-success">200 OK</span>
+          <svg class="arrow-icon" viewBox="0 0 24 24"><path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"/></svg>
+        </div>
+      </div>
+      <div class="accordion-content">
+        <div class="bdd-container">
+          <div class="bdd-header">
+            <span>Gherkin (BDD)</span>
+            <button class="copy-btn" onclick="copyBDD('bdd-code-l07', event)">
+              <svg style="width: 12px; height: 12px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+              Copiar BDD
+            </button>
+          </div>
+          <pre class="bdd-code" id="bdd-code-l07"><span class="keyword">Funcionalidade:</span> Validação da API de Login
+
+  <span class="scenario-title">Cenário: Autenticação de usuário com dados corretos e conta ativa</span>
+    <span class="keyword">Dado que</span> o usuário está ativo e com cadastro válido no sistema (ex: <span class="string">"admin@qatest.com"</span> / <span class="string">"Teste@123"</span>)
+    <span class="keyword">Quando</span> o cliente envia uma requisição POST com as credenciais corretas
+    <span class="keyword">Então</span> a API deve responder com o código de status HTTP <span class="number">200</span> OK
+    <span class="keyword">E</span> o corpo da resposta deve conter o token JWT na chave <span class="keyword">"data.token"</span>
+    <span class="keyword">E</span> a mensagem de retorno na chave <span class="keyword">"mensagens"</span> deve ser: <span class="string">"Login realizado com sucesso"</span></pre>
+        </div>
+        
+        <div class="code-excerpt-container">
+          <div class="code-excerpt-title">Trecho do Código na API:</div>
+          <pre class="code-excerpt">return Response.json({
+  data: {
+    token,
+    user: { id: user.id, email: user.email, full_name: user.full_name, role: user.role }
+  },
+  mensagens: 'Login realizado com sucesso'
+}, { status: 200 });</pre>
+        </div>
+      </div>
+    </div>
+
+    <!-- CEN-L08 -->
+    <div class="accordion-item" id="CEN-L08" data-search="erro interno do servidor exception 500">
+      <div class="accordion-header" onclick="toggleAccordion('CEN-L08')">
+        <h3>CEN-L08: Erro Interno do Servidor</h3>
+        <div class="status-info">
+          <span class="badge badge-error">500 Internal Error</span>
+          <svg class="arrow-icon" viewBox="0 0 24 24"><path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"/></svg>
+        </div>
+      </div>
+      <div class="accordion-content">
+        <div class="bdd-container">
+          <div class="bdd-header">
+            <span>Gherkin (BDD)</span>
+            <button class="copy-btn" onclick="copyBDD('bdd-code-l08', event)">
+              <svg style="width: 12px; height: 12px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+              Copiar BDD
+            </button>
+          </div>
+          <pre class="bdd-code" id="bdd-code-l08"><span class="keyword">Funcionalidade:</span> Validação da API de Login
+
+  <span class="scenario-title">Cenário: Falha crítica ou erro inesperado no backend da API</span>
+    <span class="keyword">Dado que</span> ocorre um erro crítico imprevisto no servidor de aplicação
+    <span class="keyword">Quando</span> uma requisição POST de login for enviada
+    <span class="keyword">Então</span> a API deve responder com o código de status HTTP <span class="number">500</span> Internal Server Error
+    <span class="keyword">E</span> o corpo da resposta deve conter na lista de mensagens: <span class="string">"Erro interno do servidor"</span></pre>
+        </div>
+        
+        <div class="code-excerpt-container">
+          <div class="code-excerpt-title">Trecho do Código na API:</div>
+          <pre class="code-excerpt">} catch (error) {
+  console.error('Erro no login:', error);
+  return Response.json(
+    { data: null, mensagens: ['Erro interno do servidor'] },
+    { status: 500 }
+  );
+}</pre>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="toast" id="toast">BDD copiado para a área de transferência!</div>
+
+<script>
+  // Accordion Logic
+  function toggleAccordion(id) {
+    const item = document.getElementById(id);
+    const isActive = item.classList.contains('active');
+    
+    // Close other items
+    document.querySelectorAll('.accordion-item').forEach(el => {
+      el.classList.remove('active');
+    });
+
+    if (!isActive) {
+      item.classList.add('active');
+    }
+  }
+
+  function openAccordion(id) {
+    const item = document.getElementById(id);
+    toggleAccordion(id);
+    // Smooth scroll to accordion item
+    setTimeout(() => {
+      item.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }, 100);
+  }
+
+  // Copy to Clipboard
+  function copyBDD(codeId, event) {
+    event.stopPropagation();
+    const codeElement = document.getElementById(codeId);
+    
+    // Create element to extract text content without tags
+    const tempText = codeElement.textContent;
+    
+    navigator.clipboard.writeText(tempText).then(() => {
+      showToast();
+    }).catch(err => {
+      console.error('Erro ao copiar: ', err);
+    });
+  }
+
+  function showToast() {
+    const toast = document.getElementById('toast');
+    toast.classList.add('show');
+    setTimeout(() => {
+      toast.classList.remove('show');
+    }, 2500);
+  }
+
+  // Filter Search
+  const searchInput = document.getElementById('search-input');
+  const tableRows = document.querySelectorAll('#table-body tr');
+  const accordionItems = document.querySelectorAll('.accordion-item');
+  const statsLabel = document.getElementById('stats-label');
+
+  searchInput.addEventListener('input', function() {
+    const query = this.value.toLowerCase().trim();
+    let visibleCount = 0;
+
+    tableRows.forEach(row => {
+      const text = row.textContent.toLowerCase();
+      if (text.includes(query)) {
+        row.style.display = '';
+        visibleCount++;
+      } else {
+        row.style.display = 'none';
+      }
+    });
+
+    accordionItems.forEach(item => {
+      const searchData = item.getAttribute('data-search').toLowerCase();
+      const title = item.querySelector('h3').textContent.toLowerCase();
+      if (searchData.includes(query) || title.includes(query)) {
+        item.style.display = '';
+      } else {
+        item.style.display = 'none';
+      }
+    });
+
+    statsLabel.textContent = `Exibindo ${visibleCount} de ${tableRows.length} especificações.`;
+  });
+
+  // Dark/Light Theme Toggle
+  const themeToggle = document.getElementById('theme-toggle');
+  let currentTheme = localStorage.getItem('theme') || 'light';
+
+  if (currentTheme === 'dark') {
+    document.documentElement.setAttribute('data-theme', 'dark');
+    themeToggle.innerHTML = `
+      <svg style="width: 16px; height: 16px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="12" cy="12" r="5"></circle>
+        <line x1="12" y1="1" x2="12" y2="3"></line>
+        <line x1="12" y1="21" x2="12" y2="23"></line>
+        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+        <line x1="1" y1="12" x2="3" y2="12"></line>
+        <line x1="21" y1="12" x2="23" y2="12"></line>
+        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+      </svg>
+      Tema Claro
+    `;
+  }
+
+  themeToggle.addEventListener('click', () => {
+    let theme = document.documentElement.getAttribute('data-theme');
+    if (theme === 'dark') {
+      document.documentElement.setAttribute('data-theme', 'light');
+      localStorage.setItem('theme', 'light');
+      themeToggle.innerHTML = `
+        <svg style="width: 16px; height: 16px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+        </svg>
+        Tema Escuro
+      `;
+    } else {
+      document.documentElement.setAttribute('data-theme', 'dark');
+      localStorage.setItem('theme', 'dark');
+      themeToggle.innerHTML = `
+        <svg style="width: 16px; height: 16px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="5"></circle>
+          <line x1="12" y1="1" x2="12" y2="3"></line>
+          <line x1="12" y1="21" x2="12" y2="23"></line>
+          <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+          <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+          <line x1="1" y1="12" x2="3" y2="12"></line>
+          <line x1="21" y1="12" x2="23" y2="12"></line>
+          <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+          <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+        </svg>
+        Tema Claro
+      `;
+    }
+  });
+</script>
+</body>
+</html>

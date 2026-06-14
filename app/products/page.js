@@ -219,6 +219,7 @@ export default function ProductsPage() {
             <h1 className="text-5xl font-extrabold text-white mb-3">QA Automation Shop</h1>
             <p className="text-xl text-pink-100 mb-4">Lista de Produtos (Admin View)</p>
             <button onClick={() => setShowRules(true)}
+              data-testid="show-rules-button"
               className="bg-yellow-500 hover:bg-yellow-600 text-purple-900 font-bold px-6 py-3 rounded-xl shadow-lg flex items-center gap-2 mx-auto transition transform hover:scale-105">
               <AlertTriangle className="w-6 h-6" />
               Regras do Playground
@@ -228,6 +229,7 @@ export default function ProductsPage() {
           <div className="flex justify-end gap-4 mb-6">
             <button 
               onClick={() => router.push('/cart')}
+              data-testid="view-cart-button"
               className="bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-3 rounded-xl transition font-semibold shadow-lg flex items-center gap-2 border border-emerald-500/20"
             >
               <ShoppingBag className="w-5 h-5" />
@@ -235,6 +237,7 @@ export default function ProductsPage() {
             </button>
 
             <button onClick={() => setShowAddModal(true)}
+              data-testid="add-product-button"
               className="bg-green-600 text-white px-6 py-3 rounded-xl hover:bg-green-700 transition font-semibold shadow-lg flex items-center gap-2">
               <Plus className="w-5 h-5" />
               Adicionar Produto
@@ -242,6 +245,7 @@ export default function ProductsPage() {
 
             <button
               onClick={() => window.open('/categories', '_blank')}
+              data-testid="new-category-button"
               className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-xl transition font-semibold shadow-lg flex items-center gap-2"
               title="Cadastrar nova categoria"
             >
@@ -251,6 +255,7 @@ export default function ProductsPage() {
 
             <button
               onClick={() => window.open('/suppliers', '_blank')}
+              data-testid="new-supplier-button"
               className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-xl transition font-semibold shadow-lg flex items-center gap-2"
               title="Cadastrar novo fornecedor"
             >
@@ -272,6 +277,7 @@ export default function ProductsPage() {
                     value={searchName}
                     onChange={(e) => setSearchName(e.target.value)}
                     placeholder="Digite o nome do produto..."
+                    data-testid="product-search-input"
                     className="w-full pl-11 pr-4 py-3 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-purple-500"
                   />
                 </div>
@@ -283,6 +289,7 @@ export default function ProductsPage() {
                   <select
                     value={selectedCategory}
                     onChange={(e) => setSelectedCategory(e.target.value || '')}
+                    data-testid="category-filter-select"
                     className="w-full px-4 py-3 bg-slate-700 border border-slate-600 rounded-lg text-white appearance-none cursor-pointer focus:outline-none focus:ring-2 focus:ring-purple-500 pr-10"
                   >
                     <option value="">Todas as categorias</option>
@@ -300,6 +307,7 @@ export default function ProductsPage() {
                   <select
                     value={selectedSupplier}
                     onChange={(e) => setSelectedSupplier(e.target.value || '')}
+                    data-testid="supplier-filter-select"
                     className="w-full px-4 py-3 bg-slate-700 border border-slate-600 rounded-lg text-white appearance-none cursor-pointer focus:outline-none focus:ring-2 focus:ring-purple-500 pr-10"
                   >
                     <option value="">Todos os fornecedores</option>
@@ -314,6 +322,7 @@ export default function ProductsPage() {
               {/* LIMPAR */}
               {hasFilters && (
                 <button onClick={clearFilters}
+                  data-testid="clear-filters-button"
                   className="px-6 py-3 bg-red-600 hover:bg-red-700 text-white rounded-lg transition flex items-center gap-2">
                   <X className="w-5 h-5" />
                   Limpar filtros
@@ -325,12 +334,13 @@ export default function ProductsPage() {
           {/* TABELA */}
           <div className="relative bg-slate-800/90 backdrop-blur-md rounded-2xl shadow-2xl border border-slate-700 overflow-hidden">
             {loading ? (
-              <div className="p-12 text-center text-slate-400">Carregando produtos...</div>
+              <div className="p-12 text-center text-slate-400" data-testid="loading-products">Carregando produtos...</div>
             ) : products.length === 0 ? (
-              <div className="p-12 text-center text-slate-400">
+              <div className="p-12 text-center text-slate-400" data-testid="no-products-container">
                 <p className="text-xl mb-6">Nenhum produto encontrado.</p>
                 <button 
                   onClick={() => setShowAddModal(true)}
+                  data-testid="add-first-product-button"
                   className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-8 py-4 rounded-xl font-semibold shadow-lg transition transform hover:scale-105 flex items-center gap-3 mx-auto"
                 >
                   <Plus className="w-6 h-6" />
@@ -345,7 +355,7 @@ export default function ProductsPage() {
             ) : (
               <>
                 <div className="overflow-x-auto">
-                  <table className="w-full text-left">
+                  <table className="w-full text-left" data-testid="products-table">
                     <thead className="bg-slate-700/50 border-b border-slate-600">
                       <tr>
                         <th className="px-4 py-3 text-slate-200 font-semibold text-sm">ID</th>
@@ -358,26 +368,29 @@ export default function ProductsPage() {
                     </thead>
                     <tbody>
                       {products.map((p) => (
-                        <tr key={p.id} className="border-b border-slate-700 hover:bg-slate-700/30 transition">
-                          <td className="px-4 py-2 text-slate-300 font-mono text-sm">{p.id}</td>
-                          <td className="px-4 py-2 text-white font-medium text-sm">{p.name}</td>
-                          <td className="px-4 py-2 text-green-400 font-semibold text-sm">
+                        <tr key={p.id} data-testid={`product-row-${p.id}`} className="border-b border-slate-700 hover:bg-slate-700/30 transition">
+                          <td className="px-4 py-2 text-slate-300 font-mono text-sm" data-testid={`product-id-${p.id}`}>{p.id}</td>
+                          <td className="px-4 py-2 text-white font-medium text-sm" data-testid={`product-name-${p.id}`}>{p.name}</td>
+                          <td className="px-4 py-2 text-green-400 font-semibold text-sm" data-testid={`product-price-${p.id}`}>
                             R$ {parseFloat(p.price || 0).toFixed(2)}
                           </td>
-                          <td className="px-4 py-2 text-slate-300 text-sm">{p.categories?.name || '-'}</td>
-                          <td className="px-4 py-2 text-slate-300 text-sm">{p.suppliers?.company_name || '-'}</td>
+                          <td className="px-4 py-2 text-slate-300 text-sm" data-testid={`product-category-${p.id}`}>{p.categories?.name || '-'}</td>
+                          <td className="px-4 py-2 text-slate-300 text-sm" data-testid={`product-supplier-${p.id}`}>{p.suppliers?.company_name || '-'}</td>
                           <td className="px-4 py-2 text-center">
                             <div className="flex justify-center gap-2">
                               <button onClick={() => { setEditingProduct(p); setShowEditModal(true); }}
+                                data-testid={`edit-product-${p.id}`}
                                 className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded text-xs transition flex items-center gap-1">
                                 <Edit className="w-4 h-4" /> Edit
                               </button>
                               <button onClick={() => openConfirm(p.id)}
+                                data-testid={`delete-product-${p.id}`}
                                 className="bg-red-600 hover:bg-red-700 text-white px-3 py-1.5 rounded text-xs transition flex items-center gap-1">
                                 <Trash2 className="w-4 h-4" /> Delete
                               </button>
                               <button 
                                 onClick={() => { setSelectedProduct(p); setShowDetails(true); }}
+                                data-testid={`view-details-product-${p.id}`}
                                 className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition flex items-center gap-1.5 shadow-md">
                                 <Search className="w-4 h-4" /> Detalhes
                               </button>
@@ -390,20 +403,22 @@ export default function ProductsPage() {
                 </div>
 
                 <div className="bg-slate-900/50 px-6 py-4 border-t border-slate-700 flex flex-wrap items-center justify-between gap-4">
-                  <p className="text-slate-400 text-sm">
+                  <p className="text-slate-400 text-sm" data-testid="products-count">
                     Mostrando {(pagination.page - 1) * ITEMS_PER_PAGE + 1}–{Math.min(pagination.page * ITEMS_PER_PAGE, pagination.total)} de {pagination.total} produtos
                   </p>
                   <div className="flex items-center gap-3">
                     <button onClick={() => handlePageChange(pagination.page - 1)}
                       disabled={pagination.page === 1}
+                      data-testid="prev-page-button"
                       className="px-4 py-2 bg-slate-700 text-white rounded-lg disabled:opacity-50 hover:bg-slate-600 transition">
                       Anterior
                     </button>
-                    <span className="text-slate-300 font-medium">
+                    <span className="text-slate-300 font-medium" data-testid="current-page">
                       Página {pagination.page} de {pagination.totalPages || 1}
                     </span>
                     <button onClick={() => handlePageChange(pagination.page + 1)}
                       disabled={pagination.page === pagination.totalPages}
+                      data-testid="next-page-button"
                       className="px-4 py-2 bg-slate-700 text-white rounded-lg disabled:opacity-50 hover:bg-slate-600 transition">
                       Próxima
                     </button>

@@ -113,7 +113,7 @@ export default function UnlinkSupplierModal({ supplier, onClose, onSuccess }) {
   if (!supplier) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+    <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4" data-testid="unlink-supplier-modal">
       <div className="w-full max-w-3xl bg-slate-800 rounded-xl border border-slate-700 shadow-2xl max-h-[90vh] overflow-hidden">
         {/* Header */}
         <div className="p-6 border-b border-slate-700">
@@ -124,13 +124,14 @@ export default function UnlinkSupplierModal({ supplier, onClose, onSuccess }) {
               </div>
               <div>
                 <h2 className="text-2xl font-bold text-white">Desvincular Fornecedor</h2>
-                <p className="text-slate-400 text-sm mt-1">
+                <p className="text-slate-400 text-sm mt-1" data-testid="unlink-supplier-name">
                   {supplier.company_name} - Remover fornecedor dos produtos selecionados
                 </p>
               </div>
             </div>
             <button
               onClick={onClose}
+              data-testid="unlink-supplier-close"
               className="text-slate-400 hover:text-white transition"
             >
               <X className="w-6 h-6" />
@@ -141,7 +142,7 @@ export default function UnlinkSupplierModal({ supplier, onClose, onSuccess }) {
         {/* Content */}
         <div className="p-6">
           {/* Alert */}
-          <div className="bg-orange-500/10 border border-orange-500/30 rounded-lg p-4 mb-6">
+          <div className="bg-orange-500/10 border border-orange-500/30 rounded-lg p-4 mb-6" data-testid="unlink-supplier-alert">
             <div className="flex items-start gap-3">
               <AlertTriangle className="w-5 h-5 text-orange-400 mt-0.5 flex-shrink-0" />
               <div>
@@ -156,12 +157,12 @@ export default function UnlinkSupplierModal({ supplier, onClose, onSuccess }) {
 
           {/* Products List */}
           {loading ? (
-            <div className="text-center py-12">
+            <div className="text-center py-12" data-testid="unlink-supplier-loading">
               <Loader2 className="w-8 h-8 animate-spin text-blue-400 mx-auto mb-4" />
               <p className="text-slate-400">Carregando produtos...</p>
             </div>
           ) : products.length === 0 ? (
-            <div className="text-center py-12">
+            <div className="text-center py-12" data-testid="unlink-supplier-no-products">
               <Package className="w-16 h-16 mx-auto mb-4 text-slate-600 opacity-50" />
               <p className="text-slate-400 text-lg mb-4">
                 Nenhum produto vinculado a este fornecedor
@@ -180,29 +181,32 @@ export default function UnlinkSupplierModal({ supplier, onClose, onSuccess }) {
                       type="checkbox"
                       checked={selectedProducts.length === products.length}
                       onChange={handleSelectAll}
+                      data-testid="unlink-supplier-select-all"
                       className="w-4 h-4 text-blue-600 bg-slate-700 border-slate-600 rounded focus:ring-blue-500 focus:ring-2"
                     />
                     <span className="text-sm">
                       Selecionar todos ({products.length})
                     </span>
                   </label>
-                  <span className="text-slate-400 text-sm">
+                  <span className="text-slate-400 text-sm" data-testid="unlink-supplier-selected-count">
                     {selectedProducts.length} selecionado(s)
                   </span>
                 </div>
               </div>
 
               {/* Products Grid */}
-              <div className="max-h-96 overflow-y-auto space-y-2">
+              <div className="max-h-96 overflow-y-auto space-y-2" data-testid="unlink-supplier-products-list">
                 {products.map((product) => (
                   <div
                     key={product.id}
+                    data-testid={`unlink-supplier-product-${product.id}`}
                     className="flex items-center gap-4 p-4 bg-slate-700/50 rounded-lg border border-slate-600 hover:border-blue-500 transition"
                   >
                     <input
                       type="checkbox"
                       checked={selectedProducts.includes(product.id)}
                       onChange={() => handleProductToggle(product.id)}
+                      data-testid={`unlink-supplier-product-checkbox-${product.id}`}
                       className="w-4 h-4 text-blue-600 bg-slate-700 border-slate-600 rounded focus:ring-blue-500 focus:ring-2 flex-shrink-0"
                     />
                     
@@ -212,15 +216,15 @@ export default function UnlinkSupplierModal({ supplier, onClose, onSuccess }) {
                           <Package className="w-5 h-5 text-blue-400 flex-shrink-0" />
                         </div>
                         <div className="flex-1 min-w-0">
-                          <h4 className="text-white font-medium truncate">{product.name}</h4>
+                          <h4 className="text-white font-medium truncate" data-testid={`unlink-supplier-product-name-${product.id}`}>{product.name}</h4>
                           <div className="flex items-center gap-4 mt-1">
-                            <span className="text-green-400 text-sm font-semibold">
+                            <span className="text-green-400 text-sm font-semibold" data-testid={`unlink-supplier-product-price-${product.id}`}>
                               R$ {parseFloat(product.price || 0).toFixed(2)}
                             </span>
-                            <span className="text-slate-400 text-sm">
+                            <span className="text-slate-400 text-sm" data-testid={`unlink-supplier-product-stock-${product.id}`}>
                               Estoque: {product.stock_quantity || 0}
                             </span>
-                            <span className="text-slate-400 text-sm">
+                            <span className="text-slate-400 text-sm" data-testid={`unlink-supplier-product-sku-${product.id}`}>
                               SKU: {product.sku || 'N/A'}
                             </span>
                           </div>
@@ -239,6 +243,7 @@ export default function UnlinkSupplierModal({ supplier, onClose, onSuccess }) {
           <div className="flex gap-3">
             <button
               onClick={onClose}
+              data-testid="unlink-supplier-cancel"
               className="flex-1 px-6 py-3 bg-slate-700 hover:bg-slate-600 text-white rounded-lg transition font-semibold"
             >
               Cancelar
@@ -248,6 +253,7 @@ export default function UnlinkSupplierModal({ supplier, onClose, onSuccess }) {
               <button
                 onClick={handleUnlink}
                 disabled={selectedProducts.length === 0 || unlinking}
+                data-testid="unlink-supplier-confirm"
                 className="flex-1 px-6 py-3 bg-orange-600 hover:bg-orange-700 disabled:bg-slate-700 disabled:opacity-50 text-white rounded-lg transition font-semibold flex items-center justify-center gap-2"
               >
                 {unlinking ? (

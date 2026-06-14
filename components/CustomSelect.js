@@ -10,7 +10,8 @@ export default function CustomSelect({
   onChange, 
   placeholder, 
   name,
-  displayField = 'name'
+  displayField = 'name',
+  'data-testid': dataTestId
 }) {
   const [isOpen, setIsOpen] = useState(false);
   const selectedOption = options.find(opt => opt.id === value);
@@ -20,6 +21,7 @@ export default function CustomSelect({
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
+        data-testid={dataTestId}
         className="w-full px-4 py-2 rounded-lg bg-slate-700 border border-slate-600 text-white text-base flex justify-between items-center hover:border-orange-500 focus:outline-none focus:ring-2 focus:ring-orange-500 transition"
       >
         <span className={value ? 'text-white' : 'text-slate-400'}>
@@ -39,6 +41,7 @@ export default function CustomSelect({
                   onChange({ target: { name, value: option.id } });
                   setIsOpen(false);
                 }}
+                data-testid={`${dataTestId}-option-${option.id}`}
                 className="w-full px-4 py-2 text-left text-white text-base hover:bg-orange-600/20 transition first:rounded-t-lg last:rounded-b-lg"
               >
                 {option[displayField]}

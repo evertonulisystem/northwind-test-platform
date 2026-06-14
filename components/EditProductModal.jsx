@@ -302,7 +302,7 @@ export default function EditProductModal({ product, onClose, onUpdate }) {
               placeholder="Informe o nome do produto"
             />
             {errors.name && (
-              <p data-testid="error-name" className="text-red-400 text-xs mt-1 flex items-center gap-1">
+              <p data-testid="error-edit-product-name" className="text-red-400 text-xs mt-1 flex items-center gap-1">
                 <AlertCircle className="w-3 h-3" /> {errors.name}
               </p>
             )}
@@ -334,10 +334,10 @@ export default function EditProductModal({ product, onClose, onUpdate }) {
     placeholder="Informe o preço unitário do produto"
   />
   {errors.price && (
-    <p data-testid="error-price" className="text-red-400 text-xs mt-1 flex items-center gap-1">
-      <AlertCircle className="w-3 h-3" /> {errors.price}
-    </p>
-  )}
+              <p data-testid="error-edit-product-price" className="text-red-400 text-xs mt-1 flex items-center gap-1">
+                <AlertCircle className="w-3 h-3" /> {errors.price}
+              </p>
+            )}
 </div>
 
           {/* ESTOQUE */}
@@ -356,7 +356,7 @@ export default function EditProductModal({ product, onClose, onUpdate }) {
               placeholder="Apenas números entre 1 e 999"
             />
             {errors.stock_quantity && (
-              <p data-testid="error-stock" className="text-red-400 text-xs mt-1 flex items-center gap-1">
+              <p data-testid="error-edit-product-stock" className="text-red-400 text-xs mt-1 flex items-center gap-1">
                 <AlertCircle className="w-3 h-3" /> {errors.stock_quantity}
               </p>
             )}
@@ -377,7 +377,7 @@ export default function EditProductModal({ product, onClose, onUpdate }) {
               placeholder="Ex: MGP-2024"
             />
             {errors.sku && (
-              <p data-testid="error-sku" className="text-red-400 text-xs mt-1 flex items-center gap-1">
+              <p data-testid="error-edit-product-sku" className="text-red-400 text-xs mt-1 flex items-center gap-1">
                 <AlertCircle className="w-3 h-3" /> {errors.sku}
               </p>
             )}
@@ -402,14 +402,15 @@ export default function EditProductModal({ product, onClose, onUpdate }) {
                 />
               </div>
               <button
-                type="button"
-                onClick={() => window.open('/categories', '_blank')}
-                className="px-3 py-2.5 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition flex items-center gap-1 text-sm font-medium"
-                title="Cadastrar nova categoria"
-              >
-                <Plus className="w-4 h-4" />
-                Nova
-              </button>
+                    type="button"
+                    onClick={() => window.open('/categories', '_blank')}
+                    data-testid="edit-product-new-category"
+                    className="px-3 py-2.5 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition flex items-center gap-1 text-sm font-medium"
+                    title="Cadastrar nova categoria"
+                  >
+                    <Plus className="w-4 h-4" />
+                    Nova
+                  </button>
             </div>
           </div>
 
@@ -434,11 +435,12 @@ export default function EditProductModal({ product, onClose, onUpdate }) {
               <button
                 type="button"
                 onClick={() => window.open('/suppliers', '_blank')}
+                data-testid="edit-product-new-supplier"
                 className="px-3 py-2.5 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition flex items-center gap-1 text-sm font-medium"
                 title="Cadastrar novo fornecedor"
               >
                 <Plus className="w-4 h-4" />
-                Novo
+                Nova
               </button>
             </div>
           </div>
@@ -452,15 +454,17 @@ export default function EditProductModal({ product, onClose, onUpdate }) {
             
             {/* Preview da imagem */}
             {imagePreview && (
-              <div className="mb-3 relative">
+              <div className="mb-3 relative" data-testid="edit-product-image-preview-container">
                 <img 
                   src={imagePreview} 
                   alt="Preview do produto" 
+                  data-testid="edit-product-image-preview"
                   className="w-full h-32 object-cover rounded-lg border border-slate-600"
                 />
                 <button
                   type="button"
                   onClick={handleRemoveImage}
+                  data-testid="edit-product-remove-image"
                   className="absolute top-2 right-2 bg-red-500 hover:bg-red-600 text-white p-1 rounded-full transition"
                 >
                   <X className="w-4 h-4" />
@@ -470,16 +474,17 @@ export default function EditProductModal({ product, onClose, onUpdate }) {
 
             {/* Upload */}
             <div className="flex gap-2">
-              <label className="flex-1 cursor-pointer">
+              <label className="flex-1 cursor-pointer" data-testid="edit-product-image-select-label">
                 <input
                   type="file"
                   accept=".png,image/png"
                   onChange={handleImageChange}
+                  data-testid="edit-product-image-input"
                   className="hidden"
                 />
                 <div className="flex items-center justify-center gap-2 px-4 py-2.5 bg-orange-500 border-2 border-orange-400 rounded-lg hover:bg-orange-600 transition shadow-lg">
                   <Upload className="w-4 h-4 text-white" />
-                  <span className="text-white text-sm font-medium">
+                  <span className="text-white text-sm font-medium" data-testid="edit-product-image-select-text">
                     {imageFile ? imageFile.name : 'Selecionar imagem PNG'}
                   </span>
                 </div>
@@ -490,11 +495,12 @@ export default function EditProductModal({ product, onClose, onUpdate }) {
                   type="button"
                   onClick={handleImageUpload}
                   disabled={uploadingImage}
+                  data-testid="edit-product-upload-image"
                   className="px-4 py-2.5 bg-green-600 hover:bg-green-700 text-white rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
                 >
                   {uploadingImage ? (
                     <>
-                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" data-testid="edit-product-uploading-spinner"></div>
                       Enviando...
                     </>
                   ) : (
@@ -508,7 +514,7 @@ export default function EditProductModal({ product, onClose, onUpdate }) {
             </div>
             
             {errors.image && (
-              <p className="text-red-400 text-xs mt-1 flex items-center gap-1">
+              <p className="text-red-400 text-xs mt-1 flex items-center gap-1" data-testid="error-edit-product-image">
                 <AlertCircle className="w-3 h-3" /> {errors.image}
               </p>
             )}

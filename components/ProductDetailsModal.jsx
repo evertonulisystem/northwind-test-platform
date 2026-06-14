@@ -85,7 +85,7 @@ export default function ProductDetailsModal({ product, onClose }) {
   };
 
   return (
-    <div className="fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center z-50 p-4">
+    <div className="fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center z-50 p-4" data-testid="product-details-modal">
       <div className="bg-gradient-to-br from-slate-900 via-purple-900 to-pink-900 rounded-3xl shadow-2xl border border-purple-600 overflow-hidden max-w-3xl w-full">
         {/* Header */}
         <div className="bg-gradient-to-r from-purple-700 to-pink-700 px-8 py-5 flex justify-between items-center">
@@ -95,6 +95,7 @@ export default function ProductDetailsModal({ product, onClose }) {
           </h2>
           <button
             onClick={onClose}
+            data-testid="product-details-close"
             className="text-white hover:bg-white/20 p-2 rounded-lg transition"
           >
             <X className="w-6 h-6" />
@@ -104,37 +105,37 @@ export default function ProductDetailsModal({ product, onClose }) {
         {/* Conteúdo */}
         <div className="p-8 bg-slate-900/95">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="bg-slate-800/80 p-5 rounded-xl">
+            <div className="bg-slate-800/80 p-5 rounded-xl" data-testid="detail-product-id">
               <span className="text-purple-400 font-bold">ID:</span>
               <span className="text-white ml-3">{product.id}</span>
             </div>
-            <div className="bg-slate-800/80 p-5 rounded-xl">
+            <div className="bg-slate-800/80 p-5 rounded-xl" data-testid="detail-product-sku">
               <span className="text-purple-400 font-bold">SKU:</span>
               <span className="text-white ml-3">{product.sku || '—'}</span>
             </div>
-            <div className="bg-slate-800/80 p-5 rounded-xl md:col-span-2">
+            <div className="bg-slate-800/80 p-5 rounded-xl md:col-span-2" data-testid="detail-product-name">
               <span className="text-purple-400 font-bold">Nome:</span>
               <span className="text-white ml-3 text-lg font-medium">{product.name}</span>
             </div>
-            <div className="bg-slate-800/80 p-5 rounded-xl">
+            <div className="bg-slate-800/80 p-5 rounded-xl" data-testid="detail-product-price">
               <span className="text-purple-400 font-bold">Preço:</span>
               <span className="text-green-400 ml-3 text-xl font-bold">
                 R$ {parseFloat(product.price || 0).toFixed(2)}
               </span>
             </div>
-            <div className="bg-slate-800/80 p-5 rounded-xl">
+            <div className="bg-slate-800/80 p-5 rounded-xl" data-testid="detail-product-stock">
               <span className="text-purple-400 font-bold">Estoque:</span>
               <span className="text-yellow-300 ml-3 text-xl">{product.stock_quantity} unid.</span>
             </div>
-            <div className="bg-slate-800/80 p-5 rounded-xl">
+            <div className="bg-slate-800/80 p-5 rounded-xl" data-testid="detail-product-category">
               <span className="text-purple-400 font-bold">Categoria:</span>
               <span className="text-cyan-300 ml-3">{product.categories?.name || 'Sem categoria'}</span>
             </div>
-            <div className="bg-slate-800/80 p-5 rounded-xl">
+            <div className="bg-slate-800/80 p-5 rounded-xl" data-testid="detail-product-supplier">
               <span className="text-purple-400 font-bold">Fornecedor:</span>
               <span className="text-pink-300 ml-3">{product.suppliers?.company_name || 'Sem fornecedor'}</span>
             </div>
-            <div className="bg-slate-800/80 p-5 rounded-xl md:col-span-2">
+            <div className="bg-slate-800/80 p-5 rounded-xl md:col-span-2" data-testid="detail-product-slug">
               <span className="text-purple-400 font-bold">Slug:</span>
               <span className="text-gray-400 ml-3 text-sm">{product.slug}</span>
             </div>
@@ -144,6 +145,7 @@ export default function ProductDetailsModal({ product, onClose }) {
           <div className="flex justify-center gap-4 mt-10">
             <button
               onClick={handlePrint}
+              data-testid="product-details-print"
               className="bg-slate-800 hover:bg-slate-700 text-slate-300 px-6 py-4 rounded-xl font-bold transition flex items-center gap-2 border border-slate-700"
             >
               Imprimir
@@ -185,6 +187,7 @@ export default function ProductDetailsModal({ product, onClose }) {
             </button>
             <button
               onClick={onClose}
+              data-testid="product-details-close-btn"
               className="bg-gray-700 hover:bg-gray-600 text-white px-6 py-4 rounded-xl font-bold transition"
             >
               Fechar

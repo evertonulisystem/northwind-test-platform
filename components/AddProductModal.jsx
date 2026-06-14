@@ -214,7 +214,7 @@ export default function AddProductModal({ onClose, onAdd, preselectedCategory = 
               placeholder="Informe o nome do produto"
             />
             {errors.name && (
-              <p data-testid="error-name" className="text-red-400 text-xs mt-1 flex items-center gap-1">
+              <p data-testid="error-add-product-name" className="text-red-400 text-xs mt-1 flex items-center gap-1">
                 <AlertCircle className="w-3 h-3" /> {errors.name}
               </p>
             )}
@@ -228,28 +228,28 @@ export default function AddProductModal({ onClose, onAdd, preselectedCategory = 
     Preço (R$) <span className="text-red-500">*</span>
   </label>
   <input
-    data-testid="edit-product-price"
-    name="price"
-    type="number"
-    step="0.01"
-    min="0.01"
-    max="999999.99"
-    value={formData.price}
-    onChange={(e) => {
-      const value = e.target.value;
-      // Bloqueia valores absurdos já no front
-      if (value === '' || (parseFloat(value) >= 0 && parseFloat(value) <= 999999.99)) {
-        handleChange(e);
-      }
-    }}
-    className="w-full px-4 py-2.5 rounded-lg bg-white/80 backdrop-blur text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-purple-500 focus:border-purple-500 transition"
-    placeholder="Informe o preço unitário do produto"
-  />
+              data-testid="add-product-price"
+              name="price"
+              type="number"
+              step="0.01"
+              min="0.01"
+              max="999999.99"
+              value={formData.price}
+              onChange={(e) => {
+                const value = e.target.value;
+                // Bloqueia valores absurdos já no front
+                if (value === '' || (parseFloat(value) >= 0 && parseFloat(value) <= 999999.99)) {
+                  handleChange(e);
+                }
+              }}
+              className="w-full px-4 py-2.5 rounded-lg bg-white/80 backdrop-blur text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-purple-500 focus:border-purple-500 transition"
+              placeholder="Informe o preço unitário do produto"
+            />
   {errors.price && (
-    <p data-testid="error-price" className="text-red-400 text-xs mt-1 flex items-center gap-1">
-      <AlertCircle className="w-3 h-3" /> {errors.price}
-    </p>
-  )}
+              <p data-testid="error-add-product-price" className="text-red-400 text-xs mt-1 flex items-center gap-1">
+                <AlertCircle className="w-3 h-3" /> {errors.price}
+              </p>
+            )}
 </div>
 
           {/* ESTOQUE */}
@@ -268,7 +268,7 @@ export default function AddProductModal({ onClose, onAdd, preselectedCategory = 
               placeholder="Apenas números entre 1 e 999"
             />
             {errors.stock_quantity && (
-              <p data-testid="error-stock" className="text-red-400 text-xs mt-1 flex items-center gap-1">
+              <p data-testid="error-add-product-stock" className="text-red-400 text-xs mt-1 flex items-center gap-1">
                 <AlertCircle className="w-3 h-3" /> {errors.stock_quantity}
               </p>
             )}
@@ -289,7 +289,7 @@ export default function AddProductModal({ onClose, onAdd, preselectedCategory = 
               placeholder="Ex: MGP-2024"
             />
             {errors.sku && (
-              <p data-testid="error-sku" className="text-red-400 text-xs mt-1 flex items-center gap-1">
+              <p data-testid="error-add-product-sku" className="text-red-400 text-xs mt-1 flex items-center gap-1">
                 <AlertCircle className="w-3 h-3" /> {errors.sku}
               </p>
             )}
