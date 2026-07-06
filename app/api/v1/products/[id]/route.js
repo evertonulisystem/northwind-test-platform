@@ -30,11 +30,65 @@ function generateSlug(name) {
  *         required: true
  *         schema:
  *           type: integer
+ *           minimum: 1
+ *         description: ID do produto a ser buscado
  *     responses:
  *       200:
- *         description: Produto encontrado
+ *         description: Produto encontrado com sucesso
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 data:
+ *                   $ref: '#/components/schemas/Product'
+ *                 mensagens:
+ *                   type: array
+ *                   items:
+ *                     type: string
+ *                   example: ["Produto carregado com sucesso."]
+ *       400:
+ *         description: ID do produto inválido (não é número ou menor que 1)
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *             example:
+ *               data: null
+ *               mensagens: ["ID do produto inválido. Deve ser um número positivo."]
+ *       401:
+ *         description: Não autorizado - token ausente ou inválido
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *             examples:
+ *               TokenAusente:
+ *                 value:
+ *                   data: null
+ *                   mensagens: ["Token ausente"]
+ *               TokenInvalido:
+ *                 value:
+ *                   data: null
+ *                   mensagens: ["Token inválido"]
  *       404:
- *         description: Produto não encontrado
+ *         description: Produto não encontrado com o ID informado
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *             example:
+ *               data: null
+ *               mensagens: ["Produto com ID 999 não encontrado."]
+ *       500:
+ *         description: Erro interno do servidor
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *             example:
+ *               data: null
+ *               mensagens: ["Erro interno ao buscar produto."]
  */
 export async function GET(request, { params }) {
   try {
@@ -122,6 +176,104 @@ export async function GET(request, { params }) {
   }
 }
 
+/**
+ * @swagger
+ * /api/v1/products/{id}:
+ *   put:
+ *     summary: Atualiza um produto existente
+ *     tags: [Products]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *           minimum: 1
+ *         description: ID do produto a ser atualizado
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/ProductCreateRequest'
+ *     responses:
+ *       200:
+ *         description: Produto atualizado com sucesso
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 data:
+ *                   $ref: '#/components/schemas/Product'
+ *                 mensagens:
+ *                   type: array
+ *                   items:
+ *                     type: string
+ *                   example: ["Produto atualizado com sucesso!"]
+ *       400:
+ *         description: Dados inválidos, campos obrigatórios ausentes ou ID inválido
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *             examples:
+ *               IdInvalido:
+ *                 summary: ID do produto inválido
+ *                 value:
+ *                   data: null
+ *                   mensagens: ["ID do produto inválido. Deve ser um número positivo."]
+ *               CamposObrigatorios:
+ *                 summary: Campos obrigatórios não preenchidos
+ *                 value:
+ *                   data: null
+ *                   mensagens: ["SKU é obrigatório."]
+ *       401:
+ *         description: Não autorizado - token ausente ou inválido
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *             examples:
+ *               TokenAusente:
+ *                 value:
+ *                   data: null
+ *                   mensagens: ["Token ausente"]
+ *               TokenInvalido:
+ *                 value:
+ *                   data: null
+ *                   mensagens: ["Token inválido"]
+ *       404:
+ *         description: Produto não encontrado
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *             example:
+ *               data: null
+ *               mensagens: ["Produto com ID 999 não encontrado."]
+ *       409:
+ *         description: Nome/slug ou SKU já existe em outro produto
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *             examples:
+ *               NomeDuplicado:
+ *                 summary: Nome/slug já existe
+ *                 value:
+ *                   data: null
+ *                   mensagens: ["Já existe outro produto com esse nome/slug."]
+ *               SkuDuplicado:
+ *                 summary: SKU já existe
+ *                 value:
+ *                   data: null
+ *                   mensagens: ["Já existe outro produto com esse SKU."]
+ *       500:
+ *         description: Erro interno do servidor
+ */
 // === PUT (EDITAR) ===
 export async function PUT(request, { params }) {
   try {

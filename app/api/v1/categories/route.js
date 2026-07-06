@@ -184,18 +184,70 @@ export async function GET(request) {
  *       content:
  *         application/json:
  *           schema:
- *             type: object
- *             required:
- *               - name
- *               - description
- *             properties:
- *               name:
- *                 type: string
- *               description:
- *                 type: string
+ *             $ref: '#/components/schemas/CategoryCreateRequest'
  *     responses:
  *       201:
- *         description: Categoria criada
+ *         description: Categoria criada com sucesso
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 data:
+ *                   $ref: '#/components/schemas/Category'
+ *                 mensagens:
+ *                   type: array
+ *                   items:
+ *                     type: string
+ *                   example: ["Categoria criada com sucesso!", "Verificado: Salvo no banco Supabase (seu-projeto.supabase.co)"]
+ *       400:
+ *         description: Dados inválidos, campos obrigatórios ausentes ou validações não atendidas
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *             examples:
+ *               CamposObrigatorios:
+ *                 summary: Campos obrigatórios não preenchidos
+ *                 value:
+ *                   data: null
+ *                   mensagens: ["Nome e descrição são obrigatórios."]
+ *               NomeInvalido:
+ *                 summary: Nome da categoria inválido (tamanho)
+ *                 value:
+ *                   data: null
+ *                   mensagens: ["Nome da categoria deve ter entre 3 e 100 caracteres."]
+ *               DescricaoInvalida:
+ *                 summary: Descrição muito longa
+ *                 value:
+ *                   data: null
+ *                   mensagens: ["Descrição da categoria deve ter no máximo 500 caracteres."]
+ *               NomeDuplicado:
+ *                 summary: Nome da categoria já existe
+ *                 value:
+ *                   data: null
+ *                   mensagens: ["Já existe uma categoria com este nome."]
+ *       401:
+ *         description: Não autorizado - token ausente ou inválido
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *             examples:
+ *               TokenAusente:
+ *                 value:
+ *                   data: null
+ *                   mensagens: ["Token ausente"]
+ *               TokenInvalido:
+ *                 value:
+ *                   data: null
+ *                   mensagens: ["Token inválido"]
+ *       500:
+ *         description: Erro interno do servidor
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
  */
 export async function POST(request) {
   try {

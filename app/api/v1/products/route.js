@@ -9,38 +9,40 @@ import { verifyToken, getTokenFromRequest } from '@/lib/jwt';
  *   get:
  *     summary: Lista produtos com paginação, filtros e ordenação
  *     tags: [Products]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: query
  *         name: page
- *         schema: { type: integer, default: 1 }
+ *         schema: { type: integer, default: 1, minimum: 1 }
  *         description: Número da página (inicia em 1)
  *       - in: query
  *         name: limit
- *         schema: { type: integer, default: 10 }
- *         description: Quantidade de itens por página
+ *         schema: { type: integer, default: 10, minimum: 1, maximum: 1000 }
+ *         description: Quantidade de itens por página (1-1000)
  *       - in: query
  *         name: search
  *         schema: { type: string }
  *         description: Busca por nome, SKU ou ID do produto
  *       - in: query
  *         name: category_id
- *         schema: { type: integer }
+ *         schema: { type: integer, minimum: 1 }
  *         description: Filtrar por ID da categoria
  *       - in: query
  *         name: supplier_id
- *         schema: { type: integer }
+ *         schema: { type: integer, minimum: 1 }
  *         description: Filtrar por ID do fornecedor
  *       - in: query
  *         name: sortBy
  *         schema: { type: string, enum: [id, name, price, stock_quantity, sku, created_at], default: name }
- *         description: Campo de ordenação
+ *         description: Campo de ordenação permitido
  *       - in: query
  *         name: order
  *         schema: { type: string, enum: [asc, desc], default: asc }
  *         description: Ordem de ordenação (asc = crescente, desc = decrescente)
  *     responses:
  *       200:
- *         description: Lista paginada de produtos
+ *         description: Lista paginada de produtos carregada com sucesso
  *         content:
  *           application/json:
  *             schema:
@@ -49,57 +51,77 @@ import { verifyToken, getTokenFromRequest } from '@/lib/jwt';
  *                 data:
  *                   type: array
  *                   items:
- *                     type: object
- *                     properties:
- *                       id:
- *                         type: integer
- *                       name:
- *                         type: string
- *                       price:
- *                         type: number
- *                       stock_quantity:
- *                         type: integer
- *                       sku:
- *                         type: string
- *                       category_id:
- *                         type: integer
- *                       supplier_id:
- *                         type: integer
- *                       slug:
- *                         type: string
- *                       categories:
- *                         type: object
- *                         properties:
- *                           name:
- *                             type: string
- *                       suppliers:
- *                         type: object
- *                         properties:
- *                           company_name:
- *                             type: string
+ *                     $ref: '#/components/schemas/Product'
  *                 pagination:
  *                   type: object
  *                   properties:
  *                     page:
  *                       type: integer
+ *                       example: 1
  *                     limit:
  *                       type: integer
+ *                       example: 10
  *                     total:
  *                       type: integer
+ *                       example: 47
  *                     totalPages:
  *                       type: integer
+ *                       example: 5
  *                 mensagens:
  *                   type: array
  *                   items:
  *                     type: string
+ *                   example: ["Produtos carregados com sucesso."]
  *       400:
- *         description: Parâmetros inválidos
+ *         description: Parâmetros inválidos (sortBy ou order)
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *             examples:
+ *               CampoOrdenacaoInvalido:
+ *                 summary: Campo de ordenação inválido
+ *                 value:
+ *                   data: null
+ *                   mensagens: ["Campo de ordenação 'invalido' não é permitido. Use: id, name, price, stock_quantity, sku, created_at."]
+ *               OrdemInvalida:
+ *                 summary: Ordem de ordenação inválida
+ *                 value:
+ *                   data: null
+ *                   mensagens: ["Ordem 'invalido' não é permitido. Use: asc ou desc."]
  *       401:
- *         description: Não autorizado
+ *         description: Não autorizado - token ausente ou inválido
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *             examples:
+ *               TokenAusente:
+ *                 value:
+ *                   data: null
+ *                   mensagens: ["Token ausente"]
+ *               TokenInvalido:
+ *                 value:
+ *                   data: null
+ *                   mensagens: ["Token inválido"]
  *       404:
- *         description: Nenhum produto encontrado com os filtros
+ *         description: Nenhum produto encontrado com os filtros aplicados
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *             example:
+ *               data: null
+ *               mensagens: ["Nenhum produto encontrado para os filtros aplicados."]
  *       500:
  *         description: Erro interno do servidor
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *             example:
+ *               data: null
+ *               mensagens: ["Erro interno ao carregar produtos."]
  */
 // app/api/v1/products/route.js → GET ATUALIZADO (O ÚNICO QUE FUNCIONA DE VERDADE COM JOIN)
 // app/api/v1/products/route.js → GET FINAL (FUNCIONA COM TEXTO EM NOME, CATEGORIA E FORNECEDOR)
@@ -280,7 +302,7 @@ export async function GET(request) {
  * @swagger
  * /api/v1/products:
  *   post:
- *     summary: Cria um novo produto no catálogo
+ *     summary: Cria um novo produto no catálogo (US-08)
  *     tags: [Products]
  *     security:
  *       - bearerAuth: []
@@ -289,47 +311,7 @@ export async function GET(request) {
  *       content:
  *         application/json:
  *           schema:
- *             type: object
- *             required:
- *               - name
- *               - price
- *               - stock_quantity
- *               - sku
- *               - category_id
- *               - supplier_id
- *             properties:
- *               name:
- *                 type: string
- *                 minLength: 3
- *                 maxLength: 100
- *                 description: "Nome completo do produto (obrigatório, entre 3 e 100 caracteres, deve ser descritivo e único)"
- *                 example: "Mouse Gamer RGB Pro Wireless"
- *               price:
- *                 type: number
- *                 minimum: 0.01
- *                 multipleOf: 0.01
- *                 description: "Preço de venda do produto (obrigatório, deve ser maior que 0, use 2 casas decimais)"
- *                 example: 299.90
- *               stock_quantity:
- *                 type: integer
- *                 minimum: 0
- *                 description: "Quantidade em estoque (obrigatório, número inteiro, não pode ser negativo, atualiza automaticamente)"
- *                 example: 50
- *               sku:
- *                 type: string
- *                 pattern: "^[A-Z0-9]{6,20}$"
- *                 description: "SKU do produto (obrigatório, código único em maiúsculas, 6-20 caracteres alfanuméricos, sem espaços)"
- *                 example: "MGP2024W"
- *               category_id:
- *                 type: integer
- *                 minimum: 1
- *                 description: "ID da categoria (obrigatório, deve existir na tabela categories, use 1 para 'Eletrônicos')"
- *                 example: 1
- *               supplier_id:
- *                 type: integer
- *                 minimum: 1
- *                 description: "ID do fornecedor (obrigatório, deve existir na tabela suppliers, use 1 para fornecedor padrão)"
- *                 example: 1
+ *             $ref: '#/components/schemas/ProductCreateRequest'
  *     responses:
  *       201:
  *         description: Produto criado com sucesso
@@ -344,15 +326,79 @@ export async function GET(request) {
  *                   type: array
  *                   items:
  *                     type: string
- *                   example: ["Produto criado com sucesso!"]
+ *                   example: ["Produto criado com sucesso!", "Verificado: Salvo no banco Supabase (seu-projeto.supabase.co)"]
  *       400:
  *         description: Dados inválidos ou campos obrigatórios ausentes
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *             examples:
+ *               CamposObrigatorios:
+ *                 summary: Campos obrigatórios não preenchidos
+ *                 value:
+ *                   data: null
+ *                   mensagens: ["Campos obrigatórios não preenchidos: name, price."]
+ *               PrecoInvalido:
+ *                 summary: Preço inválido (menor ou igual a zero)
+ *                 value:
+ *                   data: null
+ *                   mensagens: ["O preço deve ser um valor positivo maior que zero."]
+ *               EstoqueInvalido:
+ *                 summary: Estoque inválido (menor que zero)
+ *                 value:
+ *                   data: null
+ *                   mensagens: ["A quantidade em estoque deve ser um número inteiro maior ou igual a zero."]
+ *               CategoriaInexistente:
+ *                 summary: Categoria selecionada não existe
+ *                 value:
+ *                   data: null
+ *                   mensagens: ["Categoria selecionada não existe. Escolha uma categoria válida."]
+ *               FornecedorInexistente:
+ *                 summary: Fornecedor selecionado não existe
+ *                 value:
+ *                   data: null
+ *                   mensagens: ["Fornecedor selecionado não existe. Escolha um fornecedor válido."]
  *       401:
  *         description: Não autorizado - token ausente ou inválido
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *             examples:
+ *               TokenAusente:
+ *                 summary: Token JWT não fornecido
+ *                 value:
+ *                   data: null
+ *                   mensagens: ["Token ausente"]
+ *               TokenInvalido:
+ *                 summary: Token JWT expirado ou inválido
+ *                 value:
+ *                   data: null
+ *                   mensagens: ["Token inválido"]
  *       409:
  *         description: SKU ou nome do produto já existe
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *             examples:
+ *               NomeJaExiste:
+ *                 summary: Nome do produto já existe
+ *                 value:
+ *                   data: null
+ *                   mensagens: ["Já existe um produto com esse nome/slug."]
+ *               SKUJaExiste:
+ *                 summary: SKU do produto já existe
+ *                 value:
+ *                   data: null
+ *                   mensagens: ["Já existe um produto com esse SKU."]
  *       500:
  *         description: Erro interno do servidor
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
  */
 
 // === POST (ADICIONAR) ===
