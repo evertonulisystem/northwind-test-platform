@@ -1,11 +1,13 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { toast } from 'react-toastify';
-import { Building2, Plus, Edit, Trash2, Search, X, Mail, Phone, User, MapPin, Building, Unlink } from 'lucide-react';
+import { Building2, Plus, Edit, Trash2, Search, X, Mail, Phone, User, MapPin, Building, Unlink, Eye } from 'lucide-react';
 import UnlinkSupplierModal from '@/components/UnlinkSupplierModal.jsx';
 
 export default function SuppliersPage() {
+  const router = useRouter();
   const [suppliers, setSuppliers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showAddModal, setShowAddModal] = useState(false);
@@ -67,6 +69,8 @@ export default function SuppliersPage() {
       
       const res = await fetch('/api/v1/suppliers', { headers });
       const result = await res.json();
+      
+      console.log('🔍 DEBUG - suppliers API result:', result);
       
       if (!res.ok) {
         toast.error(result.mensagens?.[0] || 'Erro ao carregar fornecedores');
@@ -346,14 +350,35 @@ export default function SuppliersPage() {
       .slice(0, 15);
   };
 
+  const displayPhone = (phone) => {
+    if (!phone) return '';
+    const clean = phone.replace(/\D/g, '');
+    return formatPhone(clean);
+  };
+
+  const displayCNPJ = (cnpj) => {
+    if (!cnpj) return '';
+    const clean = cnpj.replace(/\D/g, '');
+    return clean
+      .replace(/^(\d{2})(\d)/, '$1.$2')
+      .replace(/^(\d{2})\.(\d{3})(\d)/, '$1.$2.$3')
+      .replace(/\.(\d{3})(\d)/, '.$1/$2')
+      .replace(/(\d{4})(\d)/, '$1-$2')
+      .slice(0, 18);
+  };
+
   const ITEMS_PER_PAGE = 8;
   const [currentPage, setCurrentPage] = useState(1);
 
-  const filteredSuppliers = suppliers.filter(supplier =>
-    supplier.company_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    supplier.contact_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    supplier.email?.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredSuppliers = suppliers.filter(supplier => {
+    console.log('🔍 DEBUG - supplier:', supplier);
+    console.log('🔍 DEBUG - searchTerm:', searchTerm);
+    const matches = supplier.company_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      supplier.contact_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      supplier.email?.toLowerCase().includes(searchTerm.toLowerCase());
+    console.log('🔍 DEBUG - matches:', matches);
+    return matches;
+  });
 
   const totalPages = Math.ceil(filteredSuppliers.length / ITEMS_PER_PAGE);
   const paginatedSuppliers = filteredSuppliers.slice(
@@ -374,7 +399,6 @@ export default function SuppliersPage() {
             <div className="flex justify-center gap-4">
               <button
                 onClick={() => setShowAddModal(true)}
-                data-testid="add-supplier-btn"
                 className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-xl font-semibold shadow-lg transition transform hover:scale-105 flex items-center gap-2"
               >
                 <Plus className="w-5 h-5" />
@@ -404,7 +428,6 @@ export default function SuppliersPage() {
                     setCurrentPage(1);
                   }}
                   placeholder="Buscar fornecedores..."
-                  data-testid="supplier-search"
                   className="w-full pl-11 pr-4 py-3 bg-slate-800/50 backdrop-blur border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
@@ -435,10 +458,11 @@ export default function SuppliersPage() {
           ) : (
             <>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {paginatedSuppliers.map((supplier) => (
+                {paginatedSuppliers.map((supplier) => {
+                  console.log('🔍 DEBUG - supplier data:', supplier);
+                  return (
                   <div
                     key={supplier.id}
-                    data-testid={`supplier-card-${supplier.id}`}
                     className="bg-slate-800/50 backdrop-blur rounded-xl border border-slate-700 p-6 hover:border-blue-500 transition-all hover:shadow-xl hover:shadow-blue-500/20 flex flex-col h-full"
                   >
                     <div className="flex items-start justify-between mb-4">
@@ -447,10 +471,10 @@ export default function SuppliersPage() {
                           <Building2 className="w-6 h-6 text-blue-400" />
                         </div>
                         <div>
-                          <h3 className="text-white font-semibold text-lg line-clamp-1" data-testid={`supplier-name-${supplier.id}`} title={supplier.company_name}>
+                          <h3 className="text-white font-semibold text-lg line-clamp-1" title={supplier.company_name}>
                             {supplier.company_name}
                           </h3>
-                          <p className="text-slate-400 text-sm line-clamp-1" data-testid={`supplier-contact-${supplier.id}`} title={supplier.contact_name}>
+                          <p className="text-slate-400 text-sm line-clamp-1" title={supplier.contact_name}>
                             {supplier.contact_name}
                           </p>
                         </div>
@@ -460,31 +484,38 @@ export default function SuppliersPage() {
                     <div className="space-y-3 mb-4 flex-grow">
                       <div className="flex items-center gap-2 text-slate-300">
                         <Mail className="w-4 h-4 shrink-0" />
-                        <span className="text-sm truncate" data-testid={`supplier-email-${supplier.id}`} title={supplier.email}>
+                        <span className="text-sm truncate" title={supplier.email}>
                           {supplier.email}
                         </span>
                       </div>
                       <div className="flex items-center gap-2 text-slate-300">
                         <Phone className="w-4 h-4 shrink-0" />
-                        <span className="text-sm" data-testid={`supplier-phone-${supplier.id}`}>
-                          {supplier.phone}
+                        <span className="text-sm">
+                          {displayPhone(supplier.phone)}
                         </span>
                       </div>
                       <div className="flex items-center gap-2 text-slate-300">
                         <MapPin className="w-4 h-4 shrink-0" />
-                        <span className="text-sm" data-testid={`supplier-uf-${supplier.id}`}>
+                        <span className="text-sm">
                           {supplier.uf}
                         </span>
                       </div>
                       <div className="flex items-center gap-2 text-slate-300">
                         <Building className="w-4 h-4 shrink-0" />
-                        <span className="text-sm" data-testid={`supplier-cnpj-${supplier.id}`}>
-                          {supplier.cnpj}
+                        <span className="text-sm">
+                          {displayCNPJ(supplier.cnpj)}
                         </span>
                       </div>
                     </div>
 
-                    <div className="flex gap-2 pt-4 border-t border-slate-700 mt-auto">
+                    <div className="flex flex-wrap gap-2 pt-4 border-t border-slate-700 mt-auto">
+                      <button
+                        onClick={() => router.push(`/suppliers/${supplier.id}/products`)}
+                        className="flex-1 min-w-[100px] bg-cyan-600 hover:bg-cyan-700 text-white px-3 py-2 rounded-lg transition flex items-center justify-center gap-1"
+                      >
+                        <Eye className="w-4 h-4" />
+                        Ver Produtos
+                      </button>
                       <button
                         onClick={() => {
                           setEditingSupplier(supplier);
@@ -498,8 +529,7 @@ export default function SuppliersPage() {
                           });
                           setShowEditModal(true);
                         }}
-                        data-testid={`edit-supplier-${supplier.id}`}
-                        className="flex-1 bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-lg transition flex items-center justify-center gap-1"
+                        className="flex-1 min-w-[100px] bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-lg transition flex items-center justify-center gap-1"
                       >
                         <Edit className="w-4 h-4" />
                         Editar
@@ -509,8 +539,7 @@ export default function SuppliersPage() {
                           setUnlinkingSupplier(supplier);
                           setShowUnlinkModal(true);
                         }}
-                        data-testid={`unlink-supplier-${supplier.id}`}
-                        className="flex-1 bg-orange-600 hover:bg-orange-700 text-white px-3 py-2 rounded-lg transition flex items-center justify-center gap-1"
+                        className="flex-1 min-w-[100px] bg-orange-600 hover:bg-orange-700 text-white px-3 py-2 rounded-lg transition flex items-center justify-center gap-1"
                         title="Desvincular produtos deste fornecedor"
                       >
                         <Unlink className="w-4 h-4" />
@@ -521,15 +550,14 @@ export default function SuppliersPage() {
                           setDeleteId(supplier.id);
                           setShowConfirm(true);
                         }}
-                        data-testid={`delete-supplier-${supplier.id}`}
-                        className="flex-1 bg-red-600 hover:bg-red-700 text-white px-3 py-2 rounded-lg transition flex items-center justify-center gap-1"
+                        className="flex-1 min-w-[100px] bg-red-600 hover:bg-red-700 text-white px-3 py-2 rounded-lg transition flex items-center justify-center gap-1"
                       >
                         <Trash2 className="w-4 h-4" />
                         Excluir
                       </button>
                     </div>
                   </div>
-                ))}
+                );})}
               </div>
 
               {/* Pagination Controls */}
@@ -582,12 +610,11 @@ export default function SuppliersPage() {
                   name="company_name"
                   value={formData.company_name}
                   onChange={handleChange}
-                  data-testid="supplier-company-name"
                   className="w-full px-4 py-2.5 rounded-lg bg-slate-700 border border-slate-600 text-white placeholder-slate-400 focus:outline-none focus:border-blue-500 transition"
                   placeholder="Tech Solutions Ltda"
                 />
                 {errors.company_name && (
-                  <p className="text-red-400 text-xs mt-1" data-testid="error-company-name">
+                  <p className="text-red-400 text-xs mt-1">
                     {errors.company_name}
                   </p>
                 )}
@@ -604,12 +631,11 @@ export default function SuppliersPage() {
                   name="contact_name"
                   value={formData.contact_name}
                   onChange={handleChange}
-                  data-testid="supplier-contact-name"
                   className="w-full px-4 py-2.5 rounded-lg bg-slate-700 border border-slate-600 text-white placeholder-slate-400 focus:outline-none focus:border-blue-500 transition"
                   placeholder="João Silva"
                 />
                 {errors.contact_name && (
-                  <p className="text-red-400 text-xs mt-1" data-testid="error-contact-name">
+                  <p className="text-red-400 text-xs mt-1">
                     {errors.contact_name}
                   </p>
                 )}
@@ -626,12 +652,11 @@ export default function SuppliersPage() {
                   name="email"
                   value={formData.email}
                   onChange={handleChange}
-                  data-testid="supplier-email"
                   className="w-full px-4 py-2.5 rounded-lg bg-slate-700 border border-slate-600 text-white placeholder-slate-400 focus:outline-none focus:border-blue-500 transition"
                   placeholder="joao@techsolutions.com"
                 />
                 {errors.email && (
-                  <p className="text-red-400 text-xs mt-1" data-testid="error-email">
+                  <p className="text-red-400 text-xs mt-1">
                     {errors.email}
                   </p>
                 )}
@@ -651,12 +676,11 @@ export default function SuppliersPage() {
                     const formatted = formatPhone(e.target.value);
                     setFormData(prev => ({ ...prev, phone: formatted }));
                   }}
-                  data-testid="supplier-phone"
                   className="w-full px-4 py-2.5 rounded-lg bg-slate-700 border border-slate-600 text-white placeholder-slate-400 focus:outline-none focus:border-blue-500 transition"
                   placeholder="(11) 98765-4321"
                 />
                 {errors.phone && (
-                  <p className="text-red-400 text-xs mt-1" data-testid="error-phone">
+                  <p className="text-red-400 text-xs mt-1">
                     {errors.phone}
                   </p>
                 )}
@@ -676,12 +700,11 @@ export default function SuppliersPage() {
                     const formatted = formatCNPJ(e.target.value);
                     setFormData(prev => ({ ...prev, cnpj: formatted }));
                   }}
-                  data-testid="supplier-cnpj"
                   className="w-full px-4 py-2.5 rounded-lg bg-slate-700 border border-slate-600 text-white placeholder-slate-400 focus:outline-none focus:border-blue-500 transition"
                   placeholder="12.345.678/0001-90"
                 />
                 {errors.cnpj && (
-                  <p className="text-red-400 text-xs mt-1" data-testid="error-cnpj">
+                  <p className="text-red-400 text-xs mt-1">
                     {errors.cnpj}
                   </p>
                 )}
@@ -701,13 +724,12 @@ export default function SuppliersPage() {
                     const value = e.target.value.toUpperCase().slice(0, 2);
                     setFormData(prev => ({ ...prev, uf: value }));
                   }}
-                  data-testid="supplier-uf"
                   className="w-full px-4 py-2.5 rounded-lg bg-slate-700 border border-slate-600 text-white placeholder-slate-400 focus:outline-none focus:border-blue-500 transition uppercase"
                   placeholder="SP"
                   maxLength={2}
                 />
                 {errors.uf && (
-                  <p className="text-red-400 text-xs mt-1" data-testid="error-uf">
+                  <p className="text-red-400 text-xs mt-1">
                     {errors.uf}
                   </p>
                 )}
@@ -723,7 +745,6 @@ export default function SuppliersPage() {
                   handleSubmit(e);
                 }}
                 disabled={loading}
-                data-testid="save-supplier-btn"
                 className="flex-1 bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition font-semibold disabled:opacity-50"
               >
                 {loading ? 'Salvando...' : 'Salvar'}
@@ -734,7 +755,6 @@ export default function SuppliersPage() {
                   setShowAddModal(false);
                   resetForm();
                 }}
-                data-testid="cancel-supplier-btn"
                 className="flex-1 bg-slate-700 text-white py-3 rounded-lg hover:bg-slate-600 transition font-semibold"
               >
                 Cancelar
@@ -767,12 +787,11 @@ export default function SuppliersPage() {
                   name="company_name"
                   value={formData.company_name}
                   onChange={handleChange}
-                  data-testid="edit-supplier-company-name"
                   className="w-full px-4 py-2.5 rounded-lg bg-slate-700 border border-slate-600 text-white placeholder-slate-400 focus:outline-none focus:border-blue-500 transition"
                   placeholder="Tech Solutions Ltda"
                 />
                 {errors.company_name && (
-                  <p className="text-red-400 text-xs mt-1" data-testid="edit-error-company-name">
+                  <p className="text-red-400 text-xs mt-1">
                     {errors.company_name}
                   </p>
                 )}
@@ -789,12 +808,11 @@ export default function SuppliersPage() {
                   name="contact_name"
                   value={formData.contact_name}
                   onChange={handleChange}
-                  data-testid="edit-supplier-contact-name"
                   className="w-full px-4 py-2.5 rounded-lg bg-slate-700 border border-slate-600 text-white placeholder-slate-400 focus:outline-none focus:border-blue-500 transition"
                   placeholder="João Silva"
                 />
                 {errors.contact_name && (
-                  <p className="text-red-400 text-xs mt-1" data-testid="edit-error-contact-name">
+                  <p className="text-red-400 text-xs mt-1">
                     {errors.contact_name}
                   </p>
                 )}
@@ -811,12 +829,11 @@ export default function SuppliersPage() {
                   name="email"
                   value={formData.email}
                   onChange={handleChange}
-                  data-testid="edit-supplier-email"
                   className="w-full px-4 py-2.5 rounded-lg bg-slate-700 border border-slate-600 text-white placeholder-slate-400 focus:outline-none focus:border-blue-500 transition"
                   placeholder="joao@techsolutions.com"
                 />
                 {errors.email && (
-                  <p className="text-red-400 text-xs mt-1" data-testid="edit-error-email">
+                  <p className="text-red-400 text-xs mt-1">
                     {errors.email}
                   </p>
                 )}
@@ -836,12 +853,11 @@ export default function SuppliersPage() {
                     const formatted = formatPhone(e.target.value);
                     setFormData(prev => ({ ...prev, phone: formatted }));
                   }}
-                  data-testid="edit-supplier-phone"
                   className="w-full px-4 py-2.5 rounded-lg bg-slate-700 border border-slate-600 text-white placeholder-slate-400 focus:outline-none focus:border-blue-500 transition"
                   placeholder="(11) 98765-4321"
                 />
                 {errors.phone && (
-                  <p className="text-red-400 text-xs mt-1" data-testid="edit-error-phone">
+                  <p className="text-red-400 text-xs mt-1">
                     {errors.phone}
                   </p>
                 )}
@@ -861,12 +877,11 @@ export default function SuppliersPage() {
                     const formatted = formatCNPJ(e.target.value);
                     setFormData(prev => ({ ...prev, cnpj: formatted }));
                   }}
-                  data-testid="edit-supplier-cnpj"
                   className="w-full px-4 py-2.5 rounded-lg bg-slate-700 border border-slate-600 text-white placeholder-slate-400 focus:outline-none focus:border-blue-500 transition"
                   placeholder="12.345.678/0001-90"
                 />
                 {errors.cnpj && (
-                  <p className="text-red-400 text-xs mt-1" data-testid="edit-error-cnpj">
+                  <p className="text-red-400 text-xs mt-1">
                     {errors.cnpj}
                   </p>
                 )}
@@ -886,13 +901,12 @@ export default function SuppliersPage() {
                     const value = e.target.value.toUpperCase().slice(0, 2);
                     setFormData(prev => ({ ...prev, uf: value }));
                   }}
-                  data-testid="edit-supplier-uf"
                   className="w-full px-4 py-2.5 rounded-lg bg-slate-700 border border-slate-600 text-white placeholder-slate-400 focus:outline-none focus:border-blue-500 transition uppercase"
                   placeholder="SP"
                   maxLength={2}
                 />
                 {errors.uf && (
-                  <p className="text-red-400 text-xs mt-1" data-testid="edit-error-uf">
+                  <p className="text-red-400 text-xs mt-1">
                     {errors.uf}
                   </p>
                 )}
@@ -908,7 +922,6 @@ export default function SuppliersPage() {
                   handleUpdate();
                 }}
                 disabled={loading}
-                data-testid="update-supplier-btn"
                 className="flex-1 bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition font-semibold disabled:opacity-50"
               >
                 {loading ? 'Atualizando...' : 'Atualizar'}
@@ -920,7 +933,6 @@ export default function SuppliersPage() {
                   setEditingSupplier(null);
                   resetForm();
                 }}
-                data-testid="cancel-edit-supplier-btn"
                 className="flex-1 bg-slate-700 text-white py-3 rounded-lg hover:bg-slate-600 transition font-semibold"
               >
                 Cancelar
@@ -939,7 +951,6 @@ export default function SuppliersPage() {
             <div className="flex gap-3">
               <button
                 onClick={handleDelete}
-                data-testid="confirm-delete-btn"
                 className="flex-1 bg-red-600 text-white py-2 rounded-lg hover:bg-red-700 transition font-semibold"
               >
                 Excluir
@@ -949,7 +960,6 @@ export default function SuppliersPage() {
                   setShowConfirm(false);
                   setDeleteId(null);
                 }}
-                data-testid="cancel-delete-btn"
                 className="flex-1 bg-slate-700 text-white py-2 rounded-lg hover:bg-slate-600 transition font-semibold"
               >
                 Cancelar
