@@ -1,10 +1,12 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { toast } from 'react-toastify';
-import { FolderOpen, Plus, Edit, Trash2, Search, X, Tag, FileText, Package } from 'lucide-react';
+import { FolderOpen, Plus, Edit, Trash2, Search, X, Tag, FileText, Package, Eye } from 'lucide-react';
 
 export default function CategoriesPage() {
+  const router = useRouter();
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showAddModal, setShowAddModal] = useState(false);
@@ -321,66 +323,73 @@ export default function CategoriesPage() {
           ) : (
             <>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                {paginatedCategories.map((category) => (
-                  <div
-                    key={category.id}
-                    data-testid={`category-card-${category.id}`}
-                    className="bg-slate-800/50 backdrop-blur rounded-xl border border-slate-700 p-6 hover:border-emerald-500 transition-all hover:shadow-xl hover:shadow-emerald-500/20 group flex flex-col h-full"
-                  >
-                    <div className="flex items-start justify-between mb-4">
-                      <div className="flex items-center gap-3">
-                        <div className="bg-emerald-500/20 p-3 rounded-lg group-hover:bg-emerald-500/30 transition">
-                          <Tag className="w-6 h-6 text-emerald-400" />
-                        </div>
-                        <div className="flex-1">
-                          <h3 className="text-white font-semibold text-lg mb-1 line-clamp-1" data-testid={`category-name-${category.id}`} title={category.name}>
-                            {category.name}
-                          </h3>
-                          <div className="flex items-center gap-2 text-emerald-400 text-xs">
-                            <Package className="w-3 h-3" />
-                            <span>Produtos</span>
-                          </div>
+              {paginatedCategories.map((category) => (
+                <div
+                  key={category.id}
+                  data-testid={`category-card-${category.id}`}
+                  className="bg-slate-800/50 backdrop-blur rounded-xl border border-slate-700 p-6 hover:border-emerald-500 transition-all hover:shadow-xl hover:shadow-emerald-500/20 group flex flex-col h-full"
+                >
+                  <div className="flex items-start justify-between mb-4">
+                    <div className="flex items-center gap-3">
+                      <div className="bg-emerald-500/20 p-3 rounded-lg group-hover:bg-emerald-500/30 transition">
+                        <Tag className="w-6 h-6 text-emerald-400" />
+                      </div>
+                      <div className="flex-1">
+                        <h3 className="text-white font-semibold text-lg mb-1 line-clamp-1" data-testid={`category-name-${category.id}`} title={category.name}>
+                          {category.name}
+                        </h3>
+                        <div className="flex items-center gap-2 text-emerald-400 text-xs">
+                          <Package className="w-3 h-3" />
+                          <span>Produtos</span>
                         </div>
                       </div>
                     </div>
-
-                    <div className="mb-4 flex-grow">
-                      <p className="text-slate-300 text-sm leading-relaxed line-clamp-3" data-testid={`category-description-${category.id}`} title={category.description}>
-                        {category.description}
-                      </p>
-                    </div>
-
-                    <div className="flex gap-2 pt-4 border-t border-slate-700 mt-auto">
-                      <button
-                        onClick={() => {
-                          setEditingCategory(category);
-                          setFormData({
-                            name: category.name,
-                            description: category.description
-                          });
-                          setShowEditModal(true);
-                        }}
-                        data-testid={`edit-category-${category.id}`}
-                        className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-2 rounded-lg transition flex items-center justify-center gap-1"
-                      >
-                        <Edit className="w-4 h-4" />
-                        Editar
-                      </button>
-                      <button
-                        onClick={() => {
-                          setDeleteId(category.id);
-                          setShowConfirm(true);
-                        }}
-                        data-testid={`delete-category-${category.id}`}
-                        className="flex-1 bg-red-600 hover:bg-red-700 text-white px-3 py-2 rounded-lg transition flex items-center justify-center gap-1"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                        Excluir
-                      </button>
-                    </div>
                   </div>
-                ))}
-              </div>
+
+                  <div className="mb-4 flex-grow">
+                    <p className="text-slate-300 text-sm leading-relaxed line-clamp-3" data-testid={`category-description-${category.id}`} title={category.description}>
+                      {category.description}
+                    </p>
+                  </div>
+
+                  <div className="flex flex-wrap gap-2 pt-4 border-t border-slate-700 mt-auto">
+                    <button
+                      onClick={() => router.push(`/categories/${category.id}/products`)}
+                      className="flex-1 min-w-[100px] bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-lg transition flex items-center justify-center gap-1"
+                    >
+                      <Eye className="w-4 h-4" />
+                      Ver Produtos
+                    </button>
+                    <button
+                      onClick={() => {
+                        setEditingCategory(category);
+                        setFormData({
+                          name: category.name,
+                          description: category.description
+                        });
+                        setShowEditModal(true);
+                      }}
+                      data-testid={`edit-category-${category.id}`}
+                      className="flex-1 min-w-[100px] bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-2 rounded-lg transition flex items-center justify-center gap-1"
+                    >
+                      <Edit className="w-4 h-4" />
+                      Editar
+                    </button>
+                    <button
+                      onClick={() => {
+                        setDeleteId(category.id);
+                        setShowConfirm(true);
+                      }}
+                      data-testid={`delete-category-${category.id}`}
+                      className="flex-1 min-w-[100px] bg-red-600 hover:bg-red-700 text-white px-3 py-2 rounded-lg transition flex items-center justify-center gap-1"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                      Excluir
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
 
               {/* Pagination Controls */}
               {totalPages > 1 && (

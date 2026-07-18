@@ -2,6 +2,9 @@
 import { supabase } from '@/lib/supabase';
 import { NextResponse } from 'next/server';
 import { verifyToken, getTokenFromRequest } from '@/lib/jwt';
+import fs from 'fs/promises';
+import path from 'path';
+import { existsSync } from 'fs';
 
 export const dynamic = "force-dynamic";
 
@@ -86,8 +89,9 @@ export async function GET(request, { params }) {
     const { data: products, error } = await supabase
       .from('products')
       .select(`
-        id, name, price, stock_quantity, sku,
-        suppliers (company_name)
+        id, name, price, stock_quantity, sku, slug,
+        categories(name),
+        suppliers(company_name)
       `)
       .eq('category_id', idNum)
       .order('name');
@@ -102,10 +106,44 @@ export async function GET(request, { params }) {
       );
     }
 
+    // For each product, get the first image URL
+    const productsWithImages = await Promise.all(
+      (products || []).map(async (product) => {
+        let image_url = null;
+        try {
+          const isVercel = !!process.env.VERCEL;
+          if (isVercel) {
+            const { data: files } = await supabase.storage.from('products').list(product.id.toString());
+            if (files && files.length > 0) {
+              const firstPng = files.find(f => f.name.endsWith('.png'));
+              if (firstPng) {
+                const fileId = firstPng.name.split('_')[0];
+                image_url = `/api/v1/products/${product.id}/image/${fileId}`;
+              }
+            }
+          } else {
+            const UPLOAD_DIR = path.join(process.cwd(), 'storage', 'uploads', 'products');
+            const productDir = path.join(UPLOAD_DIR, product.id.toString());
+            if (existsSync(productDir)) {
+              const files = await fs.readdir(productDir);
+              const firstPng = files.find(f => f.endsWith('.png'));
+              if (firstPng) {
+                const fileId = firstPng.split('_')[0];
+                image_url = `/api/v1/products/${product.id}/image/${fileId}`;
+              }
+            }
+          }
+        } catch (imageError) {
+          console.error('Error fetching product image:', imageError);
+        }
+        return { ...product, image_url };
+      })
+    );
+
     return NextResponse.json({ 
-      data: products || [],
-      mensagens: products?.length > 0 
-        ? [`${products.length} produtos encontrados para a categoria ${category.name}.`]
+      data: productsWithImages || [],
+      mensagens: productsWithImages?.length > 0 
+        ? [`${productsWithImages.length} produtos encontrados para a categoria ${category.name}.`]
         : [`Nenhum produto cadastrado para a categoria ${category.name}.`]
     });
   } catch (error) {
