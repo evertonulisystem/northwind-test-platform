@@ -40,6 +40,10 @@ import { verifyToken, getTokenFromRequest } from '@/lib/jwt';
  *         name: order
  *         schema: { type: string, enum: [asc, desc], default: asc }
  *         description: Ordem de ordenação (asc = crescente, desc = decrescente)
+ *       - in: query
+ *         name: is_active
+ *         schema: { type: string, enum: ["true", "false"] }
+ *         description: Filtrar por produtos ativos ou inativos (se não for fornecido, retorna todos)
  *     responses:
  *       200:
  *         description: Lista paginada de produtos carregada com sucesso
@@ -164,6 +168,7 @@ export async function GET(request) {
     const supplier_id = searchParams.get('supplier_id');
     const sortBy = searchParams.get('sortBy') || 'name';
     const order = searchParams.get('order') || 'asc';
+    const is_active = searchParams.get('is_active');
     
     // Debug dos parâmetros
     console.log('📋 GET /products - Parâmetros recebidos:');
@@ -189,6 +194,7 @@ export async function GET(request) {
         category_id,
         supplier_id,
         slug,
+        is_active,
         categories(name),
         suppliers(company_name)
       `, { count: 'exact' });
@@ -199,6 +205,10 @@ export async function GET(request) {
     }
     if (supplier_id) {
       query = query.eq('supplier_id', supplier_id);
+    }
+    if (is_active !== undefined && is_active !== null) {
+      const isActive = is_active === 'true';
+      query = query.eq('is_active', isActive);
     }
 
     // Busca global (OR)
