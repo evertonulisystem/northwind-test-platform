@@ -262,7 +262,6 @@ export default function CategoriesPage() {
             <div className="flex justify-center gap-4">
               <button
                 onClick={() => setShowAddModal(true)}
-                data-testid="add-category-btn"
                 className="bg-emerald-600 hover:bg-emerald-700 text-white px-8 py-3 rounded-xl font-semibold shadow-lg transition transform hover:scale-105 flex items-center gap-2"
               >
                 <Plus className="w-5 h-5" />
@@ -292,7 +291,6 @@ export default function CategoriesPage() {
                     setCurrentPage(1);
                   }}
                   placeholder="Buscar categorias..."
-                  data-testid="category-search"
                   className="w-full pl-11 pr-4 py-3 bg-slate-800/50 backdrop-blur border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500"
                 />
               </div>
@@ -326,7 +324,6 @@ export default function CategoriesPage() {
               {paginatedCategories.map((category) => (
                 <div
                   key={category.id}
-                  data-testid={`category-card-${category.id}`}
                   className="bg-slate-800/50 backdrop-blur rounded-xl border border-slate-700 p-6 hover:border-emerald-500 transition-all hover:shadow-xl hover:shadow-emerald-500/20 group flex flex-col h-full"
                 >
                   <div className="flex items-start justify-between mb-4">
@@ -335,7 +332,7 @@ export default function CategoriesPage() {
                         <Tag className="w-6 h-6 text-emerald-400" />
                       </div>
                       <div className="flex-1">
-                        <h3 className="text-white font-semibold text-lg mb-1 line-clamp-1" data-testid={`category-name-${category.id}`} title={category.name}>
+                        <h3 className="text-white font-semibold text-lg mb-1 line-clamp-1" title={category.name}>
                           {category.name}
                         </h3>
                         <div className="flex items-center gap-2 text-emerald-400 text-xs">
@@ -347,7 +344,7 @@ export default function CategoriesPage() {
                   </div>
 
                   <div className="mb-4 flex-grow">
-                    <p className="text-slate-300 text-sm leading-relaxed line-clamp-3" data-testid={`category-description-${category.id}`} title={category.description}>
+                    <p className="text-slate-300 text-sm leading-relaxed line-clamp-3" title={category.description}>
                       {category.description}
                     </p>
                   </div>
@@ -369,7 +366,6 @@ export default function CategoriesPage() {
                         });
                         setShowEditModal(true);
                       }}
-                      data-testid={`edit-category-${category.id}`}
                       className="flex-1 min-w-[100px] bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-2 rounded-lg transition flex items-center justify-center gap-1"
                     >
                       <Edit className="w-4 h-4" />
@@ -380,7 +376,6 @@ export default function CategoriesPage() {
                         setDeleteId(category.id);
                         setShowConfirm(true);
                       }}
-                      data-testid={`delete-category-${category.id}`}
                       className="flex-1 min-w-[100px] bg-red-600 hover:bg-red-700 text-white px-3 py-2 rounded-lg transition flex items-center justify-center gap-1"
                     >
                       <Trash2 className="w-4 h-4" />
@@ -441,12 +436,11 @@ export default function CategoriesPage() {
                   name="name"
                   value={formData.name}
                   onChange={handleChange}
-                  data-testid="category-name-input"
                   className="w-full px-4 py-2.5 rounded-lg bg-slate-700 border border-slate-600 text-white placeholder-slate-400 focus:outline-none focus:border-emerald-500 transition"
                   placeholder="Eletrônicos"
                 />
                 {errors.name && (
-                  <p className="text-red-400 text-xs mt-1" data-testid="error-category-name">
+                  <p className="text-red-400 text-xs mt-1">
                     {errors.name}
                   </p>
                 )}
@@ -462,13 +456,12 @@ export default function CategoriesPage() {
                   name="description"
                   value={formData.description}
                   onChange={handleChange}
-                  data-testid="category-description-input"
                   rows={4}
                   className="w-full px-4 py-2.5 rounded-lg bg-slate-700 border border-slate-600 text-white placeholder-slate-400 focus:outline-none focus:border-emerald-500 transition resize-none"
                   placeholder="Produtos eletrônicos como celulares, computadores, tablets e acessórios..."
                 />
                 {errors.description && (
-                  <p className="text-red-400 text-xs mt-1" data-testid="error-category-description">
+                  <p className="text-red-400 text-xs mt-1">
                     {errors.description}
                   </p>
                 )}
@@ -480,7 +473,6 @@ export default function CategoriesPage() {
                 type="submit"
                 form="category-form"
                 disabled={loading}
-                data-testid="save-category-btn"
                 className="flex-1 bg-emerald-600 text-white py-3 rounded-lg hover:bg-emerald-700 transition font-semibold disabled:opacity-50"
               >
                 {loading ? 'Salvando...' : 'Salvar'}
@@ -495,7 +487,6 @@ export default function CategoriesPage() {
                   });
                   setErrors({});
                 }}
-                data-testid="cancel-category-btn"
                 className="flex-1 bg-slate-700 text-white py-3 rounded-lg hover:bg-slate-600 transition font-semibold"
               >
                 Cancelar
@@ -528,12 +519,11 @@ export default function CategoriesPage() {
                   name="name"
                   value={formData.name}
                   onChange={handleChange}
-                  data-testid="edit-category-name-input"
                   className="w-full px-4 py-2.5 rounded-lg bg-slate-700 border border-slate-600 text-white placeholder-slate-400 focus:outline-none focus:border-emerald-500 transition"
                   placeholder="Eletrônicos"
                 />
                 {errors.name && (
-                  <p className="text-red-400 text-xs mt-1" data-testid="edit-error-category-name">
+                  <p className="text-red-400 text-xs mt-1">
                     {errors.name}
                   </p>
                 )}
@@ -549,13 +539,12 @@ export default function CategoriesPage() {
                   name="description"
                   value={formData.description}
                   onChange={handleChange}
-                  data-testid="edit-category-description-input"
                   rows={4}
                   className="w-full px-4 py-2.5 rounded-lg bg-slate-700 border border-slate-600 text-white placeholder-slate-400 focus:outline-none focus:border-emerald-500 transition resize-none"
                   placeholder="Produtos eletrônicos como celulares, computadores, tablets e acessórios..."
                 />
                 {errors.description && (
-                  <p className="text-red-400 text-xs mt-1" data-testid="edit-error-category-description">
+                  <p className="text-red-400 text-xs mt-1">
                     {errors.description}
                   </p>
                 )}
@@ -567,7 +556,6 @@ export default function CategoriesPage() {
                 type="submit"
                 form="edit-category-form"
                 disabled={loading}
-                data-testid="update-category-btn"
                 className="flex-1 bg-emerald-600 text-white py-3 rounded-lg hover:bg-emerald-700 transition font-semibold disabled:opacity-50"
               >
                 {loading ? 'Atualizando...' : 'Atualizar'}
@@ -583,7 +571,6 @@ export default function CategoriesPage() {
                   });
                   setErrors({});
                 }}
-                data-testid="cancel-edit-category-btn"
                 className="flex-1 bg-slate-700 text-white py-3 rounded-lg hover:bg-slate-600 transition font-semibold"
               >
                 Cancelar
@@ -602,7 +589,6 @@ export default function CategoriesPage() {
             <div className="flex gap-3">
               <button
                 onClick={handleDelete}
-                data-testid="confirm-delete-category-btn"
                 className="flex-1 bg-red-600 text-white py-2 rounded-lg hover:bg-red-700 transition font-semibold"
               >
                 Excluir
@@ -612,7 +598,6 @@ export default function CategoriesPage() {
                   setShowConfirm(false);
                   setDeleteId(null);
                 }}
-                data-testid="cancel-delete-category-btn"
                 className="flex-1 bg-slate-700 text-white py-2 rounded-lg hover:bg-slate-600 transition font-semibold"
               >
                 Cancelar
