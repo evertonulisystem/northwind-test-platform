@@ -89,7 +89,8 @@ export async function GET(request, { params }) {
       .from('products')
       .select(`
         id, name, price, stock_quantity, sku,
-        categories (name)
+        categories (name),
+        suppliers (company_name)
       `)
       .eq('supplier_id', idNum)
       .order('name');

@@ -57,7 +57,7 @@ export default function SuppliersPage() {
     });
   };
 
-  const fetchSuppliers = async () => {
+  const fetchSuppliers = async (search = '') => {
     try {
       setLoading(true);
       const token = localStorage.getItem('token');
@@ -67,7 +67,12 @@ export default function SuppliersPage() {
         headers['Authorization'] = `Bearer ${token}`;
       }
       
-      const res = await fetch('/api/v1/suppliers', { headers });
+      const url = new URL('/api/v1/suppliers', window.location.origin);
+      if (search) {
+        url.searchParams.set('search', search);
+      }
+      
+      const res = await fetch(url.toString(), { headers });
       const result = await res.json();
       
       console.log('🔍 DEBUG - suppliers API result:', result);
@@ -86,8 +91,8 @@ export default function SuppliersPage() {
   };
 
   useEffect(() => {
-    fetchSuppliers();
-  }, []);
+    fetchSuppliers(searchTerm);
+  }, [searchTerm]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -370,18 +375,8 @@ export default function SuppliersPage() {
   const ITEMS_PER_PAGE = 8;
   const [currentPage, setCurrentPage] = useState(1);
 
-  const filteredSuppliers = suppliers.filter(supplier => {
-    console.log('🔍 DEBUG - supplier:', supplier);
-    console.log('🔍 DEBUG - searchTerm:', searchTerm);
-    const matches = supplier.company_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      supplier.contact_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      supplier.email?.toLowerCase().includes(searchTerm.toLowerCase());
-    console.log('🔍 DEBUG - matches:', matches);
-    return matches;
-  });
-
-  const totalPages = Math.ceil(filteredSuppliers.length / ITEMS_PER_PAGE);
-  const paginatedSuppliers = filteredSuppliers.slice(
+  const totalPages = Math.ceil(suppliers.length / ITEMS_PER_PAGE);
+  const paginatedSuppliers = suppliers.slice(
     (currentPage - 1) * ITEMS_PER_PAGE,
     currentPage * ITEMS_PER_PAGE
   );
@@ -440,7 +435,7 @@ export default function SuppliersPage() {
               <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
               <p>Carregando fornecedores...</p>
             </div>
-          ) : filteredSuppliers.length === 0 ? (
+          ) : suppliers.length === 0 ? (
             <div className="text-center text-slate-400 py-12">
               <Building2 className="w-16 h-16 mx-auto mb-4 opacity-50" />
               <p className="text-xl mb-4">

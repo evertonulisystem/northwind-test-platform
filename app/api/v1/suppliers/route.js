@@ -7,10 +7,15 @@ import { verifyToken, getTokenFromRequest } from '@/lib/jwt';
  * @swagger
  * /api/v1/suppliers:
  *   get:
- *     summary: Lista todos os fornecedores
+ *     summary: Lista fornecedores com busca opcional
  *     tags: [Suppliers]
  *     security:
  *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: search
+ *         schema: { type: string }
+ *         description: Busca por razão social, nome do contato ou e-mail
  *     responses:
  *       200:
  *         description: Lista de fornecedores
@@ -44,10 +49,31 @@ export async function GET(request) {
       );
     }
 
-    const { data, error } = await supabase
+    const { searchParams } = new URL(request.url);
+    const search = searchParams.get('search')?.trim();
+
+    let query = supabase
       .from('suppliers')
       .select('*')
       .order('company_name', { ascending: true });
+
+    // Adicionar busca se o parâmetro for fornecido
+    if (search && search.length > 0) {
+      const isNumeric = /^\d+$/.test(search);
+      const pattern = `%${search}%`;
+      
+      let orConditions = 'company_name.ilike.' + pattern + ',' + 
+                         'contact_name.ilike.' + pattern + ',' + 
+                         'email.ilike.' + pattern;
+      
+      if (isNumeric) {
+        orConditions += ',id.eq.' + search;
+      }
+      
+      query = query.or(orConditions);
+    }
+
+    const { data, error } = await query;
 
     if (error) throw error;
 
