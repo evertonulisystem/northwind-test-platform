@@ -6,7 +6,7 @@ import { toast } from 'react-toastify';
 import { useDebounce } from 'use-debounce';
 import AddProductModal from '@/components/AddProductModal.jsx';
 import EditProductModal from '@/components/EditProductModal.jsx';
-import { AlertTriangle, Plus, Edit, Trash2, Search, X, ChevronDown, ShoppingBag } from 'lucide-react';
+import { AlertTriangle, Plus, Edit, Trash2, Search, X, ChevronDown, ShoppingBag, Star } from 'lucide-react';
 import ProductDetailsModal from '@/components/ProductDetailsModal.jsx';
 import RulesModal from '@/components/RulesModal.jsx';
 import ConfirmModal from '@/components/ConfirmModal.jsx';
@@ -234,6 +234,21 @@ export default function ProductsPage() {
             >
               <ShoppingBag className="w-5 h-5" />
               Ver Carrinho
+            </button>
+
+            {/* 🆕 NOVA FUNCIONALIDADE — Botão de Avaliações com badge "Novo" pulsante */}
+            <button
+              onClick={() => router.push('/reviews')}
+              id="view-reviews-button"
+              data-testid="view-reviews-button"
+              className="relative bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white px-6 py-3 rounded-xl transition font-semibold shadow-lg flex items-center gap-2"
+            >
+              <Star className="w-5 h-5" />
+              Avaliações
+              {/* Badge "Novo" com animação CSS badge-pulse */}
+              <span className="badge-novo absolute -top-2 -right-2 bg-green-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full border-2 border-purple-900 leading-tight">
+                Novo
+              </span>
             </button>
 
             <button onClick={() => setShowAddModal(true)}
