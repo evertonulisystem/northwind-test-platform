@@ -6,7 +6,7 @@ import { toast } from 'react-toastify';
 import { useDebounce } from 'use-debounce';
 import AddProductModal from '@/components/AddProductModal.jsx';
 import EditProductModal from '@/components/EditProductModal.jsx';
-import { AlertTriangle, Plus, Edit, Trash2, Search, X, ChevronDown, ShoppingBag, Star } from 'lucide-react';
+import { AlertTriangle, Plus, Edit, Trash2, Search, X, ChevronDown, ShoppingBag, Star, BarChart2, ClipboardList } from 'lucide-react';
 import ProductDetailsModal from '@/components/ProductDetailsModal.jsx';
 import RulesModal from '@/components/RulesModal.jsx';
 import ConfirmModal from '@/components/ConfirmModal.jsx';
@@ -246,6 +246,34 @@ export default function ProductsPage() {
               <Star className="w-5 h-5" />
               Avaliações
               {/* Badge "Novo" com animação CSS badge-pulse */}
+              <span className="badge-novo absolute -top-2 -right-2 bg-green-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full border-2 border-purple-900 leading-tight">
+                Novo
+              </span>
+            </button>
+
+            {/* 🆕 NOVA FUNCIONALIDADE — Botão Meus Pedidos */}
+            <button
+              onClick={() => router.push('/orders')}
+              id="view-orders-button"
+              data-testid="view-orders-button"
+              className="relative bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white px-6 py-3 rounded-xl transition font-semibold shadow-lg flex items-center gap-2"
+            >
+              <ClipboardList className="w-5 h-5" />
+              Meus Pedidos
+              <span className="badge-novo absolute -top-2 -right-2 bg-green-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full border-2 border-purple-900 leading-tight">
+                Novo
+              </span>
+            </button>
+
+            {/* 🆕 NOVA FUNCIONALIDADE — Botão Relatório de Vendas */}
+            <button
+              onClick={() => router.push('/reports')}
+              id="view-reports-button"
+              data-testid="view-reports-button"
+              className="relative bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-700 hover:to-purple-700 text-white px-6 py-3 rounded-xl transition font-semibold shadow-lg flex items-center gap-2"
+            >
+              <BarChart2 className="w-5 h-5" />
+              Relatório
               <span className="badge-novo absolute -top-2 -right-2 bg-green-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full border-2 border-purple-900 leading-tight">
                 Novo
               </span>

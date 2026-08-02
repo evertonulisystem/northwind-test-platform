@@ -22,6 +22,18 @@ export const dynamic = "force-dynamic";
  *         required: true
  *         schema:
  *           type: integer
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *           default: 1
+ *         description: Número da página
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           default: 10
+ *         description: Quantidade de itens por página
  *     responses:
  *       200:
  *         description: Lista de produtos da categoria
@@ -47,7 +59,7 @@ export async function GET(request, { params }) {
       const message = payload?.message || 'Token inválido';
       return NextResponse.json(
         { 
-          data: null,
+          data: null, 
           mensagens: [message],
           expires_at: payload?.expires_at || null
         }, 
@@ -69,6 +81,12 @@ export async function GET(request, { params }) {
       );
     }
 
+    // Pegar parâmetros de paginação
+    const { searchParams } = new URL(request.url);
+    const page = parseInt(searchParams.get('page') || '1', 10);
+    const limit = parseInt(searchParams.get('limit') || '10', 10);
+    const start = (page - 1) * limit;
+
     // Primeiro, verifica se a categoria existe
     const { data: category, error: catError } = await supabase
       .from('categories')
@@ -86,15 +104,16 @@ export async function GET(request, { params }) {
       );
     }
 
-    const { data: products, error } = await supabase
+    const { data: products, error, count } = await supabase
       .from('products')
       .select(`
         id, name, price, stock_quantity, sku, slug,
         categories(name),
         suppliers(company_name)
-      `)
+      `, { count: 'exact' })
       .eq('category_id', idNum)
-      .order('name');
+      .order('name')
+      .range(start, start + limit - 1);
 
     if (error) {
       return NextResponse.json(
@@ -140,10 +159,19 @@ export async function GET(request, { params }) {
       })
     );
 
+    const total = count || 0;
+    const totalPages = Math.ceil(total / limit);
+
     return NextResponse.json({ 
       data: productsWithImages || [],
-      mensagens: productsWithImages?.length > 0 
-        ? [`${productsWithImages.length} produtos encontrados para a categoria ${category.name}.`]
+      pagination: {
+        page,
+        limit,
+        total,
+        totalPages
+      },
+      mensagens: total > 0 
+        ? [`${total} produtos encontrados para a categoria ${category.name}.`]
         : [`Nenhum produto cadastrado para a categoria ${category.name}.`]
     });
   } catch (error) {

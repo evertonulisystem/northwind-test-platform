@@ -12,8 +12,10 @@ export default function SupplierProductsPage() {
   const [supplier, setSupplier] = useState(null);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pagination, setPagination] = useState({ page: 1, limit: 10, total: 0, totalPages: 0 });
 
-  const fetchSupplierProducts = async () => {
+  const fetchSupplierProducts = async (page = 1) => {
     try {
       setLoading(true);
       const token = localStorage.getItem('token');
@@ -23,7 +25,7 @@ export default function SupplierProductsPage() {
         headers['Authorization'] = `Bearer ${token}`;
       }
       
-      const res = await fetch(`/api/v1/suppliers/${params.id}/products`, { 
+      const res = await fetch(`/api/v1/suppliers/${params.id}/products?page=${page}&limit=10`, { 
         headers,
         cache: 'no-store'
       });
@@ -35,6 +37,9 @@ export default function SupplierProductsPage() {
       }
       
       setProducts(result.data || []);
+      if (result.pagination) {
+        setPagination(result.pagination);
+      }
       
       // Set supplier name from first product or from endpoint messages
       if (result.data?.[0]?.suppliers?.company_name) {
@@ -74,7 +79,7 @@ export default function SupplierProductsPage() {
       if (res.ok) {
         toast.success('Produto desvinculado do fornecedor com sucesso!');
         // Refresh the product list
-        fetchSupplierProducts();
+        fetchSupplierProducts(currentPage);
       } else {
         const result = await res.json();
         toast.error(result.mensagens?.[0] || 'Erro ao desvincular produto');
@@ -86,9 +91,16 @@ export default function SupplierProductsPage() {
 
   useEffect(() => {
     if (params.id) {
-      fetchSupplierProducts();
+      setCurrentPage(1);
+      fetchSupplierProducts(1);
     }
   }, [params.id]);
+
+  useEffect(() => {
+    if (params.id) {
+      fetchSupplierProducts(currentPage);
+    }
+  }, [params.id, currentPage]);
 
   const filteredProducts = products.filter(product => 
     product.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -189,10 +201,31 @@ export default function SupplierProductsPage() {
                   </tbody>
                 </table>
               </div>
-              <div className="bg-slate-900/50 px-6 py-4 border-t border-slate-700">
+              <div className="bg-slate-900/50 px-6 py-4 border-t border-slate-700 flex items-center justify-between flex-wrap gap-4">
                 <p className="text-slate-400 text-sm">
-                  Total: {filteredProducts.length} produto{filteredProducts.length !== 1 ? 's' : ''}
+                  Total: {pagination.total} produto{pagination.total !== 1 ? 's' : ''}
                 </p>
+                {pagination.totalPages > 1 && (
+                  <div className="flex items-center gap-3">
+                    <button
+                      onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                      disabled={currentPage === 1}
+                      className="px-4 py-2 rounded-lg bg-slate-800/90 border border-slate-700 text-white hover:bg-slate-700/70 disabled:opacity-50 disabled:cursor-not-allowed transition"
+                    >
+                      Anterior
+                    </button>
+                    <span className="text-slate-300">
+                      Página <span className="font-bold text-white">{currentPage}</span> de <span className="font-bold text-white">{pagination.totalPages}</span>
+                    </span>
+                    <button
+                      onClick={() => setCurrentPage(prev => Math.min(pagination.totalPages, prev + 1))}
+                      disabled={currentPage === pagination.totalPages}
+                      className="px-4 py-2 rounded-lg bg-slate-800/90 border border-slate-700 text-white hover:bg-slate-700/70 disabled:opacity-50 disabled:cursor-not-allowed transition"
+                    >
+                      Próxima
+                    </button>
+                  </div>
+                )}
               </div>
             </>
           )}

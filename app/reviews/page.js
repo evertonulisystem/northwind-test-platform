@@ -407,6 +407,8 @@ export default function ReviewsPage() {
   // ── Estado: avaliações aprovadas ─────────────────────────────
   const [reviews, setReviews] = useState([]);
   const [loadingReviews, setLoadingReviews] = useState(true);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pagination, setPagination] = useState({ page: 1, limit: 10, total: 0, totalPages: 0 });
 
   // ── Estado: modal de avaliação ───────────────────────────────
   const [modalProduct, setModalProduct] = useState(null); // produto selecionado
@@ -455,13 +457,13 @@ export default function ReviewsPage() {
   }, []);
 
   // ── Busca: todas as avaliações aprovadas ─────────────────────
-  const fetchReviews = useCallback(async () => {
+  const fetchReviews = useCallback(async (page = 1) => {
     setLoadingReviews(true);
     try {
       const token = localStorage.getItem('token');
       if (!token) return;
 
-      const res = await fetch('/api/v1/reviews', {
+      const res = await fetch(`/api/v1/reviews?page=${page}&limit=10`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -476,6 +478,9 @@ export default function ReviewsPage() {
 
       const data = await res.json();
       setReviews(data.data || []);
+      if (data.pagination) {
+        setPagination(data.pagination);
+      }
     } catch (err) {
       console.error('Erro ao buscar avaliações:', err);
       toast.error('Erro ao carregar avaliações.');
@@ -488,15 +493,15 @@ export default function ReviewsPage() {
   // Carrega ambas as listas ao montar a página
   useEffect(() => {
     fetchProductsWithoutReviews();
-    fetchReviews();
-  }, [fetchProductsWithoutReviews, fetchReviews]);
+    fetchReviews(currentPage);
+  }, [fetchProductsWithoutReviews, fetchReviews, currentPage]);
 
   // ── Handler: após envio da avaliação com sucesso ─────────────
   // Fecha o modal e recarrega ambas as listas para refletir o estado atual
   function handleReviewSuccess() {
     setModalProduct(null);
     fetchProductsWithoutReviews();
-    fetchReviews();
+    fetchReviews(currentPage);
   }
 
   return (
@@ -708,9 +713,9 @@ export default function ReviewsPage() {
                 </p>
               </div>
 
-              {!loadingReviews && reviews.length > 0 && (
+              {!loadingReviews && pagination.total > 0 && (
                 <span className="ml-auto bg-purple-500/20 border border-purple-500/40 text-purple-300 px-3 py-1 rounded-full text-sm font-semibold">
-                  {reviews.length} avaliação{reviews.length !== 1 ? 'ões' : ''}
+                  {pagination.total} avaliação{pagination.total !== 1 ? 'ões' : ''}
                 </span>
               )}
             </div>
@@ -738,78 +743,102 @@ export default function ReviewsPage() {
                 </p>
               </div>
             ) : (
-              <div
-                className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4"
-                data-testid="reviews-grid"
-              >
-                {reviews.map((review) => (
-                  <article
-                    key={review.id}
-                    data-testid={`review-card-${review.id}`}
-                    className="bg-slate-800/90 backdrop-blur-md border border-slate-700 rounded-xl p-5 hover:border-slate-600 hover:bg-slate-700/70 transition-all shadow-lg"
-                  >
-                    {/* Cabeçalho do card: produto + estrelas */}
-                    <div className="flex items-start justify-between mb-3">
-                      <div className="flex-1 min-w-0">
-                        <p className="text-xs text-slate-500 uppercase tracking-wider mb-0.5">
-                          Produto
-                        </p>
-                        <p
-                          className="text-white font-semibold text-sm truncate"
-                          data-testid={`review-product-name-${review.id}`}
-                        >
-                          {review.products?.name || `Produto #${review.product_id}`}
-                        </p>
-                      </div>
-                      <StarDisplay rating={review.rating} />
-                    </div>
-
-                    {/* Título da avaliação */}
-                    {review.title && (
-                      <p
-                        className="text-white font-medium text-sm mb-2"
-                        data-testid={`review-title-${review.id}`}
-                      >
-                        &ldquo;{review.title}&rdquo;
-                      </p>
-                    )}
-
-                    {/* Comentário */}
-                    <p
-                      className="text-slate-300 text-sm leading-relaxed line-clamp-3 mb-3"
-                      data-testid={`review-comment-${review.id}`}
+              <>
+                <div
+                  className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4"
+                  data-testid="reviews-grid"
+                >
+                  {reviews.map((review) => (
+                    <article
+                      key={review.id}
+                      data-testid={`review-card-${review.id}`}
+                      className="bg-slate-800/90 backdrop-blur-md border border-slate-700 rounded-xl p-5 hover:border-slate-600 hover:bg-slate-700/70 transition-all shadow-lg"
                     >
-                      {review.comment}
-                    </p>
+                      {/* Cabeçalho do card: produto + estrelas */}
+                      <div className="flex items-start justify-between mb-3">
+                        <div className="flex-1 min-w-0">
+                          <p className="text-xs text-slate-500 uppercase tracking-wider mb-0.5">
+                            Produto
+                          </p>
+                          <p
+                            className="text-white font-semibold text-sm truncate"
+                            data-testid={`review-product-name-${review.id}`}
+                          >
+                            {review.products?.name || `Produto #${review.product_id}`}
+                          </p>
+                        </div>
+                        <StarDisplay rating={review.rating} />
+                      </div>
 
-                    {/* Rodapé: badges + data */}
-                    <div className="flex items-center justify-between pt-3 border-t border-slate-700/60">
-                      <div className="flex gap-2">
-                        {/* Badge: compra verificada */}
-                        {review.is_verified_purchase && (
-                          <span className="inline-flex items-center gap-1 bg-green-500/15 border border-green-500/30 text-green-400 px-2 py-0.5 rounded-full text-xs">
-                            <CheckCircle className="w-3 h-3" />
-                            Verificado
+                      {/* Título da avaliação */}
+                      {review.title && (
+                        <p
+                          className="text-white font-medium text-sm mb-2"
+                          data-testid={`review-title-${review.id}`}
+                        >
+                          &ldquo;{review.title}&rdquo;
+                        </p>
+                      )}
+
+                      {/* Comentário */}
+                      <p
+                        className="text-slate-300 text-sm leading-relaxed line-clamp-3 mb-3"
+                        data-testid={`review-comment-${review.id}`}
+                      >
+                        {review.comment}
+                      </p>
+
+                      {/* Rodapé: badges + data */}
+                      <div className="flex items-center justify-between pt-3 border-t border-slate-700/60">
+                        <div className="flex gap-2">
+                          {/* Badge: compra verificada */}
+                          {review.is_verified_purchase && (
+                            <span className="inline-flex items-center gap-1 bg-green-500/15 border border-green-500/30 text-green-400 px-2 py-0.5 rounded-full text-xs">
+                              <CheckCircle className="w-3 h-3" />
+                              Verificado
+                            </span>
+                          )}
+                          {/* Nota numérica */}
+                          <span className="inline-flex items-center gap-1 bg-amber-500/15 border border-amber-500/30 text-amber-400 px-2 py-0.5 rounded-full text-xs font-semibold">
+                            <Star className="w-3 h-3 fill-amber-400" />
+                            {review.rating}/5
                           </span>
-                        )}
-                        {/* Nota numérica */}
-                        <span className="inline-flex items-center gap-1 bg-amber-500/15 border border-amber-500/30 text-amber-400 px-2 py-0.5 rounded-full text-xs font-semibold">
-                          <Star className="w-3 h-3 fill-amber-400" />
-                          {review.rating}/5
+                        </div>
+
+                        {/* Data da avaliação */}
+                        <span
+                          className="text-slate-500 text-xs"
+                          data-testid={`review-date-${review.id}`}
+                        >
+                          {formatDate(review.created_at)}
                         </span>
                       </div>
+                    </article>
+                  ))}
+                </div>
 
-                      {/* Data da avaliação */}
-                      <span
-                        className="text-slate-500 text-xs"
-                        data-testid={`review-date-${review.id}`}
-                      >
-                        {formatDate(review.created_at)}
-                      </span>
-                    </div>
-                  </article>
-                ))}
-              </div>
+                {pagination.totalPages > 1 && (
+                  <div className="flex justify-center items-center gap-4 mt-8">
+                    <button
+                      onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
+                      disabled={currentPage === 1}
+                      className="px-4 py-2 rounded-lg bg-slate-800 border border-slate-600 text-white hover:bg-slate-700 disabled:opacity-50 disabled:cursor-not-allowed transition"
+                    >
+                      Anterior
+                    </button>
+                    <span className="text-slate-300">
+                      Página <span className="font-bold text-white">{currentPage}</span> de <span className="font-bold text-white">{pagination.totalPages}</span>
+                    </span>
+                    <button
+                      onClick={() => setCurrentPage((prev) => Math.min(pagination.totalPages, prev + 1))}
+                      disabled={currentPage === pagination.totalPages}
+                      className="px-4 py-2 rounded-lg bg-slate-800 border border-slate-600 text-white hover:bg-slate-700 disabled:opacity-50 disabled:cursor-not-allowed transition"
+                    >
+                      Próxima
+                    </button>
+                  </div>
+                )}
+              </>
             )}
           </section>
         </div>

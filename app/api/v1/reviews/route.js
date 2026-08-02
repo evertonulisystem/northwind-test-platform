@@ -13,11 +13,12 @@ import { verifyToken, getTokenFromRequest } from '@/lib/jwt';
  * GET /api/v1/reviews
  *
  * Retorna todas as avaliações aprovadas (is_approved = true).
- * Suporte a query param: ?product_id=X para filtrar por produto.
+ * Suporte a query params: 
+ *   - ?product_id=X para filtrar por produto
+ *   - ?page=N para página (padrão 1)
+ *   - ?limit=M para itens por página (padrão 10)
  *
- * Resposta: array de objetos com:
- *   { id, product_id, user_id, rating, title, comment,
- *     is_verified_purchase, helpful_count, created_at }
+ * Resposta: { data, pagination: { page, limit, total, totalPages }, mensagens }
  *
  * Requer autenticação via Bearer token.
  */
@@ -43,14 +44,14 @@ export async function GET(request) {
   }
 
   // ── 2. Parâmetros de query ───────────────────────────────────
-  // Permitimos filtrar por produto via ?product_id=X
   const { searchParams } = new URL(request.url);
   const productId = searchParams.get('product_id');
+  const page = parseInt(searchParams.get('page') || '1', 10);
+  const limit = parseInt(searchParams.get('limit') || '10', 10);
+  const start = (page - 1) * limit;
 
   try {
     // ── 3. Query no Supabase ─────────────────────────────────────
-    // Buscamos apenas avaliações aprovadas pelo moderador (is_approved = true).
-    // O join com products traz o nome para exibição no front-end.
     let query = supabase
       .from('reviews')
       .select(`
@@ -64,7 +65,7 @@ export async function GET(request) {
         helpful_count,
         created_at,
         products(name)
-      `)
+      `, { count: 'exact' })
       .eq('is_approved', true)
       .order('created_at', { ascending: false });
 
@@ -73,15 +74,27 @@ export async function GET(request) {
       query = query.eq('product_id', productId);
     }
 
-    const { data, error } = await query;
+    // Aplicar paginação
+    query = query.range(start, start + limit - 1);
+
+    const { data, error, count } = await query;
 
     if (error) {
       console.error('Erro Supabase GET reviews:', error);
       throw error;
     }
 
+    const total = count || 0;
+    const totalPages = Math.ceil(total / limit);
+
     return NextResponse.json({
       data: data || [],
+      pagination: {
+        page,
+        limit,
+        total,
+        totalPages,
+      },
       mensagens: ['Avaliações carregadas com sucesso.'],
     });
 
