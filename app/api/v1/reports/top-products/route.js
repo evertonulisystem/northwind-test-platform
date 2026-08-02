@@ -13,9 +13,16 @@
 // Adicionado em: agosto/2026
 // ============================================================
 
-import { supabase } from '@/lib/supabase';
-import { NextResponse } from 'next/server';
-import { requireAuth } from '@/lib/auth';
+import { supabase } from "@/lib/supabase";
+import { NextResponse } from "next/server";
+import { requireAuth } from "@/lib/auth";
+
+const ALLOWED_TOP_VALUES = [10, 20, 50, 100];
+
+function parsePositiveInteger(value, fallback) {
+  const parsed = parseInt(value || "", 10);
+  return Number.isNaN(parsed) || parsed < 1 ? fallback : parsed;
+}
 
 /**
  * @swagger
@@ -27,9 +34,17 @@ import { requireAuth } from '@/lib/auth';
  *       - bearerAuth: []
  *     parameters:
  *       - in: query
+ *         name: top
+ *         schema: { type: integer, default: 20 }
+ *         description: Quantidade máxima de produtos no ranking analisado
+ *       - in: query
+ *         name: page
+ *         schema: { type: integer, default: 1 }
+ *         description: Página da paginação
+ *       - in: query
  *         name: limit
  *         schema: { type: integer, default: 10 }
- *         description: Quantidade máxima de produtos no ranking
+ *         description: Quantidade de produtos por página
  *     responses:
  *       200:
  *         description: Ranking de produtos mais vendidos
@@ -37,14 +52,30 @@ import { requireAuth } from '@/lib/auth';
 async function getTopProducts(request, { user }) {
   try {
     const { searchParams } = new URL(request.url);
-    const limit = parseInt(searchParams.get('limit') || '10', 10);
+    const rawTop = searchParams.get("top");
+    const page = parsePositiveInteger(searchParams.get("page"), 1);
+    const limit = parsePositiveInteger(searchParams.get("limit"), 10);
 
-    // Buscar todos os order_items com dados do produto relacionado
-    // O Supabase não suporta GROUP BY diretamente via JS client,
-    // então buscamos todos os itens e agrupamos no servidor Node.
-    const { data: items, error } = await supabase
-      .from('order_items')
-      .select(`
+    if (rawTop !== null) {
+      const parsedTop = parseInt(rawTop, 10);
+      if (
+        !Number.isInteger(parsedTop) ||
+        parsedTop < 1 ||
+        !ALLOWED_TOP_VALUES.includes(parsedTop)
+      ) {
+        return NextResponse.json(
+          {
+            data: null,
+            mensagens: ["Valor de top inválido. Use 10, 20, 50 ou 100."],
+          },
+          { status: 400 },
+        );
+      }
+    }
+
+    const top = rawTop === null ? 20 : parsePositiveInteger(rawTop, 20);
+
+    const { data: items, error } = await supabase.from("order_items").select(`
         product_id,
         quantity,
         unit_price,
@@ -66,12 +97,16 @@ async function getTopProducts(request, { user }) {
     if (!items || items.length === 0) {
       return NextResponse.json({
         data: [],
-        mensagens: ['Nenhum item de pedido encontrado.'],
+        pagination: {
+          page: 1,
+          limit: 10,
+          total: 0,
+          totalPages: 0,
+        },
+        mensagens: ["Nenhuma venda encontrada."],
       });
     }
 
-    // Agrupar por product_id e acumular as métricas
-    // Equivalente ao GROUP BY do SQL
     const grouped = {};
     for (const item of items) {
       const pid = item.product_id;
@@ -91,41 +126,68 @@ async function getTopProducts(request, { user }) {
       grouped[pid].orders_count += 1;
     }
 
-    // Converter para array, ordenar por quantidade DESC e limitar
-    const ranking = Object.values(grouped)
+    const rankedProducts = Object.values(grouped)
       .sort((a, b) => b.total_quantity - a.total_quantity)
-      .slice(0, limit)
-      .map((item, index) => ({
-        rank: index + 1,
-        product_id: item.product_id,
-        name: item.product?.name || 'Produto removido',
-        sku: item.product?.sku || '-',
-        image_url: item.product?.image_url || null,
-        current_price: item.product?.price || 0,
-        rating: item.product?.rating || 0,
-        reviews_count: item.product?.reviews_count || 0,
-        total_quantity_sold: item.total_quantity,
-        total_revenue: Math.round(item.total_revenue * 100) / 100,
-        total_discount_given: Math.round(item.total_discount * 100) / 100,
-        orders_count: item.orders_count,
-      }));
+      .slice(0, top);
+
+    const maxQuantity = rankedProducts.reduce(
+      (highest, item) => Math.max(highest, item.total_quantity),
+      0,
+    );
+
+    const ranking = rankedProducts.map((item, index) => ({
+      rank: index + 1,
+      product_id: item.product_id,
+      name: item.product?.name || "Produto removido",
+      sku: item.product?.sku || "-",
+      image_url: item.product?.image_url || null,
+      current_price: item.product?.price || 0,
+      rating: item.product?.rating || 0,
+      reviews_count: item.product?.reviews_count || 0,
+      total_quantity_sold: item.total_quantity,
+      total_revenue: Math.round(item.total_revenue * 100) / 100,
+      total_discount_given: Math.round(item.total_discount * 100) / 100,
+      orders_count: item.orders_count,
+      participation_percentage:
+        maxQuantity > 0 ? (item.total_quantity / maxQuantity) * 100 : 0,
+    }));
+
+    const total = ranking.length;
+    const totalPages = total > 0 ? Math.ceil(total / limit) : 0;
+    const safePage = totalPages > 0 ? Math.min(page, totalPages) : 1;
+    const start = (safePage - 1) * limit;
+    const paginatedRanking = ranking.slice(start, start + limit);
 
     return NextResponse.json({
-      data: ranking,
+      data: paginatedRanking,
       meta: {
-        total_products_sold: ranking.length,
-        grand_total_revenue: Math.round(
-          ranking.reduce((acc, p) => acc + p.total_revenue, 0) * 100
-        ) / 100,
+        total_products_sold: total,
+        grand_total_quantity: ranking.reduce(
+          (acc, p) => acc + p.total_quantity_sold,
+          0,
+        ),
+        grand_total_revenue:
+          Math.round(
+            ranking.reduce((acc, p) => acc + p.total_revenue, 0) * 100,
+          ) / 100,
+        grand_total_discount:
+          Math.round(
+            ranking.reduce((acc, p) => acc + p.total_discount_given, 0) * 100,
+          ) / 100,
       },
-      mensagens: ['Relatório de top produtos gerado com sucesso.'],
+      pagination: {
+        page: safePage,
+        limit,
+        total,
+        totalPages,
+      },
+      mensagens: ["Relatório de top produtos gerado com sucesso."],
     });
-
   } catch (error) {
-    console.error('Erro ao gerar relatório de top produtos:', error);
+    console.error("Erro ao gerar relatório de top produtos:", error);
     return NextResponse.json(
-      { data: null, mensagens: ['Erro interno ao gerar relatório.'] },
-      { status: 500 }
+      { data: null, mensagens: ["Erro interno ao gerar relatório."] },
+      { status: 500 },
     );
   }
 }

@@ -39,7 +39,7 @@ function getTodayUtcDateOnly() {
  * @swagger
  * /api/v1/orders:
  *   get:
- *     summary: Lista o histórico de pedidos do usuário
+ *     summary: Lista o histórico de pedidos do usuário (ou todos, se for admin)
  *     tags: [Orders]
  *     security:
  *       - bearerAuth: []
@@ -106,17 +106,25 @@ async function getOrders(request, { user }) {
       );
     }
 
+    // 👇 ÚNICA MUDANÇA REAL: monta a query SEM o .eq('user_id', ...) fixo,
+    // e só filtra por dono do pedido se o usuário NÃO for admin.
+    // Também trouxe o nome/e-mail do dono via join, pra exibir na tela quando for admin.
     let query = supabase
       .from('orders')
       .select(`
         id,
+        user_id,
         order_number,
         status,
         total_amount,
         created_at,
-        shippers (company_name)
-      `, { count: 'exact' })
-      .eq('user_id', user.id);
+        shippers (company_name),
+        users (full_name, email)
+      `, { count: 'exact' });
+
+    if (user.role !== 'admin') {
+      query = query.eq('user_id', user.id);
+    }
 
     if (status) {
       query = query.eq('status', status);
@@ -135,7 +143,7 @@ async function getOrders(request, { user }) {
       .order('created_at', { ascending: false });
 
     if (error) throw error;
-    
+
     if (!data || data.length === 0) {
       const noFilterMessage = hasFrom || hasTo || status
         ? 'Nenhum pedido encontrado para os filtros aplicados.'
@@ -251,7 +259,6 @@ async function checkout(request, { user }) {
     const orderNumber = `ORD-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
 
     // 3. Criar Pedido
-    // Fallback de segurança: garantir que shipper_id seja um número válido existente ou remover a restrição para testes
     const { data: order, error: orderError } = await supabase
       .from('orders')
       .insert({
@@ -261,7 +268,7 @@ async function checkout(request, { user }) {
         subtotal,
         shipping_cost: shippingCost,
         total_amount: totalAmount,
-        shipper_id: shipper_id || 1, 
+        shipper_id: shipper_id || 1,
         shipping_address_id: address_id || null,
         notes: notes || ''
       })
@@ -275,7 +282,6 @@ async function checkout(request, { user }) {
 
     // 4. Criar Itens do Pedido e Atualizar Estoque (Simulado Sequencial)
     for (const item of cartItems) {
-      // Inserir Order Item
       await supabase
         .from('order_items')
         .insert({
@@ -286,7 +292,6 @@ async function checkout(request, { user }) {
           subtotal: item.products.price * item.quantity
         });
 
-      // Decrementar estoque
       await supabase
         .from('products')
         .update({ stock_quantity: item.products.stock_quantity - item.quantity })
@@ -300,13 +305,13 @@ async function checkout(request, { user }) {
       .eq('user_id', user.id);
 
     return NextResponse.json(
-      { 
+      {
         data: {
           id: order.id,
           order_number: order.order_number,
           total: totalAmount
-        }, 
-        mensagens: ['Pedido realizado com sucesso!'] 
+        },
+        mensagens: ['Pedido realizado com sucesso!']
       },
       { status: 201 }
     );
@@ -314,10 +319,10 @@ async function checkout(request, { user }) {
   } catch (error) {
     console.error('Erro no checkout:', error);
     return NextResponse.json(
-      { 
-        data: null, 
+      {
+        data: null,
         mensagens: ['Erro ao processar pedido.', error.message || 'Erro desconhecido'],
-        debug: error 
+        debug: error
       },
       { status: 500 }
     );
