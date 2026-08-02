@@ -141,17 +141,29 @@ function OrdersPageContent() {
   const [dataInicio, setDataInicio] = useState("");
   const [dataFim, setDataFim] = useState("");
   const [dateError, setDateError] = useState("");
+  const [shippers, setShippers] = useState([]);
+  const [customerFilter, setCustomerFilter] = useState("");
+  const [minTotal, setMinTotal] = useState("");
+  const [maxTotal, setMaxTotal] = useState("");
+  const [selectedShipper, setSelectedShipper] = useState("");
 
   useEffect(() => {
     const nextStatus = searchParams.get("status") || "";
     const nextDataInicio = searchParams.get("from") || "";
     const nextDataFim = searchParams.get("to") || "";
+    const nextShipper = searchParams.get("shipper") || "";
+    const nextMin = searchParams.get("min_total") || "";
+    const nextMax = searchParams.get("max_total") || "";
     const rawPage = parseInt(searchParams.get("page") || "1", 10);
     const nextPage = Number.isNaN(rawPage) || rawPage < 1 ? 1 : rawPage;
 
     setStatus(nextStatus);
     setDataInicio(nextDataInicio);
     setDataFim(nextDataFim);
+    setMinTotal(nextMin);
+    setMaxTotal(nextMax);
+    setCustomerFilter(searchParams.get("customer") || "");
+    setSelectedShipper(nextShipper);
     setDateError("");
 
     fetchOrders({
@@ -159,8 +171,32 @@ function OrdersPageContent() {
       dataInicio: nextDataInicio,
       dataFim: nextDataFim,
       page: nextPage,
+      shipper: nextShipper,
+      min_total: nextMin,
+      max_total: nextMax,
     });
   }, [searchParams]);
+
+  useEffect(() => {
+    const fetchShippers = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        const headers = {};
+        if (token) headers["Authorization"] = `Bearer ${token}`;
+        const res = await fetch("/api/v1/shippers", {
+          headers,
+          cache: "no-store",
+        });
+        if (!res.ok) return;
+        const result = await res.json();
+        setShippers(result.data || []);
+      } catch (e) {
+        // ignore
+      }
+    };
+
+    fetchShippers();
+  }, []);
 
   async function fetchOrders(filters) {
     try {
@@ -175,12 +211,18 @@ function OrdersPageContent() {
       const nextStatus = filters?.status || "";
       const nextDataInicio = filters?.dataInicio || "";
       const nextDataFim = filters?.dataFim || "";
+      const nextShipper = filters?.shipper || "";
+      const nextMinTotal = filters?.min_total || "";
+      const nextMaxTotal = filters?.max_total || "";
       const nextPage = filters?.page || 1;
       const requestParams = new URLSearchParams();
 
       if (nextStatus) requestParams.set("status", nextStatus);
       if (nextDataInicio) requestParams.set("from", nextDataInicio);
       if (nextDataFim) requestParams.set("to", nextDataFim);
+      if (nextShipper) requestParams.set("shipper", String(nextShipper));
+      if (nextMinTotal) requestParams.set("min_total", String(nextMinTotal));
+      if (nextMaxTotal) requestParams.set("max_total", String(nextMaxTotal));
       requestParams.set("page", String(nextPage));
       requestParams.set("limit", String(ITEMS_PER_PAGE));
 
@@ -212,7 +254,20 @@ function OrdersPageContent() {
         return;
       }
 
-      setOrders(result.data || []);
+      // Aplicar filtro de cliente no frontend (por nome/email) se informado
+      let fetched = result.data || [];
+      if (customerFilter) {
+        const q = customerFilter.toLowerCase();
+        fetched = fetched.filter((o) => {
+          const name = o.users?.full_name || "";
+          const email = o.users?.email || "";
+          return (
+            name.toLowerCase().includes(q) || email.toLowerCase().includes(q)
+          );
+        });
+      }
+
+      setOrders(fetched);
       setPagination(
         result.pagination || {
           page: nextPage,
@@ -240,12 +295,20 @@ function OrdersPageContent() {
     const nextDataInicio = nextFilters.dataInicio ?? dataInicio;
     const nextDataFim = nextFilters.dataFim ?? dataFim;
     const nextPage = nextFilters.page ?? pagination.page;
+    const nextShipper = nextFilters.shipper ?? selectedShipper;
+    const nextMin = nextFilters.min_total ?? minTotal;
+    const nextMax = nextFilters.max_total ?? maxTotal;
+    const nextCustomer = nextFilters.customer ?? customerFilter;
     const params = new URLSearchParams();
 
     if (nextStatus) params.set("status", nextStatus);
     if (nextDataInicio) params.set("from", nextDataInicio);
     if (nextDataFim) params.set("to", nextDataFim);
     if (nextPage > 1) params.set("page", String(nextPage));
+    if (nextShipper) params.set("shipper", String(nextShipper));
+    if (nextMin) params.set("min_total", String(nextMin));
+    if (nextMax) params.set("max_total", String(nextMax));
+    if (nextCustomer) params.set("customer", String(nextCustomer));
 
     const query = params.toString();
     router.replace(query ? `/orders?${query}` : "/orders");
@@ -269,11 +332,19 @@ function OrdersPageContent() {
     setDataInicio("");
     setDataFim("");
     setDateError("");
+    setSelectedShipper("");
+    setMinTotal("");
+    setMaxTotal("");
+    setCustomerFilter("");
     updateOrdersUrl({
       status: "",
       dataInicio: "",
       dataFim: "",
       page: 1,
+      shipper: "",
+      min_total: "",
+      max_total: "",
+      customer: "",
     });
   }
 
@@ -290,8 +361,8 @@ function OrdersPageContent() {
   );
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-900 via-pink-800 to-orange-700 p-6">
-      <div className="max-w-5xl mx-auto">
+    <div className="min-h-screen bg-gradient-to-br from-purple-900 via-pink-800 to-orange-700 px-4 py-6">
+      <div className="max-w-6xl mx-auto">
         {/* Header */}
         <div className="mb-8">
           <button
@@ -380,9 +451,78 @@ function OrdersPageContent() {
               />
             </div>
 
+            <div className="min-w-[220px]">
+              <label className="block text-sm font-medium text-pink-200 mb-2">
+                Transportadora
+              </label>
+              <select
+                value={selectedShipper}
+                onChange={(e) => setSelectedShipper(e.target.value)}
+                className="w-full bg-slate-800/80 border border-purple-400/30 text-white rounded-xl px-4 py-3 outline-none transition focus:border-pink-400 focus:ring-2 focus:ring-pink-500/20"
+                data-testid="shipper-filter-select"
+              >
+                <option value="">Todas</option>
+                {shippers.map((s) => (
+                  <option key={s.id} value={s.id}>
+                    {s.company_name}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="min-w-[220px]">
+              <label className="block text-sm font-medium text-pink-200 mb-2">
+                Cliente
+              </label>
+              <input
+                value={customerFilter}
+                onChange={(e) => setCustomerFilter(e.target.value)}
+                placeholder="Nome ou email"
+                className="w-full bg-slate-800/80 border border-purple-400/30 text-white rounded-xl px-4 py-3 outline-none transition focus:border-pink-400 focus:ring-2 focus:ring-pink-500/20"
+                data-testid="customer-filter-input"
+              />
+            </div>
+
+            <div className="min-w-[160px]">
+              <label className="block text-sm font-medium text-pink-200 mb-2">
+                Valor min
+              </label>
+              <input
+                type="number"
+                value={minTotal}
+                onChange={(e) => setMinTotal(e.target.value)}
+                className="w-full bg-slate-800/80 border border-purple-400/30 text-white rounded-xl px-4 py-3 outline-none transition focus:border-pink-400 focus:ring-2 focus:ring-pink-500/20"
+                data-testid="min-total-input"
+              />
+            </div>
+
+            <div className="min-w-[160px]">
+              <label className="block text-sm font-medium text-pink-200 mb-2">
+                Valor max
+              </label>
+              <input
+                type="number"
+                value={maxTotal}
+                onChange={(e) => setMaxTotal(e.target.value)}
+                className="w-full bg-slate-800/80 border border-purple-400/30 text-white rounded-xl px-4 py-3 outline-none transition focus:border-pink-400 focus:ring-2 focus:ring-pink-500/20"
+                data-testid="max-total-input"
+              />
+            </div>
+
             <button
               type="button"
-              onClick={handleApplyFilters}
+              onClick={() => {
+                // Push selected filters into URL and reload
+                updateOrdersUrl({
+                  page: 1,
+                  status,
+                  dataInicio,
+                  dataFim,
+                  shipper: selectedShipper,
+                  min_total: minTotal,
+                  max_total: maxTotal,
+                });
+              }}
               className="bg-gradient-to-r from-purple-600 via-pink-600 to-orange-500 hover:from-purple-700 hover:via-pink-700 hover:to-orange-600 text-white px-5 py-3 rounded-xl font-semibold shadow-lg transition"
             >
               Aplicar filtros
@@ -576,8 +716,8 @@ function OrdersPageContent() {
 
 function OrdersPageFallback() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-900 via-pink-800 to-orange-700 p-6">
-      <div className="max-w-5xl mx-auto">
+    <div className="min-h-screen bg-gradient-to-br from-purple-900 via-pink-800 to-orange-700 px-4 py-6">
+      <div className="max-w-6xl mx-auto">
         <div className="text-center py-20">
           <div className="inline-block w-10 h-10 border-4 border-pink-400 border-t-transparent rounded-full animate-spin" />
           <p className="text-pink-200 mt-4">Carregando pedidos...</p>
