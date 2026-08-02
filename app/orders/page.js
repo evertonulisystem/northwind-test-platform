@@ -8,8 +8,8 @@
 // Adicionado em: agosto/2026
 // ============================================================
 
-import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { Suspense, useState, useEffect } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { toast } from 'react-toastify';
 import {
   ShoppingBag, Clock, CheckCircle, XCircle, Truck,
@@ -42,20 +42,77 @@ function formatDate(dateStr) {
   }).format(new Date(dateStr));
 }
 
-export default function OrdersPage() {
+const ITEMS_PER_PAGE = 10;
+
+function getTodayDateString() {
+  const today = new Date();
+  const year = today.getFullYear();
+  const month = String(today.getMonth() + 1).padStart(2, '0');
+  const day = String(today.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
+function validateDateFilters(dataInicio, dataFim) {
+  const hasStartDate = Boolean(dataInicio);
+  const hasEndDate = Boolean(dataFim);
+  const today = getTodayDateString();
+
+  if (hasStartDate !== hasEndDate) {
+    return 'Preencha as duas datas para filtrar por período.';
+  }
+
+  if (!hasStartDate && !hasEndDate) {
+    return '';
+  }
+
+  if (dataInicio > today || dataFim > today) {
+    return 'A data não pode ser maior que hoje.';
+  }
+
+  if (dataFim < dataInicio) {
+    return 'A data final não pode ser anterior à data inicial.';
+  }
+
+  return '';
+}
+
+function OrdersPageContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [orders, setOrders] = useState([]);
-  const [totalOrders, setTotalOrders] = useState(0);
+  const [pagination, setPagination] = useState({
+    page: 1,
+    limit: ITEMS_PER_PAGE,
+    total: 0,
+    totalPages: 0,
+  });
   const [loading, setLoading] = useState(true);
   const [status, setStatus] = useState('');
   const [dataInicio, setDataInicio] = useState('');
   const [dataFim, setDataFim] = useState('');
+  const [dateError, setDateError] = useState('');
 
   useEffect(() => {
-    fetchOrders();
-  }, []);
+    const nextStatus = searchParams.get('status') || '';
+    const nextDataInicio = searchParams.get('from') || '';
+    const nextDataFim = searchParams.get('to') || '';
+    const rawPage = parseInt(searchParams.get('page') || '1', 10);
+    const nextPage = Number.isNaN(rawPage) || rawPage < 1 ? 1 : rawPage;
 
-  async function fetchOrders(filters = {}) {
+    setStatus(nextStatus);
+    setDataInicio(nextDataInicio);
+    setDataFim(nextDataFim);
+    setDateError('');
+
+    fetchOrders({
+      status: nextStatus,
+      dataInicio: nextDataInicio,
+      dataFim: nextDataFim,
+      page: nextPage,
+    });
+  }, [searchParams]);
+
+  async function fetchOrders(filters) {
     try {
       setLoading(true);
       const token = localStorage.getItem('token');
@@ -65,16 +122,19 @@ export default function OrdersPage() {
         return;
       }
 
-      const nextStatus = filters.status ?? status;
-      const nextDataInicio = filters.dataInicio ?? dataInicio;
-      const nextDataFim = filters.dataFim ?? dataFim;
-      const searchParams = new URLSearchParams();
+      const nextStatus = filters?.status || '';
+      const nextDataInicio = filters?.dataInicio || '';
+      const nextDataFim = filters?.dataFim || '';
+      const nextPage = filters?.page || 1;
+      const requestParams = new URLSearchParams();
 
-      if (nextStatus) searchParams.set('status', nextStatus);
-      if (nextDataInicio) searchParams.set('from', nextDataInicio);
-      if (nextDataFim) searchParams.set('to', nextDataFim);
+      if (nextStatus) requestParams.set('status', nextStatus);
+      if (nextDataInicio) requestParams.set('from', nextDataInicio);
+      if (nextDataFim) requestParams.set('to', nextDataFim);
+      requestParams.set('page', String(nextPage));
+      requestParams.set('limit', String(ITEMS_PER_PAGE));
 
-      const queryString = searchParams.toString();
+      const queryString = requestParams.toString();
       const url = queryString ? `/api/v1/orders?${queryString}` : '/api/v1/orders';
 
       const res = await fetch(url, {
@@ -83,26 +143,89 @@ export default function OrdersPage() {
       });
       if (res.status === 401) { router.push('/'); return; }
       const result = await res.json();
+      if (!res.ok) {
+        const message = result?.mensagens?.[0] || 'Erro ao carregar pedidos.';
+        setOrders([]);
+        setPagination({
+          page: nextPage,
+          limit: ITEMS_PER_PAGE,
+          total: 0,
+          totalPages: 0,
+        });
+        setDateError(res.status === 400 ? message : '');
+        toast.error(message);
+        return;
+      }
+
       setOrders(result.data || []);
-      setTotalOrders(result.total ?? 0);
+      setPagination(result.pagination || {
+        page: nextPage,
+        limit: ITEMS_PER_PAGE,
+        total: 0,
+        totalPages: 0,
+      });
     } catch {
       setOrders([]);
-      setTotalOrders(0);
+      setPagination({
+        page: 1,
+        limit: ITEMS_PER_PAGE,
+        total: 0,
+        totalPages: 0,
+      });
       toast.error('Erro ao carregar pedidos.');
     } finally {
       setLoading(false);
     }
   }
 
+  function updateOrdersUrl(nextFilters = {}) {
+    const nextStatus = nextFilters.status ?? status;
+    const nextDataInicio = nextFilters.dataInicio ?? dataInicio;
+    const nextDataFim = nextFilters.dataFim ?? dataFim;
+    const nextPage = nextFilters.page ?? pagination.page;
+    const params = new URLSearchParams();
+
+    if (nextStatus) params.set('status', nextStatus);
+    if (nextDataInicio) params.set('from', nextDataInicio);
+    if (nextDataFim) params.set('to', nextDataFim);
+    if (nextPage > 1) params.set('page', String(nextPage));
+
+    const query = params.toString();
+    router.replace(query ? `/orders?${query}` : '/orders');
+  }
+
   function handleApplyFilters() {
-    fetchOrders();
+    const validationMessage = validateDateFilters(dataInicio, dataFim);
+
+    if (validationMessage) {
+      setDateError(validationMessage);
+      toast.error(validationMessage);
+      return;
+    }
+
+    setDateError('');
+    updateOrdersUrl({ page: 1 });
   }
 
   function handleClearFilters() {
     setStatus('');
     setDataInicio('');
     setDataFim('');
-    fetchOrders({ status: '', dataInicio: '', dataFim: '' });
+    setDateError('');
+    updateOrdersUrl({
+      status: '',
+      dataInicio: '',
+      dataFim: '',
+      page: 1,
+    });
+  }
+
+  function handlePageChange(newPage) {
+    if (newPage < 1 || newPage > (pagination.totalPages || 1)) {
+      return;
+    }
+
+    updateOrdersUrl({ page: newPage });
   }
 
   return (
@@ -169,8 +292,12 @@ export default function OrdersPage() {
               </label>
               <input
                 type="date"
+                max={getTodayDateString()}
                 value={dataInicio}
-                onChange={(event) => setDataInicio(event.target.value)}
+                onChange={(event) => {
+                  setDataInicio(event.target.value);
+                  setDateError('');
+                }}
                 className="w-full bg-slate-800/80 border border-purple-400/30 text-white rounded-xl px-4 py-3 outline-none transition focus:border-pink-400 focus:ring-2 focus:ring-pink-500/20"
               />
             </div>
@@ -181,8 +308,12 @@ export default function OrdersPage() {
               </label>
               <input
                 type="date"
+                max={getTodayDateString()}
                 value={dataFim}
-                onChange={(event) => setDataFim(event.target.value)}
+                onChange={(event) => {
+                  setDataFim(event.target.value);
+                  setDateError('');
+                }}
                 className="w-full bg-slate-800/80 border border-purple-400/30 text-white rounded-xl px-4 py-3 outline-none transition focus:border-pink-400 focus:ring-2 focus:ring-pink-500/20"
               />
             </div>
@@ -203,6 +334,12 @@ export default function OrdersPage() {
               Limpar filtros
             </button>
           </div>
+
+          {dateError && (
+            <p className="mt-3 text-sm text-rose-300 font-medium">
+              {dateError}
+            </p>
+          )}
         </div>
 
         {/* Loading */}
@@ -216,7 +353,7 @@ export default function OrdersPage() {
         {!loading && (
           <div className="mb-4">
             <p className="text-pink-100 font-medium">
-              {totalOrders} {totalOrders === 1 ? 'pedido encontrado' : 'pedidos encontrados'}
+              {pagination.total} {pagination.total === 1 ? 'pedido encontrado' : 'pedidos encontrados'}
             </p>
           </div>
         )}
@@ -238,63 +375,116 @@ export default function OrdersPage() {
 
         {/* Lista de pedidos */}
         {!loading && orders.length > 0 && (
-          <div className="space-y-4" data-testid="orders-list">
-            {orders.map((order) => {
-              const sc = getStatusConfig(order.status);
-              const StatusIcon = sc.Icon;
-              return (
-                <div
-                  key={order.id}
-                  data-testid={`order-card-${order.id}`}
-                  className="bg-slate-800/90 backdrop-blur-md rounded-2xl border border-slate-700 p-6 hover:border-purple-500/50 transition-all duration-200 shadow-xl hover:shadow-purple-900/30"
-                >
-                  <div className="flex items-center justify-between flex-wrap gap-4">
-                    {/* Info do pedido */}
-                    <div className="flex items-start gap-4">
-                      <div className={`p-3 rounded-xl ${sc.bg} border ${sc.border}`}>
-                        <StatusIcon className={`w-6 h-6 ${sc.color}`} />
-                      </div>
-                      <div>
-                        <p className="text-white font-bold text-lg" data-testid={`order-number-${order.id}`}>
-                          {order.order_number}
-                        </p>
-                        <p className="text-slate-400 text-sm mt-0.5">
-                          {formatDate(order.created_at)}
-                        </p>
-                        <p className="text-slate-400 text-sm">
-                          Transportadora: {order.shippers?.company_name || '-'}
-                        </p>
-                      </div>
-                    </div>
+          <div className="relative bg-slate-800/90 backdrop-blur-md rounded-2xl shadow-2xl border border-slate-700 overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full text-left" data-testid="orders-list">
+                <thead className="bg-slate-700/50 border-b border-slate-600">
+                  <tr>
+                    <th className="px-4 py-3 text-slate-200 font-semibold text-sm">Pedido</th>
+                    <th className="px-4 py-3 text-slate-200 font-semibold text-sm">Data</th>
+                    <th className="px-4 py-3 text-slate-200 font-semibold text-sm">Transportadora</th>
+                    <th className="px-4 py-3 text-slate-200 font-semibold text-sm">Status</th>
+                    <th className="px-4 py-3 text-slate-200 font-semibold text-sm">Total</th>
+                    <th className="px-4 py-3 text-slate-200 font-semibold text-sm text-center">Ações</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {orders.map((order) => {
+                    const sc = getStatusConfig(order.status);
+                    const StatusIcon = sc.Icon;
 
-                    {/* Status + valor + botão */}
-                    <div className="flex items-center gap-6 flex-wrap">
-                      <span className={`px-3 py-1.5 rounded-full text-sm font-semibold ${sc.bg} ${sc.color} border ${sc.border}`}>
-                        {sc.label}
-                      </span>
-                      <div className="text-right">
-                        <p className="text-slate-400 text-xs">Total</p>
-                        <p className="text-white font-bold text-xl">
-                          {formatCurrency(order.total_amount)}
-                        </p>
-                      </div>
-                      <button
-                        onClick={() => router.push(`/orders/${order.id}`)}
-                        data-testid={`order-detail-button-${order.id}`}
-                        className="flex items-center gap-2 bg-purple-600 hover:bg-purple-700 text-white px-5 py-2.5 rounded-xl font-semibold transition shadow"
+                    return (
+                      <tr
+                        key={order.id}
+                        data-testid={`order-card-${order.id}`}
+                        className="border-b border-slate-700 hover:bg-slate-700/30 transition"
                       >
-                        <Eye className="w-4 h-4" />
-                        Ver Detalhes
-                        <ChevronRight className="w-4 h-4" />
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
+                        <td className="px-4 py-3 text-white font-bold text-sm" data-testid={`order-number-${order.id}`}>
+                          {order.order_number}
+                        </td>
+                        <td className="px-4 py-3 text-slate-300 text-sm">
+                          {formatDate(order.created_at)}
+                        </td>
+                        <td className="px-4 py-3 text-slate-300 text-sm">
+                          {order.shippers?.company_name || '-'}
+                        </td>
+                        <td className="px-4 py-3">
+                          <span className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-sm font-semibold ${sc.bg} ${sc.color} border ${sc.border}`}>
+                            <StatusIcon className="w-4 h-4" />
+                            {sc.label}
+                          </span>
+                        </td>
+                        <td className="px-4 py-3 text-white font-semibold text-sm">
+                          {formatCurrency(order.total_amount)}
+                        </td>
+                        <td className="px-4 py-3 text-center">
+                          <button
+                            onClick={() => router.push(`/orders/${order.id}`)}
+                            data-testid={`order-detail-button-${order.id}`}
+                            className="inline-flex items-center gap-2 bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition shadow"
+                          >
+                            <Eye className="w-4 h-4" />
+                            Ver Detalhes
+                            <ChevronRight className="w-4 h-4" />
+                          </button>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+
+            <div className="bg-slate-900/50 px-6 py-4 border-t border-slate-700 flex flex-wrap items-center justify-between gap-4">
+              <p className="text-slate-400 text-sm">
+                Mostrando {((pagination.page - 1) * pagination.limit) + 1}-{Math.min(pagination.page * pagination.limit, pagination.total)} de {pagination.total} pedidos
+              </p>
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={() => handlePageChange(pagination.page - 1)}
+                  disabled={pagination.page === 1}
+                  data-testid="prev-page-button"
+                  className="px-4 py-2 bg-slate-700 text-white rounded-lg disabled:opacity-50 hover:bg-slate-600 transition"
+                >
+                  Anterior
+                </button>
+                <span className="text-slate-300 font-medium" data-testid="current-page">
+                  Página {pagination.page} de {pagination.totalPages || 1}
+                </span>
+                <button
+                  onClick={() => handlePageChange(pagination.page + 1)}
+                  disabled={pagination.page >= (pagination.totalPages || 1)}
+                  data-testid="next-page-button"
+                  className="px-4 py-2 bg-slate-700 text-white rounded-lg disabled:opacity-50 hover:bg-slate-600 transition"
+                >
+                  Próxima
+                </button>
+              </div>
+            </div>
           </div>
         )}
       </div>
     </div>
+  );
+}
+
+function OrdersPageFallback() {
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-purple-900 via-pink-800 to-orange-700 p-6">
+      <div className="max-w-5xl mx-auto">
+        <div className="text-center py-20">
+          <div className="inline-block w-10 h-10 border-4 border-pink-400 border-t-transparent rounded-full animate-spin" />
+          <p className="text-pink-200 mt-4">Carregando pedidos...</p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export default function OrdersPage() {
+  return (
+    <Suspense fallback={<OrdersPageFallback />}>
+      <OrdersPageContent />
+    </Suspense>
   );
 }

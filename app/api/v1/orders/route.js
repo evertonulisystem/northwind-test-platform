@@ -3,6 +3,38 @@ import { supabase } from '@/lib/supabase';
 import { NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/auth';
 
+const ALLOWED_ORDER_STATUSES = ['pending', 'confirmed', 'processing', 'shipped', 'delivered', 'cancelled'];
+
+function parsePositiveInteger(value, fallback) {
+  const parsed = parseInt(value || '', 10);
+  return Number.isNaN(parsed) || parsed < 1 ? fallback : parsed;
+}
+
+function parseDateOnly(value) {
+  if (!value || !/^\d{4}-\d{2}-\d{2}$/.test(value)) {
+    return null;
+  }
+
+  const [year, month, day] = value.split('-').map(Number);
+  const date = new Date(Date.UTC(year, month - 1, day));
+
+  if (
+    Number.isNaN(date.getTime()) ||
+    date.getUTCFullYear() !== year ||
+    date.getUTCMonth() !== month - 1 ||
+    date.getUTCDate() !== day
+  ) {
+    return null;
+  }
+
+  return date;
+}
+
+function getTodayUtcDateOnly() {
+  const now = new Date();
+  return new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
+}
+
 /**
  * @swagger
  * /api/v1/orders:
@@ -21,6 +53,58 @@ async function getOrders(request, { user }) {
     const status = searchParams.get('status');
     const from = searchParams.get('from');
     const to = searchParams.get('to');
+    const page = parsePositiveInteger(searchParams.get('page'), 1);
+    const limit = parsePositiveInteger(searchParams.get('limit'), 10);
+    const start = (page - 1) * limit;
+
+    if (status && !ALLOWED_ORDER_STATUSES.includes(status)) {
+      return NextResponse.json(
+        { data: null, mensagens: ['Status de pedido inválido.'] },
+        { status: 400 }
+      );
+    }
+
+    const hasFrom = Boolean(from);
+    const hasTo = Boolean(to);
+
+    if (hasFrom !== hasTo) {
+      return NextResponse.json(
+        { data: null, mensagens: ['Preencha as duas datas para filtrar por período.'] },
+        { status: 400 }
+      );
+    }
+
+    const fromDate = hasFrom ? parseDateOnly(from) : null;
+    const toDate = hasTo ? parseDateOnly(to) : null;
+    const today = getTodayUtcDateOnly();
+
+    if ((hasFrom && !fromDate) || (hasTo && !toDate)) {
+      return NextResponse.json(
+        { data: null, mensagens: ['Data inválida informada para o filtro.'] },
+        { status: 400 }
+      );
+    }
+
+    if (fromDate && fromDate.getTime() > today.getTime()) {
+      return NextResponse.json(
+        { data: null, mensagens: ['A data não pode ser maior que hoje.'] },
+        { status: 400 }
+      );
+    }
+
+    if (toDate && toDate.getTime() > today.getTime()) {
+      return NextResponse.json(
+        { data: null, mensagens: ['A data não pode ser maior que hoje.'] },
+        { status: 400 }
+      );
+    }
+
+    if (fromDate && toDate && toDate.getTime() < fromDate.getTime()) {
+      return NextResponse.json(
+        { data: null, mensagens: ['A data final não pode ser anterior à data inicial.'] },
+        { status: 400 }
+      );
+    }
 
     let query = supabase
       .from('orders')
@@ -31,7 +115,7 @@ async function getOrders(request, { user }) {
         total_amount,
         created_at,
         shippers (company_name)
-      `)
+      `, { count: 'exact' })
       .eq('user_id', user.id);
 
     if (status) {
@@ -46,26 +130,50 @@ async function getOrders(request, { user }) {
       query = query.lte('created_at', `${to}T23:59:59.999`);
     }
 
-    const { data, error } = await query.order('created_at', { ascending: false });
+    const { data, error, count } = await query
+      .range(start, start + limit - 1)
+      .order('created_at', { ascending: false });
 
     if (error) throw error;
     
     if (!data || data.length === 0) {
+      const noFilterMessage = hasFrom || hasTo || status
+        ? 'Nenhum pedido encontrado para os filtros aplicados.'
+        : 'Você ainda não possui pedidos.';
+
       return NextResponse.json(
-        { data: [], total: 0, mensagens: ['Você ainda não possui pedidos.'] },
+        {
+          data: [],
+          pagination: {
+            page,
+            limit,
+            total: count || 0,
+            totalPages: Math.ceil((count || 0) / limit),
+          },
+          mensagens: [noFilterMessage]
+        },
         { status: 200 }
       );
     }
 
     return NextResponse.json({
       data: data,
-      total: data.length,
+      pagination: {
+        page,
+        limit,
+        total: count || 0,
+        totalPages: Math.ceil((count || 0) / limit),
+      },
       mensagens: ['Histórico de pedidos carregado.']
     });
   } catch (error) {
     console.error('Erro ao buscar pedidos:', error);
     return NextResponse.json(
-      { data: null, mensagens: ['Erro ao buscar histórico de pedidos.'] },
+      {
+        data: [],
+        pagination: { page: 1, limit: 10, total: 0, totalPages: 0 },
+        mensagens: ['Erro ao buscar histórico de pedidos.']
+      },
       { status: 500 }
     );
   }
