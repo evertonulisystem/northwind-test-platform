@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 // ============================================================
 // 🆕 NOVA FUNCIONALIDADE — Meus Pedidos
@@ -8,22 +8,66 @@
 // Adicionado em: agosto/2026
 // ============================================================
 
-import { Suspense, useState, useEffect } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
-import { toast } from 'react-toastify';
+import { Suspense, useState, useEffect } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { toast } from "react-toastify";
 import {
-  ShoppingBag, Clock, CheckCircle, XCircle, Truck,
-  Package, Eye, ArrowLeft, ChevronRight, BarChart2,
-} from 'lucide-react';
+  ShoppingBag,
+  Clock,
+  CheckCircle,
+  XCircle,
+  Truck,
+  Package,
+  Eye,
+  ArrowLeft,
+  ChevronRight,
+  BarChart2,
+} from "lucide-react";
 
 // Mapa de status para cor e ícone
 const STATUS_CONFIG = {
-  pending:    { label: 'Pendente',    color: 'text-yellow-400',  bg: 'bg-yellow-400/10',  border: 'border-yellow-400/30', Icon: Clock },
-  confirmed:  { label: 'Confirmado', color: 'text-blue-400',    bg: 'bg-blue-400/10',    border: 'border-blue-400/30',   Icon: CheckCircle },
-  processing: { label: 'Processando',color: 'text-purple-400',  bg: 'bg-purple-400/10',  border: 'border-purple-400/30', Icon: Package },
-  shipped:    { label: 'Enviado',    color: 'text-indigo-400',  bg: 'bg-indigo-400/10',  border: 'border-indigo-400/30', Icon: Truck },
-  delivered:  { label: 'Entregue',   color: 'text-green-400',   bg: 'bg-green-400/10',   border: 'border-green-400/30',  Icon: CheckCircle },
-  cancelled:  { label: 'Cancelado',  color: 'text-red-400',     bg: 'bg-red-400/10',     border: 'border-red-400/30',    Icon: XCircle },
+  pending: {
+    label: "Pendente",
+    color: "text-yellow-400",
+    bg: "bg-yellow-400/10",
+    border: "border-yellow-400/30",
+    Icon: Clock,
+  },
+  confirmed: {
+    label: "Confirmado",
+    color: "text-blue-400",
+    bg: "bg-blue-400/10",
+    border: "border-blue-400/30",
+    Icon: CheckCircle,
+  },
+  processing: {
+    label: "Processando",
+    color: "text-purple-400",
+    bg: "bg-purple-400/10",
+    border: "border-purple-400/30",
+    Icon: Package,
+  },
+  shipped: {
+    label: "Enviado",
+    color: "text-indigo-400",
+    bg: "bg-indigo-400/10",
+    border: "border-indigo-400/30",
+    Icon: Truck,
+  },
+  delivered: {
+    label: "Entregue",
+    color: "text-green-400",
+    bg: "bg-green-400/10",
+    border: "border-green-400/30",
+    Icon: CheckCircle,
+  },
+  cancelled: {
+    label: "Cancelado",
+    color: "text-red-400",
+    bg: "bg-red-400/10",
+    border: "border-red-400/30",
+    Icon: XCircle,
+  },
 };
 
 function getStatusConfig(status) {
@@ -31,14 +75,20 @@ function getStatusConfig(status) {
 }
 
 function formatCurrency(value) {
-  return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value || 0);
+  return new Intl.NumberFormat("pt-BR", {
+    style: "currency",
+    currency: "BRL",
+  }).format(value || 0);
 }
 
 function formatDate(dateStr) {
-  if (!dateStr) return '-';
-  return new Intl.DateTimeFormat('pt-BR', {
-    day: '2-digit', month: '2-digit', year: 'numeric',
-    hour: '2-digit', minute: '2-digit',
+  if (!dateStr) return "-";
+  return new Intl.DateTimeFormat("pt-BR", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
   }).format(new Date(dateStr));
 }
 
@@ -47,8 +97,8 @@ const ITEMS_PER_PAGE = 10;
 function getTodayDateString() {
   const today = new Date();
   const year = today.getFullYear();
-  const month = String(today.getMonth() + 1).padStart(2, '0');
-  const day = String(today.getDate()).padStart(2, '0');
+  const month = String(today.getMonth() + 1).padStart(2, "0");
+  const day = String(today.getDate()).padStart(2, "0");
   return `${year}-${month}-${day}`;
 }
 
@@ -58,22 +108,22 @@ function validateDateFilters(dataInicio, dataFim) {
   const today = getTodayDateString();
 
   if (hasStartDate !== hasEndDate) {
-    return 'Preencha as duas datas para filtrar por período.';
+    return "Preencha as duas datas para filtrar por período.";
   }
 
   if (!hasStartDate && !hasEndDate) {
-    return '';
+    return "";
   }
 
   if (dataInicio > today || dataFim > today) {
-    return 'A data não pode ser maior que hoje.';
+    return "A data não pode ser maior que hoje.";
   }
 
   if (dataFim < dataInicio) {
-    return 'A data final não pode ser anterior à data inicial.';
+    return "A data final não pode ser anterior à data inicial.";
   }
 
-  return '';
+  return "";
 }
 
 function OrdersPageContent() {
@@ -87,22 +137,22 @@ function OrdersPageContent() {
     totalPages: 0,
   });
   const [loading, setLoading] = useState(true);
-  const [status, setStatus] = useState('');
-  const [dataInicio, setDataInicio] = useState('');
-  const [dataFim, setDataFim] = useState('');
-  const [dateError, setDateError] = useState('');
+  const [status, setStatus] = useState("");
+  const [dataInicio, setDataInicio] = useState("");
+  const [dataFim, setDataFim] = useState("");
+  const [dateError, setDateError] = useState("");
 
   useEffect(() => {
-    const nextStatus = searchParams.get('status') || '';
-    const nextDataInicio = searchParams.get('from') || '';
-    const nextDataFim = searchParams.get('to') || '';
-    const rawPage = parseInt(searchParams.get('page') || '1', 10);
+    const nextStatus = searchParams.get("status") || "";
+    const nextDataInicio = searchParams.get("from") || "";
+    const nextDataFim = searchParams.get("to") || "";
+    const rawPage = parseInt(searchParams.get("page") || "1", 10);
     const nextPage = Number.isNaN(rawPage) || rawPage < 1 ? 1 : rawPage;
 
     setStatus(nextStatus);
     setDataInicio(nextDataInicio);
     setDataFim(nextDataFim);
-    setDateError('');
+    setDateError("");
 
     fetchOrders({
       status: nextStatus,
@@ -115,36 +165,41 @@ function OrdersPageContent() {
   async function fetchOrders(filters) {
     try {
       setLoading(true);
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem("token");
       if (!token) {
-        toast.error('Você precisa estar logado.');
-        router.push('/');
+        toast.error("Você precisa estar logado.");
+        router.push("/");
         return;
       }
 
-      const nextStatus = filters?.status || '';
-      const nextDataInicio = filters?.dataInicio || '';
-      const nextDataFim = filters?.dataFim || '';
+      const nextStatus = filters?.status || "";
+      const nextDataInicio = filters?.dataInicio || "";
+      const nextDataFim = filters?.dataFim || "";
       const nextPage = filters?.page || 1;
       const requestParams = new URLSearchParams();
 
-      if (nextStatus) requestParams.set('status', nextStatus);
-      if (nextDataInicio) requestParams.set('from', nextDataInicio);
-      if (nextDataFim) requestParams.set('to', nextDataFim);
-      requestParams.set('page', String(nextPage));
-      requestParams.set('limit', String(ITEMS_PER_PAGE));
+      if (nextStatus) requestParams.set("status", nextStatus);
+      if (nextDataInicio) requestParams.set("from", nextDataInicio);
+      if (nextDataFim) requestParams.set("to", nextDataFim);
+      requestParams.set("page", String(nextPage));
+      requestParams.set("limit", String(ITEMS_PER_PAGE));
 
       const queryString = requestParams.toString();
-      const url = queryString ? `/api/v1/orders?${queryString}` : '/api/v1/orders';
+      const url = queryString
+        ? `/api/v1/orders?${queryString}`
+        : "/api/v1/orders";
 
       const res = await fetch(url, {
         headers: { Authorization: `Bearer ${token}` },
-        cache: 'no-store',
+        cache: "no-store",
       });
-      if (res.status === 401) { router.push('/'); return; }
+      if (res.status === 401) {
+        router.push("/");
+        return;
+      }
       const result = await res.json();
       if (!res.ok) {
-        const message = result?.mensagens?.[0] || 'Erro ao carregar pedidos.';
+        const message = result?.mensagens?.[0] || "Erro ao carregar pedidos.";
         setOrders([]);
         setPagination({
           page: nextPage,
@@ -152,18 +207,20 @@ function OrdersPageContent() {
           total: 0,
           totalPages: 0,
         });
-        setDateError(res.status === 400 ? message : '');
+        setDateError(res.status === 400 ? message : "");
         toast.error(message);
         return;
       }
 
       setOrders(result.data || []);
-      setPagination(result.pagination || {
-        page: nextPage,
-        limit: ITEMS_PER_PAGE,
-        total: 0,
-        totalPages: 0,
-      });
+      setPagination(
+        result.pagination || {
+          page: nextPage,
+          limit: ITEMS_PER_PAGE,
+          total: 0,
+          totalPages: 0,
+        },
+      );
     } catch {
       setOrders([]);
       setPagination({
@@ -172,7 +229,7 @@ function OrdersPageContent() {
         total: 0,
         totalPages: 0,
       });
-      toast.error('Erro ao carregar pedidos.');
+      toast.error("Erro ao carregar pedidos.");
     } finally {
       setLoading(false);
     }
@@ -185,13 +242,13 @@ function OrdersPageContent() {
     const nextPage = nextFilters.page ?? pagination.page;
     const params = new URLSearchParams();
 
-    if (nextStatus) params.set('status', nextStatus);
-    if (nextDataInicio) params.set('from', nextDataInicio);
-    if (nextDataFim) params.set('to', nextDataFim);
-    if (nextPage > 1) params.set('page', String(nextPage));
+    if (nextStatus) params.set("status", nextStatus);
+    if (nextDataInicio) params.set("from", nextDataInicio);
+    if (nextDataFim) params.set("to", nextDataFim);
+    if (nextPage > 1) params.set("page", String(nextPage));
 
     const query = params.toString();
-    router.replace(query ? `/orders?${query}` : '/orders');
+    router.replace(query ? `/orders?${query}` : "/orders");
   }
 
   function handleApplyFilters() {
@@ -203,19 +260,19 @@ function OrdersPageContent() {
       return;
     }
 
-    setDateError('');
+    setDateError("");
     updateOrdersUrl({ page: 1 });
   }
 
   function handleClearFilters() {
-    setStatus('');
-    setDataInicio('');
-    setDataFim('');
-    setDateError('');
+    setStatus("");
+    setDataInicio("");
+    setDataFim("");
+    setDateError("");
     updateOrdersUrl({
-      status: '',
-      dataInicio: '',
-      dataFim: '',
+      status: "",
+      dataInicio: "",
+      dataFim: "",
       page: 1,
     });
   }
@@ -228,14 +285,17 @@ function OrdersPageContent() {
     updateOrdersUrl({ page: newPage });
   }
 
+  const showCustomerColumn = orders.some((order) =>
+    Boolean(order?.users?.full_name || order?.users?.email),
+  );
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-900 via-pink-800 to-orange-700 p-6">
       <div className="max-w-5xl mx-auto">
-
         {/* Header */}
         <div className="mb-8">
           <button
-            onClick={() => router.push('/products')}
+            onClick={() => router.push("/products")}
             data-testid="back-to-products-button"
             className="flex items-center gap-2 text-pink-200 hover:text-white mb-4 transition"
           >
@@ -248,12 +308,14 @@ function OrdersPageContent() {
                 <ShoppingBag className="w-10 h-10 text-amber-400" />
                 Meus Pedidos
               </h1>
-              <p className="text-pink-200 mt-1">Acompanhe seus pedidos e histórico de compras</p>
+              <p className="text-pink-200 mt-1">
+                Acompanhe seus pedidos e histórico de compras
+              </p>
             </div>
 
             {/* 🆕 Botão Relatório de Vendas */}
             <button
-              onClick={() => router.push('/reports')}
+              onClick={() => router.push("/reports")}
               data-testid="go-to-reports-button"
               className="relative bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-700 hover:to-purple-700 text-white px-5 py-3 rounded-xl font-semibold shadow-lg flex items-center gap-2 transition"
             >
@@ -296,7 +358,7 @@ function OrdersPageContent() {
                 value={dataInicio}
                 onChange={(event) => {
                   setDataInicio(event.target.value);
-                  setDateError('');
+                  setDateError("");
                 }}
                 className="w-full bg-slate-800/80 border border-purple-400/30 text-white rounded-xl px-4 py-3 outline-none transition focus:border-pink-400 focus:ring-2 focus:ring-pink-500/20"
               />
@@ -312,7 +374,7 @@ function OrdersPageContent() {
                 value={dataFim}
                 onChange={(event) => {
                   setDataFim(event.target.value);
-                  setDateError('');
+                  setDateError("");
                 }}
                 className="w-full bg-slate-800/80 border border-purple-400/30 text-white rounded-xl px-4 py-3 outline-none transition focus:border-pink-400 focus:ring-2 focus:ring-pink-500/20"
               />
@@ -353,7 +415,10 @@ function OrdersPageContent() {
         {!loading && (
           <div className="mb-4">
             <p className="text-pink-100 font-medium">
-              {pagination.total} {pagination.total === 1 ? 'pedido encontrado' : 'pedidos encontrados'}
+              {pagination.total}{" "}
+              {pagination.total === 1
+                ? "pedido encontrado"
+                : "pedidos encontrados"}
             </p>
           </div>
         )}
@@ -362,10 +427,14 @@ function OrdersPageContent() {
         {!loading && orders.length === 0 && (
           <div className="text-center py-20 bg-slate-800/60 rounded-2xl border border-slate-700">
             <ShoppingBag className="w-16 h-16 text-slate-500 mx-auto mb-4" />
-            <p className="text-slate-300 text-xl font-semibold">Nenhum pedido encontrado</p>
-            <p className="text-slate-400 mt-2">Seus pedidos aparecem aqui após o checkout.</p>
+            <p className="text-slate-300 text-xl font-semibold">
+              Nenhum pedido encontrado
+            </p>
+            <p className="text-slate-400 mt-2">
+              Seus pedidos aparecem aqui após o checkout.
+            </p>
             <button
-              onClick={() => router.push('/products')}
+              onClick={() => router.push("/products")}
               className="mt-6 bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-xl font-semibold transition"
             >
               Ver Produtos
@@ -380,12 +449,29 @@ function OrdersPageContent() {
               <table className="w-full text-left" data-testid="orders-list">
                 <thead className="bg-slate-700/50 border-b border-slate-600">
                   <tr>
-                    <th className="px-4 py-3 text-slate-200 font-semibold text-sm">Pedido</th>
-                    <th className="px-4 py-3 text-slate-200 font-semibold text-sm">Data</th>
-                    <th className="px-4 py-3 text-slate-200 font-semibold text-sm">Transportadora</th>
-                    <th className="px-4 py-3 text-slate-200 font-semibold text-sm">Status</th>
-                    <th className="px-4 py-3 text-slate-200 font-semibold text-sm">Total</th>
-                    <th className="px-4 py-3 text-slate-200 font-semibold text-sm text-center">Ações</th>
+                    <th className="px-4 py-3 text-slate-200 font-semibold text-sm">
+                      Pedido
+                    </th>
+                    <th className="px-4 py-3 text-slate-200 font-semibold text-sm">
+                      Data
+                    </th>
+                    <th className="px-4 py-3 text-slate-200 font-semibold text-sm">
+                      Transportadora
+                    </th>
+                    {showCustomerColumn && (
+                      <th className="px-4 py-3 text-slate-200 font-semibold text-sm">
+                        Cliente
+                      </th>
+                    )}
+                    <th className="px-4 py-3 text-slate-200 font-semibold text-sm">
+                      Status
+                    </th>
+                    <th className="px-4 py-3 text-slate-200 font-semibold text-sm">
+                      Total
+                    </th>
+                    <th className="px-4 py-3 text-slate-200 font-semibold text-sm text-center">
+                      Ações
+                    </th>
                   </tr>
                 </thead>
                 <tbody>
@@ -399,17 +485,32 @@ function OrdersPageContent() {
                         data-testid={`order-card-${order.id}`}
                         className="border-b border-slate-700 hover:bg-slate-700/30 transition"
                       >
-                        <td className="px-4 py-3 text-white font-bold text-sm" data-testid={`order-number-${order.id}`}>
+                        <td
+                          className="px-4 py-3 text-white font-bold text-sm"
+                          data-testid={`order-number-${order.id}`}
+                        >
                           {order.order_number}
                         </td>
                         <td className="px-4 py-3 text-slate-300 text-sm">
                           {formatDate(order.created_at)}
                         </td>
                         <td className="px-4 py-3 text-slate-300 text-sm">
-                          {order.shippers?.company_name || '-'}
+                          {order.shippers?.company_name || "-"}
                         </td>
+                        {showCustomerColumn && (
+                          <td
+                            className="px-4 py-3 text-slate-300 text-sm"
+                            data-testid={`order-customer-${order.id}`}
+                          >
+                            {order.users?.full_name ||
+                              order.users?.email ||
+                              "-"}
+                          </td>
+                        )}
                         <td className="px-4 py-3">
-                          <span className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-sm font-semibold ${sc.bg} ${sc.color} border ${sc.border}`}>
+                          <span
+                            className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-sm font-semibold ${sc.bg} ${sc.color} border ${sc.border}`}
+                          >
                             <StatusIcon className="w-4 h-4" />
                             {sc.label}
                           </span>
@@ -437,7 +538,9 @@ function OrdersPageContent() {
 
             <div className="bg-slate-900/50 px-6 py-4 border-t border-slate-700 flex flex-wrap items-center justify-between gap-4">
               <p className="text-slate-400 text-sm">
-                Mostrando {((pagination.page - 1) * pagination.limit) + 1}-{Math.min(pagination.page * pagination.limit, pagination.total)} de {pagination.total} pedidos
+                Mostrando {(pagination.page - 1) * pagination.limit + 1}-
+                {Math.min(pagination.page * pagination.limit, pagination.total)}{" "}
+                de {pagination.total} pedidos
               </p>
               <div className="flex items-center gap-3">
                 <button
@@ -448,7 +551,10 @@ function OrdersPageContent() {
                 >
                   Anterior
                 </button>
-                <span className="text-slate-300 font-medium" data-testid="current-page">
+                <span
+                  className="text-slate-300 font-medium"
+                  data-testid="current-page"
+                >
                   Página {pagination.page} de {pagination.totalPages || 1}
                 </span>
                 <button

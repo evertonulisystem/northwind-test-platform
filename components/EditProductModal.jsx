@@ -61,10 +61,14 @@ export default function EditProductModal({ product, onClose, onUpdate }) {
             headers: { 'Authorization': `Bearer ${token}` }
           });
           if (imageRes.ok) {
-            setImagePreview(`/api/v1/products/${product.id}/image`);
+            const imageList = await imageRes.json();
+            const firstImage = imageList?.data?.[0];
+            if (firstImage?.url) {
+              setImagePreview(firstImage.url);
+            }
           }
         } catch (error) {
-          // Produto não tem imagem, tudo bem
+          // Produto não tem imagem ou ocorreu erro, tudo bem
         }
       } catch (error) {
         toast.error('Erro ao carregar dados');
@@ -152,7 +156,7 @@ export default function EditProductModal({ product, onClose, onUpdate }) {
       toast.success('Imagem enviada com sucesso!');
       setImageFile(null);
       // Atualiza preview com a URL da imagem salva
-      setImagePreview(`/api/v1/products/${product.id}/image`);
+      setImagePreview(result.data?.url || `/api/v1/products/${product.id}/image`);
     } catch (error) {
       toast.error('Erro de conexão ao fazer upload');
     } finally {
