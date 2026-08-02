@@ -45,13 +45,17 @@ function formatDate(dateStr) {
 export default function OrdersPage() {
   const router = useRouter();
   const [orders, setOrders] = useState([]);
+  const [totalOrders, setTotalOrders] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [status, setStatus] = useState('');
+  const [dataInicio, setDataInicio] = useState('');
+  const [dataFim, setDataFim] = useState('');
 
   useEffect(() => {
     fetchOrders();
   }, []);
 
-  async function fetchOrders() {
+  async function fetchOrders(filters = {}) {
     try {
       setLoading(true);
       const token = localStorage.getItem('token');
@@ -60,18 +64,45 @@ export default function OrdersPage() {
         router.push('/');
         return;
       }
-      const res = await fetch('/api/v1/orders', {
+
+      const nextStatus = filters.status ?? status;
+      const nextDataInicio = filters.dataInicio ?? dataInicio;
+      const nextDataFim = filters.dataFim ?? dataFim;
+      const searchParams = new URLSearchParams();
+
+      if (nextStatus) searchParams.set('status', nextStatus);
+      if (nextDataInicio) searchParams.set('from', nextDataInicio);
+      if (nextDataFim) searchParams.set('to', nextDataFim);
+
+      const queryString = searchParams.toString();
+      const url = queryString ? `/api/v1/orders?${queryString}` : '/api/v1/orders';
+
+      const res = await fetch(url, {
         headers: { Authorization: `Bearer ${token}` },
         cache: 'no-store',
       });
       if (res.status === 401) { router.push('/'); return; }
       const result = await res.json();
       setOrders(result.data || []);
+      setTotalOrders(result.total ?? 0);
     } catch {
+      setOrders([]);
+      setTotalOrders(0);
       toast.error('Erro ao carregar pedidos.');
     } finally {
       setLoading(false);
     }
+  }
+
+  function handleApplyFilters() {
+    fetchOrders();
+  }
+
+  function handleClearFilters() {
+    setStatus('');
+    setDataInicio('');
+    setDataFim('');
+    fetchOrders({ status: '', dataInicio: '', dataFim: '' });
   }
 
   return (
@@ -112,11 +143,81 @@ export default function OrdersPage() {
           </div>
         </div>
 
+        <div className="mb-6 bg-slate-900/50 backdrop-blur-md rounded-2xl border border-white/10 p-5 shadow-xl">
+          <div className="flex flex-wrap items-end gap-4">
+            <div className="flex-1 min-w-[220px]">
+              <label className="block text-sm font-medium text-pink-200 mb-2">
+                Status
+              </label>
+              <select
+                value={status}
+                onChange={(event) => setStatus(event.target.value)}
+                className="w-full bg-slate-800/80 border border-purple-400/30 text-white rounded-xl px-4 py-3 outline-none transition focus:border-pink-400 focus:ring-2 focus:ring-pink-500/20"
+              >
+                <option value="">Todos</option>
+                {Object.entries(STATUS_CONFIG).map(([statusKey, config]) => (
+                  <option key={statusKey} value={statusKey}>
+                    {config.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="min-w-[200px]">
+              <label className="block text-sm font-medium text-pink-200 mb-2">
+                Data inicial
+              </label>
+              <input
+                type="date"
+                value={dataInicio}
+                onChange={(event) => setDataInicio(event.target.value)}
+                className="w-full bg-slate-800/80 border border-purple-400/30 text-white rounded-xl px-4 py-3 outline-none transition focus:border-pink-400 focus:ring-2 focus:ring-pink-500/20"
+              />
+            </div>
+
+            <div className="min-w-[200px]">
+              <label className="block text-sm font-medium text-pink-200 mb-2">
+                Data final
+              </label>
+              <input
+                type="date"
+                value={dataFim}
+                onChange={(event) => setDataFim(event.target.value)}
+                className="w-full bg-slate-800/80 border border-purple-400/30 text-white rounded-xl px-4 py-3 outline-none transition focus:border-pink-400 focus:ring-2 focus:ring-pink-500/20"
+              />
+            </div>
+
+            <button
+              type="button"
+              onClick={handleApplyFilters}
+              className="bg-gradient-to-r from-purple-600 via-pink-600 to-orange-500 hover:from-purple-700 hover:via-pink-700 hover:to-orange-600 text-white px-5 py-3 rounded-xl font-semibold shadow-lg transition"
+            >
+              Aplicar filtros
+            </button>
+
+            <button
+              type="button"
+              onClick={handleClearFilters}
+              className="bg-slate-800/90 hover:bg-slate-700 text-pink-100 border border-pink-300/15 px-5 py-3 rounded-xl font-semibold transition"
+            >
+              Limpar filtros
+            </button>
+          </div>
+        </div>
+
         {/* Loading */}
         {loading && (
           <div className="text-center py-20">
             <div className="inline-block w-10 h-10 border-4 border-pink-400 border-t-transparent rounded-full animate-spin" />
             <p className="text-pink-200 mt-4">Carregando pedidos...</p>
+          </div>
+        )}
+
+        {!loading && (
+          <div className="mb-4">
+            <p className="text-pink-100 font-medium">
+              {totalOrders} {totalOrders === 1 ? 'pedido encontrado' : 'pedidos encontrados'}
+            </p>
           </div>
         )}
 

@@ -17,7 +17,12 @@ import { requireAuth } from '@/lib/auth';
  */
 async function getOrders(request, { user }) {
   try {
-    const { data, error } = await supabase
+    const { searchParams } = new URL(request.url);
+    const status = searchParams.get('status');
+    const from = searchParams.get('from');
+    const to = searchParams.get('to');
+
+    let query = supabase
       .from('orders')
       .select(`
         id,
@@ -27,20 +32,34 @@ async function getOrders(request, { user }) {
         created_at,
         shippers (company_name)
       `)
-      .eq('user_id', user.id)
-      .order('created_at', { ascending: false });
+      .eq('user_id', user.id);
+
+    if (status) {
+      query = query.eq('status', status);
+    }
+
+    if (from) {
+      query = query.gte('created_at', `${from}T00:00:00.000`);
+    }
+
+    if (to) {
+      query = query.lte('created_at', `${to}T23:59:59.999`);
+    }
+
+    const { data, error } = await query.order('created_at', { ascending: false });
 
     if (error) throw error;
     
     if (!data || data.length === 0) {
       return NextResponse.json(
-        { data: [], mensagens: ['Você ainda não possui pedidos.'] },
-        { status: 404 }
+        { data: [], total: 0, mensagens: ['Você ainda não possui pedidos.'] },
+        { status: 200 }
       );
     }
 
     return NextResponse.json({
       data: data,
+      total: data.length,
       mensagens: ['Histórico de pedidos carregado.']
     });
   } catch (error) {
