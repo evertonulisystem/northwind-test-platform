@@ -6,9 +6,9 @@
 // Adicionado em: agosto/2026
 // ============================================================
 
-import { supabase } from '@/lib/supabase';
-import { NextResponse } from 'next/server';
-import { requireAuth } from '@/lib/auth';
+import { supabase } from "@/lib/supabase";
+import { NextResponse } from "next/server";
+import { requireAuth } from "@/lib/auth";
 
 /**
  * @swagger
@@ -35,25 +35,27 @@ async function getOrderPayments(request, { params, user }) {
     const { id } = await params;
 
     // 1. Verificar se o pedido pertence ao usuário autenticado (segurança)
-    const { data: order, error: orderError } = await supabase
-      .from('orders')
-      .select('id')
-      .eq('id', id)
-      .eq('user_id', user.id)
-      .maybeSingle();
+    const orderQuery = supabase.from("orders").select("id").eq("id", id);
+
+    if (user.role !== "admin") {
+      orderQuery.eq("user_id", user.id);
+    }
+
+    const { data: order, error: orderError } = await orderQuery.maybeSingle();
 
     if (orderError || !order) {
       return NextResponse.json(
-        { data: null, mensagens: ['Pedido não encontrado ou sem permissão.'] },
-        { status: 404 }
+        { data: null, mensagens: ["Pedido não encontrado ou sem permissão."] },
+        { status: 404 },
       );
     }
 
     // 2. Buscar pagamentos deste pedido
     // A tabela payments armazena: método, status, valor, parcelas, últimos dígitos do cartão, etc.
     const { data: payments, error: paymentsError } = await supabase
-      .from('payments')
-      .select(`
+      .from("payments")
+      .select(
+        `
         id,
         order_id,
         payment_method,
@@ -65,29 +67,32 @@ async function getOrderPayments(request, { params, user }) {
         installments,
         notes,
         created_at
-      `)
-      .eq('order_id', id)
-      .order('created_at', { ascending: true });
+      `,
+      )
+      .eq("order_id", id)
+      .order("created_at", { ascending: true });
 
     if (paymentsError) throw paymentsError;
 
     if (!payments || payments.length === 0) {
       return NextResponse.json(
-        { data: [], mensagens: ['Nenhum pagamento encontrado para este pedido.'] },
-        { status: 404 }
+        {
+          data: [],
+          mensagens: ["Nenhum pagamento encontrado para este pedido."],
+        },
+        { status: 404 },
       );
     }
 
     return NextResponse.json({
       data: payments,
-      mensagens: ['Pagamentos carregados com sucesso.'],
+      mensagens: ["Pagamentos carregados com sucesso."],
     });
-
   } catch (error) {
-    console.error('Erro ao buscar pagamentos do pedido:', error);
+    console.error("Erro ao buscar pagamentos do pedido:", error);
     return NextResponse.json(
-      { data: null, mensagens: ['Erro interno ao buscar pagamentos.'] },
-      { status: 500 }
+      { data: null, mensagens: ["Erro interno ao buscar pagamentos."] },
+      { status: 500 },
     );
   }
 }

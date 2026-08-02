@@ -1,7 +1,7 @@
 // app/api/v1/orders/[id]/route.js
-import { supabase } from '@/lib/supabase';
-import { NextResponse } from 'next/server';
-import { requireAuth } from '@/lib/auth';
+import { supabase } from "@/lib/supabase";
+import { NextResponse } from "next/server";
+import { requireAuth } from "@/lib/auth";
 
 /**
  * @swagger
@@ -27,35 +27,45 @@ async function getOrderDetail(request, { params, user }) {
     const { id } = await params;
 
     // 1. Buscar o pedido
-    const { data: order, error: orderError } = await supabase
-      .from('orders')
-      .select(`
+    const orderQuery = supabase
+      .from("orders")
+      .select(
+        `
         *,
         shippers (company_name, phone)
-      `)
-      .eq('id', id)
-      .eq('user_id', user.id) // Segurança
-      .maybeSingle();
+      `,
+      )
+      .eq("id", id);
+
+    if (user.role !== "admin") {
+      orderQuery.eq("user_id", user.id);
+    }
+
+    const { data: order, error: orderError } = await orderQuery.maybeSingle();
 
     if (orderError) {
-      console.error('Erro ao buscar pedido:', orderError);
+      console.error("Erro ao buscar pedido:", orderError);
       return NextResponse.json(
-        { data: null, mensagens: ['Erro interno ao buscar detalhes do pedido.'] },
-        { status: 500 }
+        {
+          data: null,
+          mensagens: ["Erro interno ao buscar detalhes do pedido."],
+        },
+        { status: 500 },
       );
     }
 
     if (!order) {
       return NextResponse.json(
-        { data: null, mensagens: ['Pedido não encontrado.'] },
-        { status: 404 }
+        { data: null, mensagens: ["Pedido não encontrado."] },
+        { status: 404 },
       );
     }
 
     // 2. Buscar os itens do pedido
     const { data: items, error: itemsError } = await supabase
-      .from('order_items')
-      .select(`
+      .from("order_items")
+      .select(
+        `
         id,
         quantity,
         unit_price,
@@ -66,24 +76,24 @@ async function getOrderDetail(request, { params, user }) {
           sku,
           image_url
         )
-      `)
-      .eq('order_id', id);
+      `,
+      )
+      .eq("order_id", id);
 
     if (itemsError) throw itemsError;
 
     return NextResponse.json({
       data: {
         ...order,
-        items: items || []
+        items: items || [],
       },
-      mensagens: ['Detalhes do pedido carregados com sucesso.']
+      mensagens: ["Detalhes do pedido carregados com sucesso."],
     });
-
   } catch (error) {
-    console.error('Erro ao buscar detalhes do pedido:', error);
+    console.error("Erro ao buscar detalhes do pedido:", error);
     return NextResponse.json(
-      { data: null, mensagens: ['Erro ao buscar detalhes do pedido.'] },
-      { status: 500 }
+      { data: null, mensagens: ["Erro ao buscar detalhes do pedido."] },
+      { status: 500 },
     );
   }
 }
