@@ -525,6 +525,7 @@ export default function CategoriesPage() {
               </button>
               <button
                 type="button"
+                 data-testid="cancel-category-btn"
                 onClick={() => {
                   setShowAddModal(false);
                   setFormData({
@@ -610,7 +611,7 @@ export default function CategoriesPage() {
               </button>
               <button
                 type="button"
-                  data-testid="cancel-category-btn"
+                  data-testid="cancel-edit-category-btn"
                 onClick={() => {
                   setShowEditModal(false);
                   setEditingCategory(null);
