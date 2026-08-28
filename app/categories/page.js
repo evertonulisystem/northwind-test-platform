@@ -479,7 +479,13 @@ export default function CategoriesPage() {
                   placeholder="Eletrônicos"
                 />
                 {errors.name && (
-                  <p className="text-red-400 text-xs mt-1">{errors.name}</p>
+                 
+                 <p 
+                  data-testid="error-category-name"
+                 className="text-red-400 text-xs mt-1">
+                  {errors.name}
+                 
+                 </p>
                 )}
               </div>
 
@@ -498,7 +504,9 @@ export default function CategoriesPage() {
                   placeholder="Produtos eletrônicos como celulares, computadores, tablets e acessórios..."
                 />
                 {errors.description && (
-                  <p className="text-red-400 text-xs mt-1">
+                  <p
+                  data-testid="error-category-description"
+                  className="text-red-400 text-xs mt-1">
                     {errors.description}
                   </p>
                 )}
