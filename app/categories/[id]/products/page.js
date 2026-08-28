@@ -104,6 +104,7 @@ export default function CategoryProductsPage() {
         {/* Header */}
         <div className="mb-8 text-center">
           <button
+            data-testid="back-to-categories-button"
             onClick={() => router.push("/categories")}
             className="inline-flex items-center gap-2 text-white hover:text-emerald-300 mb-4 transition"
           >
