@@ -5,11 +5,11 @@
 // ============================================================
 
 // app/reviews/page.js
-'use client';
+"use client";
 
-import { useState, useEffect, useCallback } from 'react';
-import { useRouter } from 'next/navigation';
-import { toast } from 'react-toastify';
+import { useState, useEffect, useCallback } from "react";
+import { useRouter } from "next/navigation";
+import { toast } from "react-toastify";
 import {
   Star,
   AlertTriangle,
@@ -20,7 +20,7 @@ import {
   CheckCircle,
   XCircle,
   Loader2,
-} from 'lucide-react';
+} from "lucide-react";
 
 // ── Helpers ─────────────────────────────────────────────────────
 
@@ -29,11 +29,11 @@ import {
  * Ex: "12 de jul. de 2026"
  */
 function formatDate(iso) {
-  if (!iso) return '—';
-  return new Date(iso).toLocaleDateString('pt-BR', {
-    day: '2-digit',
-    month: 'short',
-    year: 'numeric',
+  if (!iso) return "—";
+  return new Date(iso).toLocaleDateString("pt-BR", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
   });
 }
 
@@ -49,8 +49,8 @@ function StarDisplay({ rating = 0 }) {
           key={star}
           className={`w-4 h-4 transition-colors ${
             star <= rating
-              ? 'text-amber-400 fill-amber-400'
-              : 'text-slate-600 fill-slate-600'
+              ? "text-amber-400 fill-amber-400"
+              : "text-slate-600 fill-slate-600"
           }`}
         />
       ))}
@@ -61,11 +61,11 @@ function StarDisplay({ rating = 0 }) {
 // ── Labels das estrelas ──────────────────────────────────────────
 // Fornece feedback textual ao usuário durante a seleção de nota
 const STAR_LABELS = {
-  1: 'Ruim',
-  2: 'Regular',
-  3: 'Bom',
-  4: 'Muito Bom',
-  5: 'Excelente',
+  1: "Ruim",
+  2: "Regular",
+  3: "Bom",
+  4: "Muito Bom",
+  5: "Excelente",
 };
 
 // ── Componente: Sistema de estrelas clicáveis ────────────────────
@@ -98,7 +98,7 @@ function StarRating({ value, onChange, error }) {
             type="button"
             id={`star-${star}`}
             data-testid={`star-${star}`}
-            aria-label={`${star} estrela${star > 1 ? 's' : ''} — ${STAR_LABELS[star]}`}
+            aria-label={`${star} estrela${star > 1 ? "s" : ""} — ${STAR_LABELS[star]}`}
             onClick={() => onChange(star)}
             onMouseEnter={() => setHovered(star)}
             className="focus:outline-none transition-transform hover:scale-110 active:scale-95"
@@ -106,8 +106,8 @@ function StarRating({ value, onChange, error }) {
             <Star
               className={`w-9 h-9 transition-colors duration-150 ${
                 star <= activeRating
-                  ? 'text-amber-400 fill-amber-400 drop-shadow-[0_0_6px_rgba(251,191,36,0.6)]'
-                  : 'text-slate-500 fill-slate-700 hover:text-amber-300'
+                  ? "text-amber-400 fill-amber-400 drop-shadow-[0_0_6px_rgba(251,191,36,0.6)]"
+                  : "text-slate-500 fill-slate-700 hover:text-amber-300"
               }`}
             />
           </button>
@@ -123,7 +123,10 @@ function StarRating({ value, onChange, error }) {
 
       {/* Erro inline quando nenhuma estrela foi selecionada */}
       {error && (
-        <p className="text-red-400 text-xs mt-1 flex items-center gap-1" role="alert">
+        <p
+          className="text-red-400 text-xs mt-1 flex items-center gap-1"
+          role="alert"
+        >
           <XCircle className="w-3.5 h-3.5" />
           {error}
         </p>
@@ -143,8 +146,8 @@ function StarRating({ value, onChange, error }) {
  */
 function ReviewModal({ product, onClose, onSuccess }) {
   const [rating, setRating] = useState(0);
-  const [title, setTitle] = useState('');
-  const [comment, setComment] = useState('');
+  const [title, setTitle] = useState("");
+  const [comment, setComment] = useState("");
   const [loading, setLoading] = useState(false);
 
   // Erros inline por campo
@@ -156,11 +159,11 @@ function ReviewModal({ product, onClose, onSuccess }) {
     const newErrors = {};
 
     if (!rating || rating < 1 || rating > 5) {
-      newErrors.rating = 'Selecione uma nota de 1 a 5 estrelas.';
+      newErrors.rating = "Selecione uma nota de 1 a 5 estrelas.";
     }
 
     if (!comment || comment.trim().length < 10) {
-      newErrors.comment = 'O comentário deve ter ao menos 10 caracteres.';
+      newErrors.comment = "O comentário deve ter ao menos 10 caracteres.";
     }
 
     setErrors(newErrors);
@@ -177,19 +180,19 @@ function ReviewModal({ product, onClose, onSuccess }) {
     setLoading(true);
 
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem("token");
 
       // Tratar 401: redirecionar para login se não autenticado
       if (!token) {
-        toast.error('Você precisa estar logado para avaliar.');
-        window.location.href = '/';
+        toast.error("Você precisa estar logado para avaliar.");
+        window.location.href = "/";
         return;
       }
 
-      const res = await fetch('/api/v1/reviews', {
-        method: 'POST',
+      const res = await fetch("/api/v1/reviews", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
@@ -204,25 +207,24 @@ function ReviewModal({ product, onClose, onSuccess }) {
 
       if (res.status === 401) {
         // Token expirado ou inválido → redirecionar para login
-        localStorage.removeItem('token');
-        localStorage.removeItem('user');
-        toast.error('Sessão expirada. Faça login novamente.');
-        window.location.href = '/';
+        localStorage.removeItem("token");
+        localStorage.removeItem("user");
+        toast.error("Sessão expirada. Faça login novamente.");
+        window.location.href = "/";
         return;
       }
 
       if (!res.ok) {
-        toast.error(data.mensagens?.[0] || 'Erro ao enviar avaliação.');
+        toast.error(data.mensagens?.[0] || "Erro ao enviar avaliação.");
         return;
       }
 
       // Sucesso!
-      toast.success('✅ Avaliação enviada com sucesso!');
+      toast.success("✅ Avaliação enviada com sucesso!");
       onSuccess();
-
     } catch (err) {
-      console.error('Erro ao enviar avaliação:', err);
-      toast.error('Erro de conexão ao enviar avaliação.');
+      console.error("Erro ao enviar avaliação:", err);
+      toast.error("Erro de conexão ao enviar avaliação.");
     } finally {
       setLoading(false);
     }
@@ -271,7 +273,6 @@ function ReviewModal({ product, onClose, onSuccess }) {
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-5" noValidate>
-
           {/* ── Campo: Nota (estrelas clicáveis) ── */}
           <div>
             <label className="block text-slate-300 text-sm font-medium mb-2">
@@ -282,7 +283,8 @@ function ReviewModal({ product, onClose, onSuccess }) {
               onChange={(v) => {
                 setRating(v);
                 // Limpa erro ao selecionar uma nota
-                if (errors.rating) setErrors((prev) => ({ ...prev, rating: null }));
+                if (errors.rating)
+                  setErrors((prev) => ({ ...prev, rating: null }));
               }}
               error={errors.rating}
             />
@@ -294,7 +296,7 @@ function ReviewModal({ product, onClose, onSuccess }) {
               htmlFor="review-title"
               className="block text-slate-300 text-sm font-medium mb-1.5"
             >
-              Título da avaliação{' '}
+              Título da avaliação{" "}
               <span className="text-slate-500 font-normal">(opcional)</span>
             </label>
             <input
@@ -332,14 +334,18 @@ function ReviewModal({ product, onClose, onSuccess }) {
               data-testid="review-comment-input"
               className={`w-full px-4 py-2.5 bg-slate-700 border rounded-lg text-white placeholder-slate-500 focus:outline-none focus:ring-2 transition resize-none text-sm ${
                 errors.comment
-                  ? 'border-red-500 focus:ring-red-500'
-                  : 'border-slate-600 focus:ring-purple-500'
+                  ? "border-red-500 focus:ring-red-500"
+                  : "border-slate-600 focus:ring-purple-500"
               }`}
             />
             {/* Contador de caracteres */}
             <div className="flex justify-between mt-1">
               {errors.comment ? (
-                <p className="text-red-400 text-xs flex items-center gap-1" role="alert" data-testid="comment-error">
+                <p
+                  className="text-red-400 text-xs flex items-center gap-1"
+                  role="alert"
+                  data-testid="comment-error"
+                >
                   <XCircle className="w-3.5 h-3.5" />
                   {errors.comment}
                 </p>
@@ -348,7 +354,7 @@ function ReviewModal({ product, onClose, onSuccess }) {
               )}
               <span
                 className={`text-xs ml-auto ${
-                  comment.length < 10 ? 'text-slate-500' : 'text-slate-400'
+                  comment.length < 10 ? "text-slate-500" : "text-slate-400"
                 }`}
               >
                 {comment.length}/1000
@@ -408,21 +414,26 @@ export default function ReviewsPage() {
   const [reviews, setReviews] = useState([]);
   const [loadingReviews, setLoadingReviews] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
-  const [pagination, setPagination] = useState({ page: 1, limit: 10, total: 0, totalPages: 0 });
+  const [pagination, setPagination] = useState({
+    page: 1,
+    limit: 10,
+    total: 0,
+    totalPages: 0,
+  });
 
   // ── Estado: modal de avaliação ───────────────────────────────
   const [modalProduct, setModalProduct] = useState(null); // produto selecionado
 
   // ── Helper: headers autenticados ────────────────────────────
   function getAuthHeaders() {
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem("token");
     if (!token) {
-      toast.error('Você precisa estar logado.');
-      router.push('/');
+      toast.error("Você precisa estar logado.");
+      router.push("/");
       return null;
     }
     return {
-      'Content-Type': 'application/json',
+      "Content-Type": "application/json",
       Authorization: `Bearer ${token}`,
     };
   }
@@ -434,45 +445,45 @@ export default function ReviewsPage() {
       const headers = getAuthHeaders();
       if (!headers) return;
 
-      const res = await fetch('/api/v1/reviews/without-reviews', {
+      const res = await fetch("/api/v1/reviews/without-reviews", {
         headers,
-        cache: 'no-store',
+        cache: "no-store",
       });
 
       if (res.status === 401) {
-        localStorage.removeItem('token');
-        router.push('/');
+        localStorage.removeItem("token");
+        router.push("/");
         return;
       }
 
       const data = await res.json();
       setProductsWithoutReviews(data.data || []);
     } catch (err) {
-      console.error('Erro ao buscar produtos sem avaliação:', err);
-      toast.error('Erro ao carregar produtos sem avaliação.');
+      console.error("Erro ao buscar produtos sem avaliação:", err);
+      toast.error("Erro ao carregar produtos sem avaliação.");
     } finally {
       setLoadingWithout(false);
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // ── Busca: todas as avaliações aprovadas ─────────────────────
   const fetchReviews = useCallback(async (page = 1) => {
     setLoadingReviews(true);
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem("token");
       if (!token) return;
 
       const res = await fetch(`/api/v1/reviews?page=${page}&limit=10`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
-        cache: 'no-store',
+        cache: "no-store",
       });
 
       if (res.status === 401) {
-        localStorage.removeItem('token');
-        router.push('/');
+        localStorage.removeItem("token");
+        router.push("/");
         return;
       }
 
@@ -482,12 +493,12 @@ export default function ReviewsPage() {
         setPagination(data.pagination);
       }
     } catch (err) {
-      console.error('Erro ao buscar avaliações:', err);
-      toast.error('Erro ao carregar avaliações.');
+      console.error("Erro ao buscar avaliações:", err);
+      toast.error("Erro ao carregar avaliações.");
     } finally {
       setLoadingReviews(false);
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Carrega ambas as listas ao montar a página
@@ -509,13 +520,12 @@ export default function ReviewsPage() {
       {/* ════════════════════════════════════════════════════════
           LAYOUT PRINCIPAL — gradiente igual ao restante do projeto
           ════════════════════════════════════════════════════════ */}
-      <div className="min-h-screen bg-gradient-to-br from-purple-900 via-pink-800 to-orange-700 p-6">
+      <div className="min-h-screen bg-gradient-to-br from-purple-900 via-pink-800 to-orange-700 px-4 py-6">
         <div className="max-w-7xl mx-auto">
-
           {/* ── Header ── */}
           <div className="mb-8">
             <button
-              onClick={() => router.push('/products')}
+              onClick={() => router.push("/products")}
               id="back-to-products-button"
               data-testid="back-to-products-button"
               className="flex items-center gap-2 text-pink-200 hover:text-white transition mb-6 group"
@@ -538,7 +548,8 @@ export default function ReviewsPage() {
                 Avaliações de Produtos
               </h1>
               <p className="text-xl text-pink-100">
-                Gerencie as avaliações e identifique produtos que ainda aguardam feedback
+                Gerencie as avaliações e identifique produtos que ainda aguardam
+                feedback
               </p>
             </div>
           </div>
@@ -565,7 +576,8 @@ export default function ReviewsPage() {
                   Produtos Sem Avaliação
                 </h2>
                 <p className="text-slate-400 text-sm">
-                  Produtos que foram vendidos mas ainda não receberam nenhuma avaliação
+                  Produtos que foram vendidos mas ainda não receberam nenhuma
+                  avaliação
                 </p>
               </div>
 
@@ -715,7 +727,8 @@ export default function ReviewsPage() {
 
               {!loadingReviews && pagination.total > 0 && (
                 <span className="ml-auto bg-purple-500/20 border border-purple-500/40 text-purple-300 px-3 py-1 rounded-full text-sm font-semibold">
-                  {pagination.total} avaliação{pagination.total !== 1 ? 'ões' : ''}
+                  {pagination.total} avaliação
+                  {pagination.total !== 1 ? "ões" : ""}
                 </span>
               )}
             </div>
@@ -764,7 +777,8 @@ export default function ReviewsPage() {
                             className="text-white font-semibold text-sm truncate"
                             data-testid={`review-product-name-${review.id}`}
                           >
-                            {review.products?.name || `Produto #${review.product_id}`}
+                            {review.products?.name ||
+                              `Produto #${review.product_id}`}
                           </p>
                         </div>
                         <StarDisplay rating={review.rating} />
@@ -820,17 +834,30 @@ export default function ReviewsPage() {
                 {pagination.totalPages > 1 && (
                   <div className="flex justify-center items-center gap-4 mt-8">
                     <button
-                      onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
+                      onClick={() =>
+                        setCurrentPage((prev) => Math.max(1, prev - 1))
+                      }
                       disabled={currentPage === 1}
                       className="px-4 py-2 rounded-lg bg-slate-800 border border-slate-600 text-white hover:bg-slate-700 disabled:opacity-50 disabled:cursor-not-allowed transition"
                     >
                       Anterior
                     </button>
                     <span className="text-slate-300">
-                      Página <span className="font-bold text-white">{currentPage}</span> de <span className="font-bold text-white">{pagination.totalPages}</span>
+                      Página{" "}
+                      <span className="font-bold text-white">
+                        {currentPage}
+                      </span>{" "}
+                      de{" "}
+                      <span className="font-bold text-white">
+                        {pagination.totalPages}
+                      </span>
                     </span>
                     <button
-                      onClick={() => setCurrentPage((prev) => Math.min(pagination.totalPages, prev + 1))}
+                      onClick={() =>
+                        setCurrentPage((prev) =>
+                          Math.min(pagination.totalPages, prev + 1),
+                        )
+                      }
                       disabled={currentPage === pagination.totalPages}
                       className="px-4 py-2 rounded-lg bg-slate-800 border border-slate-600 text-white hover:bg-slate-700 disabled:opacity-50 disabled:cursor-not-allowed transition"
                     >
