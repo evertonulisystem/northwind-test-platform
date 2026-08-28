@@ -509,6 +509,7 @@ export default function CategoriesPage() {
               <button
                 type="submit"
                 form="category-form"
+                data-testid="save-category-btn"
                 disabled={loading}
                 className="flex-1 bg-emerald-600 text-white py-3 rounded-lg hover:bg-emerald-700 transition font-semibold disabled:opacity-50"
               >
