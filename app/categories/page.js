@@ -140,7 +140,16 @@ export default function CategoriesPage() {
         return;
       }
 
-      toast.success("Categoria cadastrada com sucesso!");
+      //toast.success("Categoria cadastrada com sucesso!");
+ toast.success(
+    <div data-testid="category-success-toast">
+      Categoria cadastrada com sucesso!
+    </div>
+  );
+
+
+
+
       fetchCategories();
       setCurrentPage(1); // Volta para a primeira página para ver a nova categoria
       setShowAddModal(false);
