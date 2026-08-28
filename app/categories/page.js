@@ -610,6 +610,7 @@ export default function CategoriesPage() {
               </button>
               <button
                 type="button"
+                  data-testid="cancel-category-btn"
                 onClick={() => {
                   setShowEditModal(false);
                   setEditingCategory(null);
