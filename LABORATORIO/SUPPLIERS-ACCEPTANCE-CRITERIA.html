@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Suppliers API - Acceptance Criteria | Teste de API com Playwright</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: #f8f5f2;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border: 1px solid #d4a574;
+            border-radius: 6px;
+            box-shadow: 0 1px 3px rgba(212, 165, 116, 0.2);
+        }
+
+        .header {
+            background: linear-gradient(135deg, #8b6f47 0%, #a0826d 100%);
+            color: white;
+            padding: 20px;
+            border-bottom: 1px solid #6b5637;
+        }
+
+        .header h1 {
+            font-size: 1.5em;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .header .subtitle {
+            font-size: 0.9em;
+            opacity: 0.9;
+        }
+
+        .content {
+            padding: 30px;
+        }
+
+        .user-story {
+            background: #faf6f0;
+            border: 1px solid #d4a574;
+            border-radius: 4px;
+            padding: 20px;
+            margin-bottom: 30px;
+        }
+
+        .user-story h2 {
+            color: #8b6f47;
+            font-size: 1.2em;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+
+        .user-story p {
+            color: #333;
+            margin-bottom: 15px;
+        }
+
+        .acceptance-criteria {
+            margin-bottom: 40px;
+        }
+
+        .acceptance-criteria h2 {
+            color: #8b6f47;
+            font-size: 1.2em;
+            margin-bottom: 20px;
+            font-weight: 600;
+            border-bottom: 2px solid #d4a574;
+            padding-bottom: 5px;
+        }
+
+        .endpoint {
+            margin-bottom: 30px;
+            border: 1px solid #d4a574;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .endpoint-header {
+            background: #faf6f0;
+            padding: 15px;
+            border-bottom: 1px solid #d4a574;
+        }
+
+        .endpoint-title {
+            font-weight: 600;
+            font-size: 1.1em;
+            margin-bottom: 5px;
+        }
+
+        .endpoint-method {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 3px;
+            font-size: 0.8em;
+            font-weight: bold;
+            text-transform: uppercase;
+            margin-right: 10px;
+        }
+
+        .method-get { background: #28a745; color: white; }
+        .method-post { background: #17a2b8; color: white; }
+        .method-put { background: #fd7e14; color: white; }
+        .method-patch { background: #6610f2; color: white; }
+        .method-delete { background: #dc3545; color: white; }
+
+        .endpoint-url {
+            font-family: 'Courier New', monospace;
+            background: #f1f3f4;
+            padding: 5px 8px;
+            border-radius: 3px;
+            font-size: 0.9em;
+        }
+
+        .endpoint-body {
+            padding: 20px;
+        }
+
+        .criteria-list {
+            list-style: none;
+        }
+
+        .criteria-item {
+            background: white;
+            border: 1px solid #d4a574;
+            border-left: 4px solid #8b6f47;
+            padding: 12px 15px;
+            margin-bottom: 10px;
+            border-radius: 3px;
+        }
+
+        .criteria-item strong {
+            color: #8b6f47;
+            font-weight: 600;
+        }
+
+        .status-codes {
+            margin: 15px 0;
+        }
+
+        .status-codes h4 {
+            font-size: 0.9em;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #333;
+        }
+
+        .status-code {
+            display: inline-block;
+            padding: 4px 8px;
+            margin: 2px;
+            border-radius: 3px;
+            font-size: 0.8em;
+            font-weight: bold;
+        }
+
+        .status-200 { background: #d4edda; color: #155724; }
+        .status-201 { background: #d1ecf1; color: #0c5460; }
+        .status-400 { background: #fff3cd; color: #856404; }
+        .status-401 { background: #f8d7da; color: #721c24; }
+        .status-404 { background: #e2e3e5; color: #383d41; }
+        .status-409 { background: #e2e3e5; color: #383d41; }
+        .status-500 { background: #f8d7da; color: #721c24; }
+
+        .field-list {
+            margin: 15px 0;
+        }
+
+        .field-list h4 {
+            font-size: 0.9em;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #333;
+        }
+
+        .field-item {
+            background: #faf6f0;
+            border: 1px solid #d4a574;
+            padding: 8px 12px;
+            margin-bottom: 5px;
+            border-radius: 3px;
+            font-size: 0.9em;
+        }
+
+        .field-item strong {
+            color: #6b5637;
+        }
+
+        .footer {
+            background: #faf6f0;
+            padding: 20px;
+            border-top: 1px solid #d4a574;
+            text-align: center;
+            color: #666;
+            font-size: 0.9em;
+        }
+
+        .footer strong {
+            color: #8b6f47;
+        }
+
+        @media (max-width: 768px) {
+            .content {
+                padding: 20px;
+            }
+            
+            .header h1 {
+                font-size: 1.3em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Suppliers API - Acceptance Criteria</h1>
+            <div class="subtitle">Teste de API com Playwright | Prof. Everton Ulisses</div>
+        </div>
+
+        <div class="content">
+            <div class="user-story">
+                <h2>User Story</h2>
+                <p><strong>Como:</strong> Desenvolvedor de Testes Automatizados</p>
+                <p><strong>Eu quero:</strong> Validar todos os endpoints da API de Suppliers</p>
+                <p><strong>Para que:</strong> Garantir que as regras de negócio, validações e respostas HTTP estejam funcionando corretamente antes de colocar em produção</p>
+                <p><strong>Critérios de Aceite:</strong> Todos os endpoints devem validar dados, retornar status codes corretos e manter consistência nas respostas JSON.</p>
+            </div>
+
+            <div class="acceptance-criteria">
+                <h2>Acceptance Criteria - Suppliers API</h2>
+
+                <div class="endpoint">
+                    <div class="endpoint-header">
+                        <div class="endpoint-title">
+                            <span class="endpoint-method method-get">GET</span>
+                            Listar Fornecedores
+                        </div>
+                        <div class="endpoint-url">GET /api/v1/suppliers</div>
+                    </div>
+                    <div class="endpoint-body">
+                        <div class="field-list">
+                            <h4>Query Parameters (Opcionais)</h4>
+                            <div class="field-item"><strong>page:</strong> Número da página (padrão: 1, mínimo: 1)</div>
+                            <div class="field-item"><strong>limit:</strong> Itens por página (padrão: 10, máximo: 100)</div>
+                            <div class="field-item"><strong>search:</strong> Busca textual no nome da empresa (case insensitive)</div>
+                            <div class="field-item"><strong>sort:</strong> Campo de ordenação: company_name, contact_name, created_at</div>
+                            <div class="field-item"><strong>order:</strong> Direção: asc, desc (padrão: asc)</div>
+                        </div>
+
+                        <div class="status-codes">
+                            <h4>Status Codes Esperados</h4>
+                            <span class="status-code status-200">200</span>
+                            <span class="status-code status-400">400</span>
+                            <span class="status-code status-401">401</span>
+                            <span class="status-code status-500">500</span>
+                        </div>
+
+                        <ul class="criteria-list">
+                            <li class="criteria-item"><strong>✅ Listagem com paginação funcional:</strong> Retorna fornecedores paginados com metadados</li>
+                            <li class="criteria-item"><strong>✅ Filtros aplicados corretamente:</strong> Filtra por busca textual e ordenação</li>
+                            <li class="criteria-item"><strong>✅ Token obrigatório:</strong> Requer JWT válido no header Authorization</li>
+                            <li class="criteria-item"><strong>✅ Validação de parâmetros:</strong> Valida page/limit como números positivos</li>
+                            <li class="criteria-item"><strong>✅ Estrutura JSON consistente:</strong> Retorna { data, mensagens } em todas as respostas</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="endpoint">
+                    <div class="endpoint-header">
+                        <div class="endpoint-title">
+                            <span class="endpoint-method method-post">POST</span>
+                            Criar Fornecedor
+                        </div>
+                        <div class="endpoint-url">POST /api/v1/suppliers</div>
+                    </div>
+                    <div class="endpoint-body">
+                        <div class="field-list">
+                            <h4>Body (JSON) - Campos Obrigatórios</h4>
+                            <div class="field-item"><strong>company_name:</strong> Nome da empresa (2-100 caracteres, único)</div>
+                            <div class="field-item"><strong>contact_name:</strong> Nome do contato (2-100 caracteres)</div>
+                            <div class="field-item"><strong>email:</strong> Email do fornecedor (formato email válido, único)</div>
+                            <div class="field-item"><strong>phone:</strong> Telefone (10-15 caracteres, formato internacional)</div>
+                        </div>
+
+                        <div class="status-codes">
+                            <h4>Status Codes Esperados</h4>
+                            <span class="status-code status-201">201</span>
+                            <span class="status-code status-400">400</span>
+                            <span class="status-code status-401">401</span>
+                            <span class="status-code status-409">409</span>
+                            <span class="status-code status-500">500</span>
+                        </div>
+
+                        <ul class="criteria-list">
+                            <li class="criteria-item"><strong>✅ Criação com sucesso:</strong> Fornecedor criado com ID único</li>
+                            <li class="criteria-item"><strong>✅ Validação de campos obrigatórios:</strong> Retorna erro se campos ausentes ou inválidos</li>
+                            <li class="criteria-item"><strong>✅ Validação de unicidade:</strong> Impede email ou nome de empresa duplicado</li>
+                            <li class="criteria-item"><strong>✅ Validação de email:</strong> Verifica formato de email válido</li>
+                            <li class="criteria-item"><strong>✅ Validação de telefone:</strong> Verifica formato de telefone válido</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="endpoint">
+                    <div class="endpoint-header">
+                        <div class="endpoint-title">
+                            <span class="endpoint-method method-get">GET</span>
+                            Buscar Fornecedor por ID
+                        </div>
+                        <div class="endpoint-url">GET /api/v1/suppliers/{id}</div>
+                    </div>
+                    <div class="endpoint-body">
+                        <div class="field-list">
+                            <h4>Path Parameters</h4>
+                            <div class="field-item"><strong>id:</strong> ID do fornecedor (inteiro positivo, deve existir)</div>
+                        </div>
+
+                        <div class="status-codes">
+                            <h4>Status Codes Esperados</h4>
+                            <span class="status-code status-200">200</span>
+                            <span class="status-code status-400">400</span>
+                            <span class="status-code status-401">401</span>
+                            <span class="status-code status-404">404</span>
+                            <span class="status-code status-500">500</span>
+                        </div>
+
+                        <ul class="criteria-list">
+                            <li class="criteria-item"><strong>✅ Busca por ID funcional:</strong> Retorna fornecedor específico com todos os dados</li>
+                            <li class="criteria-item"><strong>✅ Validação de ID:</strong> Valida ID como número positivo</li>
+                            <li class="criteria-item"><strong>✅ Fornecedor não encontrado:</strong> Retorna 404 se fornecedor não existe</li>
+                            <li class="criteria-item"><strong>✅ Dados completos:</strong> Retorna todos os campos incluindo data de criação</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="endpoint">
+                    <div class="endpoint-header">
+                        <div class="endpoint-title">
+                            <span class="endpoint-method method-get">GET</span>
+                            Listar Produtos do Fornecedor
+                        </div>
+                        <div class="endpoint-url">GET /api/v1/suppliers/{id}/products</div>
+                    </div>
+                    <div class="endpoint-body">
+                        <div class="field-list">
+                            <h4>Path Parameters</h4>
+                            <div class="field-item"><strong>id:</strong> ID do fornecedor (inteiro positivo, deve existir)</div>
+                        </div>
+
+                        <div class="status-codes">
+                            <h4>Status Codes Esperados</h4>
+                            <span class="status-code status-200">200</span>
+                            <span class="status-code status-400">400</span>
+                            <span class="status-code status-401">401</span>
+                            <span class="status-code status-404">404</span>
+                            <span class="status-code status-500">500</span>
+                        </div>
+
+                        <ul class="criteria-list">
+                            <li class="criteria-item"><strong>✅ Listagem de produtos funcional:</strong> Retorna produtos do fornecedor específico</li>
+                            <li class="criteria-item"><strong>✅ Fornecedor deve existir:</strong> Retorna 404 se fornecedor não existe</li>
+                            <li class="criteria-item"><strong>✅ Lista vazia permitida:</strong> Retorna lista vazia se não houver produtos</li>
+                            <li class="criteria-item"><strong>✅ Dados relacionais:</strong> Inclui nome da categoria dos produtos</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="endpoint">
+                    <div class="endpoint-header">
+                        <div class="endpoint-title">
+                            <span class="endpoint-method method-put">PUT</span>
+                            Atualizar Fornecedor (Completo)
+                        </div>
+                        <div class="endpoint-url">PUT /api/v1/suppliers/{id}</div>
+                    </div>
+                    <div class="endpoint-body">
+                        <div class="field-list">
+                            <h4>Body (JSON) - Campos Obrigatórios</h4>
+                            <div class="field-item"><strong>company_name:</strong> Nome da empresa (2-100 caracteres, único)</div>
+                            <div class="field-item"><strong>contact_name:</strong> Nome do contato (2-100 caracteres)</div>
+                            <div class="field-item"><strong>email:</strong> Email do fornecedor (formato email válido, único)</div>
+                            <div class="field-item"><strong>phone:</strong> Telefone (10-15 caracteres, formato internacional)</div>
+                        </div>
+
+                        <div class="status-codes">
+                            <h4>Status Codes Esperados</h4>
+                            <span class="status-code status-200">200</span>
+                            <span class="status-code status-400">400</span>
+                            <span class="status-code status-401">401</span>
+                            <span class="status-code status-404">404</span>
+                            <span class="status-code status-409">409</span>
+                            <span class="status-code status-500">500</span>
+                        </div>
+
+                        <ul class="criteria-list">
+                            <li class="criteria-item"><strong>✅ Atualização completa:</strong> Atualiza todos os campos do fornecedor</li>
+                            <li class="criteria-item"><strong>✅ Validação de unicidade:</strong> Verifica email e nome duplicados (exceto si mesmo)</li>
+                            <li class="criteria-item"><strong>✅ Fornecedor não encontrado:</strong> Retorna 404 se fornecedor não existe</li>
+                            <li class="criteria-item"><strong>✅ Validação de formatos:</strong> Verifica email e telefone válidos</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="endpoint">
+                    <div class="endpoint-header">
+                        <div class="endpoint-title">
+                            <span class="endpoint-method method-patch">PATCH</span>
+                            Atualizar Fornecedor (Parcial)
+                        </div>
+                        <div class="endpoint-url">PATCH /api/v1/suppliers/{id}</div>
+                    </div>
+                    <div class="endpoint-body">
+                        <div class="field-list">
+                            <h4>Body (JSON) - Pelo menos um campo obrigatório</h4>
+                            <div class="field-item"><strong>company_name:</strong> Nome da empresa (2-100 caracteres, opcional)</div>
+                            <div class="field-item"><strong>contact_name:</strong> Nome do contato (2-100 caracteres, opcional)</div>
+                            <div class="field-item"><strong>email:</strong> Email do fornecedor (formato email válido, opcional)</div>
+                            <div class="field-item"><strong>phone:</strong> Telefone (10-15 caracteres, opcional)</div>
+                        </div>
+
+                        <div class="status-codes">
+                            <h4>Status Codes Esperados</h4>
+                            <span class="status-code status-200">200</span>
+                            <span class="status-code status-400">400</span>
+                            <span class="status-code status-401">401</span>
+                            <span class="status-code status-404">404</span>
+                            <span class="status-code status-409">409</span>
+                            <span class="status-code status-500">500</span>
+                        </div>
+
+                        <ul class="criteria-list">
+                            <li class="criteria-item"><strong>✅ Atualização parcial funcional:</strong> Atualiza apenas os campos enviados</li>
+                            <li class="criteria-item"><strong>✅ Pelo menos um campo obrigatório:</strong> Retorna erro se nenhum campo for enviado</li>
+                            <li class="criteria-item"><strong>✅ Validação de campos individuais:</strong> Valida apenas os campos enviados</li>
+                            <li class="criteria-item"><strong>✅ Validação de unicidade parcial:</strong> Verifica duplicados apenas para campos alterados</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="endpoint">
+                    <div class="endpoint-header">
+                        <div class="endpoint-title">
+                            <span class="endpoint-method method-delete">DELETE</span>
+                            Remover Fornecedor
+                        </div>
+                        <div class="endpoint-url">DELETE /api/v1/suppliers/{id}</div>
+                    </div>
+                    <div class="endpoint-body">
+                        <div class="field-list">
+                            <h4>Path Parameters</h4>
+                            <div class="field-item"><strong>id:</strong> ID do fornecedor a ser removido (inteiro positivo)</div>
+                        </div>
+
+                        <div class="status-codes">
+                            <h4>Status Codes Esperados</h4>
+                            <span class="status-code status-200">200</span>
+                            <span class="status-code status-400">400</span>
+                            <span class="status-code status-401">401</span>
+                            <span class="status-code status-404">404</span>
+                            <span class="status-code status-500">500</span>
+                        </div>
+
+                        <ul class="criteria-list">
+                            <li class="criteria-item"><strong>✅ Remoção funcional:</strong> Remove fornecedor permanentemente</li>
+                            <li class="criteria-item"><strong>✅ Validação de ID:</strong> Valida ID como número positivo</li>
+                            <li class="criteria-item"><strong>✅ Fornecedor não encontrado:</strong> Retorna 404 se fornecedor não existe</li>
+                            <li class="criteria-item"><strong>✅ Confirmação de remoção:</strong> Retorna mensagem de sucesso</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="endpoint">
+                    <div class="endpoint-header">
+                        <div class="endpoint-title">
+                            <span class="endpoint-method method-post">POST</span>
+                            Upload de Documento
+                        </div>
+                        <div class="endpoint-url">POST /api/v1/suppliers/{id}/document</div>
+                    </div>
+                    <div class="endpoint-body">
+                        <div class="field-list">
+                            <h4>Body (multipart/form-data)</h4>
+                            <div class="field-item"><strong>file:</strong> Arquivo PDF (máximo 2MB)</div>
+                        </div>
+
+                        <div class="status-codes">
+                            <h4>Status Codes Esperados</h4>
+                            <span class="status-code status-200">200</span>
+                            <span class="status-code status-400">400</span>
+                            <span class="status-code status-401">401</span>
+                            <span class="status-code status-404">404</span>
+                            <span class="status-code status-500">500</span>
+                        </div>
+
+                        <ul class="criteria-list">
+                            <li class="criteria-item"><strong>✅ Upload de PDF funcional:</strong> Aceita apenas arquivos PDF</li>
+                            <li class="criteria-item"><strong>✅ Validação de tamanho:</strong> Rejeita arquivos maiores que 2MB</li>
+                            <li class="criteria-item"><strong>✅ Fornecedor deve existir:</strong> Retorna 404 se fornecedor não existe</li>
+                            <li class="criteria-item"><strong>✅ URL de retorno:</strong> Retorna URL para acesso ao documento</li>
+                        </ul>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <div class="footer">
+            <p><strong>Curso:</strong> Teste de API com Playwright | <strong>Prof. Everton Ulisses</strong></p>
+            <p>© 2026 - Todos os direitos reservados</p>
+        </div>
+    </div>
+</body>
+</html>

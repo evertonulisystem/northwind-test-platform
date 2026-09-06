@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Categories API - Acceptance Criteria | Teste de API com Playwright</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: #f6f8fa;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border: 1px solid #e1e4e8;
+            border-radius: 6px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .header {
+            background: #0078d4;
+            color: white;
+            padding: 20px;
+            border-bottom: 1px solid #005a9e;
+        }
+
+        .header h1 {
+            font-size: 1.5em;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .header .subtitle {
+            font-size: 0.9em;
+            opacity: 0.9;
+        }
+
+        .content {
+            padding: 30px;
+        }
+
+        .user-story {
+            background: #f0f9ff;
+            border: 1px solid #b3d9ff;
+            border-radius: 4px;
+            padding: 20px;
+            margin-bottom: 30px;
+        }
+
+        .user-story h2 {
+            color: #0078d4;
+            font-size: 1.2em;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+
+        .user-story p {
+            color: #333;
+            margin-bottom: 15px;
+        }
+
+        .acceptance-criteria {
+            margin-bottom: 40px;
+        }
+
+        .acceptance-criteria h2 {
+            color: #0078d4;
+            font-size: 1.2em;
+            margin-bottom: 20px;
+            font-weight: 600;
+            border-bottom: 2px solid #0078d4;
+            padding-bottom: 5px;
+        }
+
+        .endpoint {
+            margin-bottom: 30px;
+            border: 1px solid #e1e4e8;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .endpoint-header {
+            background: #f6f8fa;
+            padding: 15px;
+            border-bottom: 1px solid #e1e4e8;
+        }
+
+        .endpoint-title {
+            font-weight: 600;
+            font-size: 1.1em;
+            margin-bottom: 5px;
+        }
+
+        .endpoint-method {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 3px;
+            font-size: 0.8em;
+            font-weight: bold;
+            text-transform: uppercase;
+            margin-right: 10px;
+        }
+
+        .method-get { background: #28a745; color: white; }
+        .method-post { background: #007bff; color: white; }
+        .method-put { background: #ffc107; color: #212529; }
+        .method-patch { background: #6f42c1; color: white; }
+        .method-delete { background: #dc3545; color: white; }
+
+        .endpoint-url {
+            font-family: 'Courier New', monospace;
+            background: #f1f3f4;
+            padding: 5px 8px;
+            border-radius: 3px;
+            font-size: 0.9em;
+        }
+
+        .endpoint-body {
+            padding: 20px;
+        }
+
+        .criteria-list {
+            list-style: none;
+        }
+
+        .criteria-item {
+            background: white;
+            border: 1px solid #e1e4e8;
+            border-left: 4px solid #0078d4;
+            padding: 12px 15px;
+            margin-bottom: 10px;
+            border-radius: 3px;
+        }
+
+        .criteria-item strong {
+            color: #0078d4;
+            font-weight: 600;
+        }
+
+        .status-codes {
+            margin: 15px 0;
+        }
+
+        .status-codes h4 {
+            font-size: 0.9em;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #333;
+        }
+
+        .status-code {
+            display: inline-block;
+            padding: 4px 8px;
+            margin: 2px;
+            border-radius: 3px;
+            font-size: 0.8em;
+            font-weight: bold;
+        }
+
+        .status-200 { background: #d4edda; color: #155724; }
+        .status-201 { background: #d1ecf1; color: #0c5460; }
+        .status-400 { background: #fff3cd; color: #856404; }
+        .status-401 { background: #f8d7da; color: #721c24; }
+        .status-404 { background: #e2e3e5; color: #383d41; }
+        .status-409 { background: #e2e3e5; color: #383d41; }
+        .status-500 { background: #f8d7da; color: #721c24; }
+
+        .field-list {
+            margin: 15px 0;
+        }
+
+        .field-list h4 {
+            font-size: 0.9em;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #333;
+        }
+
+        .field-item {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            padding: 8px 12px;
+            margin-bottom: 5px;
+            border-radius: 3px;
+            font-size: 0.9em;
+        }
+
+        .field-item strong {
+            color: #495057;
+        }
+
+        .footer {
+            background: #f6f8fa;
+            padding: 20px;
+            border-top: 1px solid #e1e4e8;
+            text-align: center;
+            color: #666;
+            font-size: 0.9em;
+        }
+
+        .footer strong {
+            color: #0078d4;
+        }
+
+        @media (max-width: 768px) {
+            .content {
+                padding: 20px;
+            }
+            
+            .header h1 {
+                font-size: 1.3em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Categories API - Acceptance Criteria</h1>
+            <div class="subtitle">Teste de API com Playwright | Prof. Everton Ulisses</div>
+        </div>
+
+        <div class="content">
+            <div class="user-story">
+                <h2>User Story</h2>
+                <p><strong>Como:</strong> Desenvolvedor de Testes Automatizados</p>
+                <p><strong>Eu quero:</strong> Validar todos os endpoints da API de Categories</p>
+                <p><strong>Para que:</strong> Garantir que as regras de negócio, validações e respostas HTTP estejam funcionando corretamente antes de colocar em produção</p>
+                <p><strong>Critérios de Aceite:</strong> Todos os endpoints devem validar dados, retornar status codes corretos e manter consistência nas respostas JSON.</p>
+            </div>
+
+            <div class="acceptance-criteria">
+                <h2>Acceptance Criteria - Categories API</h2>
+
+                <div class="endpoint">
+                    <div class="endpoint-header">
+                        <div class="endpoint-title">
+                            <span class="endpoint-method method-get">GET</span>
+                            Listar Categorias
+                        </div>
+                        <div class="endpoint-url">GET /api/v1/categories</div>
+                    </div>
+                    <div class="endpoint-body">
+                        <div class="field-list">
+                            <h4>Query Parameters (Opcionais)</h4>
+                            <div class="field-item"><strong>page:</strong> Número da página (padrão: 1, mínimo: 1)</div>
+                            <div class="field-item"><strong>limit:</strong> Itens por página (padrão: 10, máximo: 100)</div>
+                            <div class="field-item"><strong>search:</strong> Busca textual no nome (case insensitive)</div>
+                            <div class="field-item"><strong>sort:</strong> Campo de ordenação: name, created_at</div>
+                            <div class="field-item"><strong>order:</strong> Direção: asc, desc (padrão: asc)</div>
+                        </div>
+
+                        <div class="status-codes">
+                            <h4>Status Codes Esperados</h4>
+                            <span class="status-code status-200">200</span>
+                            <span class="status-code status-400">400</span>
+                            <span class="status-code status-401">401</span>
+                            <span class="status-code status-500">500</span>
+                        </div>
+
+                        <ul class="criteria-list">
+                            <li class="criteria-item"><strong>✅ Listagem com paginação funcional:</strong> Retorna categorias paginadas com metadados</li>
+                            <li class="criteria-item"><strong>✅ Filtros aplicados corretamente:</strong> Filtra por busca textual e ordenação</li>
+                            <li class="criteria-item"><strong>✅ Token obrigatório:</strong> Requer JWT válido no header Authorization</li>
+                            <li class="criteria-item"><strong>✅ Validação de parâmetros:</strong> Valida page/limit como números positivos</li>
+                            <li class="criteria-item"><strong>✅ Estrutura JSON consistente:</strong> Retorna { data, mensagens } em todas as respostas</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="endpoint">
+                    <div class="endpoint-header">
+                        <div class="endpoint-title">
+                            <span class="endpoint-method method-post">POST</span>
+                            Criar Categoria
+                        </div>
+                        <div class="endpoint-url">POST /api/v1/categories</div>
+                    </div>
+                    <div class="endpoint-body">
+                        <div class="field-list">
+                            <h4>Body (JSON) - Campos Obrigatórios</h4>
+                            <div class="field-item"><strong>name:</strong> Nome da categoria (1-25 caracteres, único)</div>
+                            <div class="field-item"><strong>description:</strong> Descrição (6-40 caracteres)</div>
+                        </div>
+
+                        <div class="status-codes">
+                            <h4>Status Codes Esperados</h4>
+                            <span class="status-code status-201">201</span>
+                            <span class="status-code status-400">400</span>
+                            <span class="status-code status-401">401</span>
+                            <span class="status-code status-409">409</span>
+                            <span class="status-code status-500">500</span>
+                        </div>
+
+                        <ul class="criteria-list">
+                            <li class="criteria-item"><strong>✅ Criação com sucesso:</strong> Categoria criada com slug gerado automaticamente</li>
+                            <li class="criteria-item"><strong>✅ Validação de campos obrigatórios:</strong> Retorna erro se campos ausentes ou inválidos</li>
+                            <li class="criteria-item"><strong>✅ Validação de unicidade:</strong> Impede nome de categoria duplicado</li>
+                            <li class="criteria-item"><strong>✅ Validação de tamanho:</strong> Verifica limites de caracteres</li>
+                            <li class="criteria-item"><strong>✅ Slug automático:</strong> Gera slug a partir do nome</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="endpoint">
+                    <div class="endpoint-header">
+                        <div class="endpoint-title">
+                            <span class="endpoint-method method-get">GET</span>
+                            Buscar Categoria por ID
+                        </div>
+                        <div class="endpoint-url">GET /api/v1/categories/{id}</div>
+                    </div>
+                    <div class="endpoint-body">
+                        <div class="field-list">
+                            <h4>Path Parameters</h4>
+                            <div class="field-item"><strong>id:</strong> ID da categoria (inteiro positivo, deve existir)</div>
+                        </div>
+
+                        <div class="status-codes">
+                            <h4>Status Codes Esperados</h4>
+                            <span class="status-code status-200">200</span>
+                            <span class="status-code status-400">400</span>
+                            <span class="status-code status-401">401</span>
+                            <span class="status-code status-404">404</span>
+                            <span class="status-code status-500">500</span>
+                        </div>
+
+                        <ul class="criteria-list">
+                            <li class="criteria-item"><strong>✅ Busca por ID funcional:</strong> Retorna categoria específica com todos os dados</li>
+                            <li class="criteria-item"><strong>✅ Validação de ID:</strong> Valida ID como número positivo</li>
+                            <li class="criteria-item"><strong>✅ Categoria não encontrada:</strong> Retorna 404 se categoria não existe</li>
+                            <li class="criteria-item"><strong>✅ Dados completos:</strong> Retorna todos os campos incluindo slug</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="endpoint">
+                    <div class="endpoint-header">
+                        <div class="endpoint-title">
+                            <span class="endpoint-method method-get">GET</span>
+                            Listar Produtos da Categoria
+                        </div>
+                        <div class="endpoint-url">GET /api/v1/categories/{id}/products</div>
+                    </div>
+                    <div class="endpoint-body">
+                        <div class="field-list">
+                            <h4>Path Parameters</h4>
+                            <div class="field-item"><strong>id:</strong> ID da categoria (inteiro positivo, deve existir)</div>
+                        </div>
+
+                        <div class="status-codes">
+                            <h4>Status Codes Esperados</h4>
+                            <span class="status-code status-200">200</span>
+                            <span class="status-code status-400">400</span>
+                            <span class="status-code status-401">401</span>
+                            <span class="status-code status-404">404</span>
+                            <span class="status-code status-500">500</span>
+                        </div>
+
+                        <ul class="criteria-list">
+                            <li class="criteria-item"><strong>✅ Listagem de produtos funcional:</strong> Retorna produtos da categoria específica</li>
+                            <li class="criteria-item"><strong>✅ Categoria deve existir:</strong> Retorna 404 se categoria não existe</li>
+                            <li class="criteria-item"><strong>✅ Lista vazia permitida:</strong> Retorna lista vazia se não houver produtos</li>
+                            <li class="criteria-item"><strong>✅ Dados relacionais:</strong> Inclui nome do fornecedor dos produtos</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="endpoint">
+                    <div class="endpoint-header">
+                        <div class="endpoint-title">
+                            <span class="endpoint-method method-put">PUT</span>
+                            Atualizar Categoria (Completo)
+                        </div>
+                        <div class="endpoint-url">PUT /api/v1/categories/{id}</div>
+                    </div>
+                    <div class="endpoint-body">
+                        <div class="field-list">
+                            <h4>Body (JSON) - Campos Obrigatórios</h4>
+                            <div class="field-item"><strong>name:</strong> Nome da categoria (1-25 caracteres, único)</div>
+                            <div class="field-item"><strong>description:</strong> Descrição (6-40 caracteres)</div>
+                        </div>
+
+                        <div class="status-codes">
+                            <h4>Status Codes Esperados</h4>
+                            <span class="status-code status-200">200</span>
+                            <span class="status-code status-400">400</span>
+                            <span class="status-code status-401">401</span>
+                            <span class="status-code status-404">404</span>
+                            <span class="status-code status-409">409</span>
+                            <span class="status-code status-500">500</span>
+                        </div>
+
+                        <ul class="criteria-list">
+                            <li class="criteria-item"><strong>✅ Atualização completa:</strong> Atualiza todos os campos da categoria</li>
+                            <li class="criteria-item"><strong>✅ Slug regerado se nome mudar:</strong> Gera novo slug se nome for alterado</li>
+                            <li class="criteria-item"><strong>✅ Validação de unicidade:</strong> Verifica nome duplicado (exceto si mesmo)</li>
+                            <li class="criteria-item"><strong>✅ Categoria não encontrada:</strong> Retorna 404 se categoria não existe</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="endpoint">
+                    <div class="endpoint-header">
+                        <div class="endpoint-title">
+                            <span class="endpoint-method method-patch">PATCH</span>
+                            Atualizar Categoria (Parcial)
+                        </div>
+                        <div class="endpoint-url">PATCH /api/v1/categories/{id}</div>
+                    </div>
+                    <div class="endpoint-body">
+                        <div class="field-list">
+                            <h4>Body (JSON) - Pelo menos um campo obrigatório</h4>
+                            <div class="field-item"><strong>name:</strong> Nome da categoria (1-25 caracteres, opcional)</div>
+                            <div class="field-item"><strong>description:</strong> Descrição (6-40 caracteres, opcional)</div>
+                        </div>
+
+                        <div class="status-codes">
+                            <h4>Status Codes Esperados</h4>
+                            <span class="status-code status-200">200</span>
+                            <span class="status-code status-400">400</span>
+                            <span class="status-code status-401">401</span>
+                            <span class="status-code status-404">404</span>
+                            <span class="status-code status-409">409</span>
+                            <span class="status-code status-500">500</span>
+                        </div>
+
+                        <ul class="criteria-list">
+                            <li class="criteria-item"><strong>✅ Atualização parcial funcional:</strong> Atualiza apenas os campos enviados</li>
+                            <li class="criteria-item"><strong>✅ Pelo menos um campo obrigatório:</strong> Retorna erro se nenhum campo for enviado</li>
+                            <li class="criteria-item"><strong>✅ Slug regerado apenas se necessário:</strong> Gera slug apenas se nome for alterado</li>
+                            <li class="criteria-item"><strong>✅ Validação de campos individuais:</strong> Valida apenas os campos enviados</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="endpoint">
+                    <div class="endpoint-header">
+                        <div class="endpoint-title">
+                            <span class="endpoint-method method-delete">DELETE</span>
+                            Remover Categoria
+                        </div>
+                        <div class="endpoint-url">DELETE /api/v1/categories/{id}</div>
+                    </div>
+                    <div class="endpoint-body">
+                        <div class="field-list">
+                            <h4>Path Parameters</h4>
+                            <div class="field-item"><strong>id:</strong> ID da categoria a ser removida (inteiro positivo)</div>
+                        </div>
+
+                        <div class="status-codes">
+                            <h4>Status Codes Esperados</h4>
+                            <span class="status-code status-200">200</span>
+                            <span class="status-code status-400">400</span>
+                            <span class="status-code status-401">401</span>
+                            <span class="status-code status-404">404</span>
+                            <span class="status-code status-500">500</span>
+                        </div>
+
+                        <ul class="criteria-list">
+                            <li class="criteria-item"><strong>✅ Remoção funcional:</strong> Remove categoria permanentemente</li>
+                            <li class="criteria-item"><strong>✅ Validação de ID:</strong> Valida ID como número positivo</li>
+                            <li class="criteria-item"><strong>✅ Categoria não encontrada:</strong> Retorna 404 se categoria não existe</li>
+                            <li class="criteria-item"><strong>✅ Confirmação de remoção:</strong> Retorna mensagem de sucesso</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="endpoint">
+                    <div class="endpoint-header">
+                        <div class="endpoint-title">
+                            <span class="endpoint-method method-post">POST</span>
+                            Upload de Imagem
+                        </div>
+                        <div class="endpoint-url">POST /api/v1/categories/{id}/image</div>
+                    </div>
+                    <div class="endpoint-body">
+                        <div class="field-list">
+                            <h4>Body (multipart/form-data)</h4>
+                            <div class="field-item"><strong>file:</strong> Arquivo PNG (máximo 2MB)</div>
+                        </div>
+
+                        <div class="status-codes">
+                            <h4>Status Codes Esperados</h4>
+                            <span class="status-code status-200">200</span>
+                            <span class="status-code status-400">400</span>
+                            <span class="status-code status-401">401</span>
+                            <span class="status-code status-404">404</span>
+                            <span class="status-code status-500">500</span>
+                        </div>
+
+                        <ul class="criteria-list">
+                            <li class="criteria-item"><strong>✅ Upload de PNG funcional:</strong> Aceita apenas arquivos PNG</li>
+                            <li class="criteria-item"><strong>✅ Validação de tamanho:</strong> Rejeita arquivos maiores que 2MB</li>
+                            <li class="criteria-item"><strong>✅ Categoria deve existir:</strong> Retorna 404 se categoria não existe</li>
+                            <li class="criteria-item"><strong>✅ URL de retorno:</strong> Retorna URL para acesso à imagem</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="endpoint">
+                    <div class="endpoint-header">
+                        <div class="endpoint-title">
+                            <span class="endpoint-method method-post">POST</span>
+                            Upload de PDF
+                        </div>
+                        <div class="endpoint-url">POST /api/v1/categories/{id}/pdf</div>
+                    </div>
+                    <div class="endpoint-body">
+                        <div class="field-list">
+                            <h4>Body (multipart/form-data)</h4>
+                            <div class="field-item"><strong>file:</strong> Arquivo PDF (máximo 2MB)</div>
+                        </div>
+
+                        <div class="status-codes">
+                            <h4>Status Codes Esperados</h4>
+                            <span class="status-code status-200">200</span>
+                            <span class="status-code status-400">400</span>
+                            <span class="status-code status-401">401</span>
+                            <span class="status-code status-404">404</span>
+                            <span class="status-code status-500">500</span>
+                        </div>
+
+                        <ul class="criteria-list">
+                            <li class="criteria-item"><strong>✅ Upload de PDF funcional:</strong> Aceita apenas arquivos PDF</li>
+                            <li class="criteria-item"><strong>✅ Validação de tamanho:</strong> Rejeita arquivos maiores que 2MB</li>
+                            <li class="criteria-item"><strong>✅ Categoria deve existir:</strong> Retorna 404 se categoria não existe</li>
+                            <li class="criteria-item"><strong>✅ URL de retorno:</strong> Retorna URL para acesso ao PDF</li>
+                        </ul>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <div class="footer">
+            <p><strong>Curso:</strong> Teste de API com Playwright | <strong>Prof. Everton Ulisses</strong></p>
+            <p>© 2026 - Todos os direitos reservados</p>
+        </div>
+    </div>
+</body>
+</html>

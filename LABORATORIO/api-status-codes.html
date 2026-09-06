@@ -1,0 +1,729 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API Status Codes e Mensagens</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        .status-200 { border-left: 4px solid #10b981; }
+        .status-400 { border-left: 4px solid #f59e0b; }
+        .status-401 { border-left: 4px solid #ef4444; }
+        .status-404 { border-left: 4px solid #8b5cf6; }
+        .status-409 { border-left: 4px solid #f97316; }
+        .status-500 { border-left: 4px solid #ef4444; }
+        
+        .endpoint-card:hover { transform: translateY(-2px); }
+        .endpoint-card { transition: all 0.3s ease; }
+        
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            font-family: monospace;
+        }
+        
+        .status-200 { background: rgba(16, 185, 129, 0.1); color: #10b981; }
+        .status-400 { background: rgba(245, 158, 11, 0.1); color: #f59e0b; }
+        .status-401 { background: rgba(239, 68, 68, 0.1); color: #ef4444; }
+        .status-404 { background: rgba(139, 92, 246, 0.1); color: #8b5cf6; }
+        .status-409 { background: rgba(249, 115, 22, 0.1); color: #f97316; }
+        .status-500 { background: rgba(239, 68, 68, 0.1); color: #ef4444; }
+        
+        .message-code {
+            background: rgba(59, 130, 246, 0.1);
+            color: #3b82f6;
+            padding: 0.125rem 0.5rem;
+            border-radius: 0.25rem;
+            font-family: monospace;
+            font-size: 0.875rem;
+        }
+        
+        .endpoint-method {
+            font-family: monospace;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        
+        .method-GET { color: #3b82f6; }
+        .method-POST { color: #10b981; }
+        .method-PUT { color: #f59e0b; }
+        .method-DELETE { color: #ef4444; }
+        
+        .dark {
+            background: #1f2937;
+            color: #f3f4f6;
+        }
+        
+        .dark .endpoint-card {
+            background: #374151;
+            border-color: #4b5563;
+        }
+        
+        .dark .status-badge {
+            opacity: 0.9;
+        }
+        
+        .dark .message-code {
+            background: rgba(59, 130, 246, 0.2);
+        }
+        
+        .fade-in {
+            animation: fadeIn 0.5s ease-in;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-900 min-h-screen">
+    <div class="container mx-auto px-4 py-8 max-w-6xl">
+        <!-- Header -->
+        <header class="mb-12 text-center fade-in">
+            <div class="flex items-center justify-center gap-3 mb-4">
+                <div class="bg-blue-500 p-3 rounded-lg">
+                    <i data-lucide="api" class="w-8 h-8 text-white"></i>
+                </div>
+                <h1 class="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                    API Status Codes e Mensagens
+                </h1>
+            </div>
+            <p class="text-gray-600 text-lg">Documentação completa de códigos de status e mensagens da API</p>
+        </header>
+
+        <!-- Quick Reference -->
+        <section class="mb-12 fade-in">
+            <div class="bg-white rounded-xl shadow-lg p-6 border border-gray-200">
+                <h2 class="text-2xl font-bold mb-6 flex items-center gap-2">
+                    <i data-lucide="zap" class="w-6 h-6 text-yellow-500"></i>
+                    Referência Rápida
+                </h2>
+                <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+                    <div class="text-center">
+                        <span class="status-badge status-200">200/201</span>
+                        <p class="text-sm text-gray-600 mt-2">Sucesso</p>
+                    </div>
+                    <div class="text-center">
+                        <span class="status-badge status-400">400</span>
+                        <p class="text-sm text-gray-600 mt-2">Bad Request</p>
+                    </div>
+                    <div class="text-center">
+                        <span class="status-badge status-401">401</span>
+                        <p class="text-sm text-gray-600 mt-2">Unauthorized</p>
+                    </div>
+                    <div class="text-center">
+                        <span class="status-badge status-404">404</span>
+                        <p class="text-sm text-gray-600 mt-2">Not Found</p>
+                    </div>
+                    <div class="text-center">
+                        <span class="status-badge status-409">409</span>
+                        <p class="text-sm text-gray-600 mt-2">Conflict</p>
+                    </div>
+                    <div class="text-center">
+                        <span class="status-badge status-500">500</span>
+                        <p class="text-sm text-gray-600 mt-2">Server Error</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Products Section -->
+        <section class="mb-12 fade-in">
+            <div class="mb-6">
+                <h2 class="text-3xl font-bold flex items-center gap-3">
+                    <i data-lucide="package" class="w-8 h-8 text-blue-500"></i>
+                    Products
+                </h2>
+            </div>
+            
+            <div class="space-y-6">
+                <!-- POST /api/v1/products -->
+                <div class="endpoint-card bg-white rounded-lg shadow-md p-6 border border-gray-200 status-200">
+                    <div class="flex items-start justify-between mb-4">
+                        <div>
+                            <h3 class="text-xl font-semibold">
+                                <span class="endpoint-method method-POST">POST</span> /api/v1/products
+                            </h3>
+                            <p class="text-gray-600 mt-1">Criar novo produto</p>
+                        </div>
+                        <i data-lucide="plus-circle" class="w-6 h-6 text-green-500"></i>
+                    </div>
+                    
+                    <div class="space-y-3">
+                        <div class="flex items-center gap-2">
+                            <span class="status-badge status-200">200/201</span>
+                            <span class="text-gray-700">Produto criado com sucesso!</span>
+                        </div>
+                        
+                        <div class="space-y-2">
+                            <div class="flex items-center gap-2">
+                                <span class="status-badge status-400">400</span>
+                                <span class="text-gray-700">Dados inválidos:</span>
+                            </div>
+                            <ul class="ml-8 space-y-1 text-sm text-gray-600">
+                                <li>• Token ausente</li>
+                                <li>• Token inválido</li>
+                                <li>• Dados inválidos. Verifique se todos os campos foram preenchidos corretamente.</li>
+                                <li>• Nenhum dado informado. Preencha os campos do produto.</li>
+                                <li>• Campos obrigatórios não preenchidos: <span class="message-code">name, price, stock_quantity, sku, category_id, supplier_id</span></li>
+                                <li>• O preço deve ser um valor positivo maior que zero.</li>
+                                <li>• A quantidade em estoque deve ser um número inteiro maior ou igual a zero.</li>
+                            </ul>
+                        </div>
+                        
+                        <div class="space-y-2">
+                            <div class="flex items-center gap-2">
+                                <span class="status-badge status-409">409</span>
+                                <span class="text-gray-700">Conflito:</span>
+                            </div>
+                            <ul class="ml-8 space-y-1 text-sm text-gray-600">
+                                <li>• Já existe um produto com esse nome/slug.</li>
+                                <li>• Já existe um produto com esse SKU.</li>
+                            </ul>
+                        </div>
+                        
+                        <div class="space-y-2">
+                            <div class="flex items-center gap-2">
+                                <span class="status-badge status-500">500</span>
+                                <span class="text-gray-700">Constraint violations:</span>
+                            </div>
+                            <ul class="ml-8 space-y-1 text-sm text-gray-600">
+                                <li>• O preço deve ser um valor positivo maior que zero.</li>
+                                <li>• A quantidade em estoque deve ser um número inteiro maior ou igual a zero.</li>
+                                <li>• Dados inválidos. Verifique se preço e estoque são valores válidos.</li>
+                                <li>• Erro ao criar produto. (fallback)</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- GET /api/v1/products -->
+                <div class="endpoint-card bg-white rounded-lg shadow-md p-6 border border-gray-200 status-200">
+                    <div class="flex items-start justify-between mb-4">
+                        <div>
+                            <h3 class="text-xl font-semibold">
+                                <span class="endpoint-method method-GET">GET</span> /api/v1/products
+                            </h3>
+                            <p class="text-gray-600 mt-1">Listar produtos (paginado)</p>
+                        </div>
+                        <i data-lucide="list" class="w-6 h-6 text-blue-500"></i>
+                    </div>
+                    
+                    <div class="space-y-3">
+                        <div class="flex items-center gap-2">
+                            <span class="status-badge status-200">200</span>
+                            <span class="text-gray-700">Lista de produtos retornada com sucesso</span>
+                        </div>
+                        
+                        <div class="flex items-center gap-2">
+                            <span class="status-badge status-401">401</span>
+                            <span class="text-gray-700">Token inválido ou ausente</span>
+                        </div>
+                        
+                        <div class="flex items-center gap-2">
+                            <span class="status-badge status-500">500</span>
+                            <span class="text-gray-700">Erro ao buscar produtos</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- PUT /api/v1/products/{id} -->
+                <div class="endpoint-card bg-white rounded-lg shadow-md p-6 border border-gray-200 status-200">
+                    <div class="flex items-start justify-between mb-4">
+                        <div>
+                            <h3 class="text-xl font-semibold">
+                                <span class="endpoint-method method-PUT">PUT</span> /api/v1/products/{id}
+                            </h3>
+                            <p class="text-gray-600 mt-1">Atualizar produto existente</p>
+                        </div>
+                        <i data-lucide="edit" class="w-6 h-6 text-orange-500"></i>
+                    </div>
+                    
+                    <div class="space-y-3">
+                        <div class="flex items-center gap-2">
+                            <span class="status-badge status-200">200</span>
+                            <span class="text-gray-700">Produto atualizado com sucesso!</span>
+                        </div>
+                        
+                        <div class="flex items-center gap-2">
+                            <span class="status-badge status-404">404</span>
+                            <span class="text-gray-700">Produto com ID {id} não encontrado</span>
+                        </div>
+                        
+                        <div class="flex items-center gap-2">
+                            <span class="status-badge status-409">409</span>
+                            <span class="text-gray-700">Conflito de nome ou SKU duplicado</span>
+                        </div>
+                        
+                        <div class="flex items-center gap-2">
+                            <span class="status-badge status-500">500</span>
+                            <span class="text-gray-700">Erro ao atualizar produto</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- DELETE /api/v1/products/{id} -->
+                <div class="endpoint-card bg-white rounded-lg shadow-md p-6 border border-gray-200 status-200">
+                    <div class="flex items-start justify-between mb-4">
+                        <div>
+                            <h3 class="text-xl font-semibold">
+                                <span class="endpoint-method method-DELETE">DELETE</span> /api/v1/products/{id}
+                            </h3>
+                            <p class="text-gray-600 mt-1">Excluir produto</p>
+                        </div>
+                        <i data-lucide="trash-2" class="w-6 h-6 text-red-500"></i>
+                    </div>
+                    
+                    <div class="space-y-3">
+                        <div class="flex items-center gap-2">
+                            <span class="status-badge status-200">200</span>
+                            <span class="text-gray-700">Produto excluído com sucesso!</span>
+                        </div>
+                        
+                        <div class="flex items-center gap-2">
+                            <span class="status-badge status-404">404</span>
+                            <span class="text-gray-700">Produto com ID {id} não encontrado</span>
+                        </div>
+                        
+                        <div class="flex items-center gap-2">
+                            <span class="status-badge status-500">500</span>
+                            <span class="text-gray-700">Erro ao excluir produto</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Categories Section -->
+        <section class="mb-12 fade-in">
+            <div class="mb-6">
+                <h2 class="text-3xl font-bold flex items-center gap-3">
+                    <i data-lucide="folder" class="w-8 h-8 text-green-500"></i>
+                    Categories
+                </h2>
+            </div>
+            
+            <div class="space-y-6">
+                <!-- POST /api/v1/categories -->
+                <div class="endpoint-card bg-white rounded-lg shadow-md p-6 border border-gray-200 status-200">
+                    <div class="flex items-start justify-between mb-4">
+                        <div>
+                            <h3 class="text-xl font-semibold">
+                                <span class="endpoint-method method-POST">POST</span> /api/v1/categories
+                            </h3>
+                            <p class="text-gray-600 mt-1">Criar nova categoria</p>
+                        </div>
+                        <i data-lucide="plus-circle" class="w-6 h-6 text-green-500"></i>
+                    </div>
+                    
+                    <div class="space-y-3">
+                        <div class="flex items-center gap-2">
+                            <span class="status-badge status-200">200/201</span>
+                            <span class="text-gray-700">Categoria criada com sucesso!</span>
+                        </div>
+                        
+                        <div class="space-y-2">
+                            <div class="flex items-center gap-2">
+                                <span class="status-badge status-400">400</span>
+                                <span class="text-gray-700">Dados inválidos:</span>
+                            </div>
+                            <ul class="ml-8 space-y-1 text-sm text-gray-600">
+                                <li>• Nome da categoria é obrigatório</li>
+                                <li>• Nome deve ter entre 3 e 100 caracteres</li>
+                                <li>• Descrição deve ter no máximo 500 caracteres</li>
+                            </ul>
+                        </div>
+                        
+                        <div class="flex items-center gap-2">
+                            <span class="status-badge status-409">409</span>
+                            <span class="text-gray-700">Já existe uma categoria com este nome</span>
+                        </div>
+                        
+                        <div class="flex items-center gap-2">
+                            <span class="status-badge status-500">500</span>
+                            <span class="text-gray-700">Erro ao criar categoria</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- GET /api/v1/categories -->
+                <div class="endpoint-card bg-white rounded-lg shadow-md p-6 border border-gray-200 status-200">
+                    <div class="flex items-start justify-between mb-4">
+                        <div>
+                            <h3 class="text-xl font-semibold">
+                                <span class="endpoint-method method-GET">GET</span> /api/v1/categories
+                            </h3>
+                            <p class="text-gray-600 mt-1">Listar categorias (paginado)</p>
+                        </div>
+                        <i data-lucide="list" class="w-6 h-6 text-blue-500"></i>
+                    </div>
+                    
+                    <div class="space-y-3">
+                        <div class="flex items-center gap-2">
+                            <span class="status-badge status-200">200</span>
+                            <span class="text-gray-700">Lista de categorias retornada com sucesso</span>
+                        </div>
+                        
+                        <div class="flex items-center gap-2">
+                            <span class="status-badge status-401">401</span>
+                            <span class="text-gray-700">Token inválido ou ausente</span>
+                        </div>
+                        
+                        <div class="flex items-center gap-2">
+                            <span class="status-badge status-500">500</span>
+                            <span class="text-gray-700">Erro ao buscar categorias</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- GET /api/v1/categories/{id}/products -->
+                <div class="endpoint-card bg-white rounded-lg shadow-md p-6 border border-gray-200 status-200">
+                    <div class="flex items-start justify-between mb-4">
+                        <div>
+                            <h3 class="text-xl font-semibold">
+                                <span class="endpoint-method method-GET">GET</span> /api/v1/categories/{id}/products
+                            </h3>
+                            <p class="text-gray-600 mt-1">Listar produtos de uma categoria</p>
+                        </div>
+                        <i data-lucide="package-2" class="w-6 h-6 text-purple-500"></i>
+                    </div>
+                    
+                    <div class="space-y-3">
+                        <div class="flex items-center gap-2">
+                            <span class="status-badge status-200">200</span>
+                            <span class="text-gray-700">Lista de produtos da categoria retornada com sucesso</span>
+                        </div>
+                        
+                        <div class="flex items-center gap-2">
+                            <span class="status-badge status-404">404</span>
+                            <span class="text-gray-700">Categoria com ID {id} não encontrada</span>
+                        </div>
+                        
+                        <div class="flex items-center gap-2">
+                            <span class="status-badge status-500">500</span>
+                            <span class="text-gray-700">Erro ao buscar produtos da categoria</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Suppliers Section -->
+        <section class="mb-12 fade-in">
+            <div class="mb-6">
+                <h2 class="text-3xl font-bold flex items-center gap-3">
+                    <i data-lucide="building" class="w-8 h-8 text-orange-500"></i>
+                    Suppliers
+                </h2>
+            </div>
+            
+            <div class="space-y-6">
+                <!-- POST /api/v1/suppliers -->
+                <div class="endpoint-card bg-white rounded-lg shadow-md p-6 border border-gray-200 status-200">
+                    <div class="flex items-start justify-between mb-4">
+                        <div>
+                            <h3 class="text-xl font-semibold">
+                                <span class="endpoint-method method-POST">POST</span> /api/v1/suppliers
+                            </h3>
+                            <p class="text-gray-600 mt-1">Criar novo fornecedor</p>
+                        </div>
+                        <i data-lucide="plus-circle" class="w-6 h-6 text-green-500"></i>
+                    </div>
+                    
+                    <div class="space-y-3">
+                        <div class="flex items-center gap-2">
+                            <span class="status-badge status-200">200/201</span>
+                            <span class="text-gray-700">Fornecedor criado com sucesso!</span>
+                        </div>
+                        
+                        <div class="space-y-2">
+                            <div class="flex items-center gap-2">
+                                <span class="status-badge status-400">400</span>
+                                <span class="text-gray-700">Dados inválidos:</span>
+                            </div>
+                            <ul class="ml-8 space-y-1 text-sm text-gray-600">
+                                <li>• Razão social da empresa é obrigatória</li>
+                                <li>• Nome do contato é obrigatório</li>
+                                <li>• E-mail do fornecedor é obrigatório</li>
+                                <li>• Telefone do fornecedor é obrigatório</li>
+                                <li>• CNPJ do fornecedor é obrigatório</li>
+                                <li>• UF do fornecedor é obrigatória</li>
+                                <li>• E-mail inválido. Informe um e-mail válido</li>
+                                <li>• Telefone inválido. Use o formato (XX) XXXXX-XXXX</li>
+                                <li>• CNPJ inválido. Informe apenas os 14 números do CNPJ</li>
+                                <li>• UF inválida. Informe a sigla de 2 letras do estado</li>
+                            </ul>
+                        </div>
+                        
+                        <div class="flex items-center gap-2">
+                            <span class="status-badge status-409">409</span>
+                            <span class="text-gray-700">Já existe um fornecedor com este e-mail ou CNPJ</span>
+                        </div>
+                        
+                        <div class="flex items-center gap-2">
+                            <span class="status-badge status-500">500</span>
+                            <span class="text-gray-700">Erro ao criar fornecedor</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- POST /api/v1/suppliers/{id}/unlink -->
+                <div class="endpoint-card bg-white rounded-lg shadow-md p-6 border border-gray-200 status-200">
+                    <div class="flex items-start justify-between mb-4">
+                        <div>
+                            <h3 class="text-xl font-semibold">
+                                <span class="endpoint-method method-POST">POST</span> /api/v1/suppliers/{id}/unlink
+                            </h3>
+                            <p class="text-gray-600 mt-1">Desvincular fornecedor de produtos</p>
+                        </div>
+                        <i data-lucide="unlink" class="w-6 h-6 text-purple-500"></i>
+                    </div>
+                    
+                    <div class="space-y-3">
+                        <div class="flex items-center gap-2">
+                            <span class="status-badge status-200">200</span>
+                            <span class="text-gray-700">{updated_count} produto(s) desvinculado(s) do fornecedor com sucesso!</span>
+                        </div>
+                        
+                        <div class="space-y-2">
+                            <div class="flex items-center gap-2">
+                                <span class="status-badge status-400">400</span>
+                                <span class="text-gray-700">Dados inválidos:</span>
+                            </div>
+                            <ul class="ml-8 space-y-1 text-sm text-gray-600">
+                                <li>• IDs dos produtos são obrigatórios e devem ser um array não vazio</li>
+                                <li>• Nenhum ID de produto válido fornecido</li>
+                                <li>• Nenhum produto encontrado vinculado a este fornecedor</li>
+                            </ul>
+                        </div>
+                        
+                        <div class="flex items-center gap-2">
+                            <span class="status-badge status-404">404</span>
+                            <span class="text-gray-700">Fornecedor com ID {id} não encontrado</span>
+                        </div>
+                        
+                        <div class="flex items-center gap-2">
+                            <span class="status-badge status-500">500</span>
+                            <span class="text-gray-700">Erro interno ao processar desvinculamento</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Auth Section -->
+        <section class="mb-12 fade-in">
+            <div class="mb-6">
+                <h2 class="text-3xl font-bold flex items-center gap-3">
+                    <i data-lucide="shield" class="w-8 h-8 text-purple-500"></i>
+                    Authentication
+                </h2>
+            </div>
+            
+            <div class="space-y-6">
+                <!-- POST /api/v1/auth/login -->
+                <div class="endpoint-card bg-white rounded-lg shadow-md p-6 border border-gray-200 status-200">
+                    <div class="flex items-start justify-between mb-4">
+                        <div>
+                            <h3 class="text-xl font-semibold">
+                                <span class="endpoint-method method-POST">POST</span> /api/v1/auth/login
+                            </h3>
+                            <p class="text-gray-600 mt-1">Autenticar usuário</p>
+                        </div>
+                        <i data-lucide="log-in" class="w-6 h-6 text-green-500"></i>
+                    </div>
+                    
+                    <div class="space-y-3">
+                        <div class="flex items-center gap-2">
+                            <span class="status-badge status-200">200</span>
+                            <span class="text-gray-700">Login realizado com sucesso</span>
+                        </div>
+                        
+                        <div class="space-y-2">
+                            <div class="flex items-center gap-2">
+                                <span class="status-badge status-400">400</span>
+                                <span class="text-gray-700">Dados inválidos:</span>
+                            </div>
+                            <ul class="ml-8 space-y-1 text-sm text-gray-600">
+                                <li>• Email e senha são obrigatórios</li>
+                                <li>• Email inválido</li>
+                                <li>• Senha deve ter no mínimo 6 caracteres</li>
+                            </ul>
+                        </div>
+                        
+                        <div class="flex items-center gap-2">
+                            <span class="status-badge status-401">401</span>
+                            <span class="text-gray-700">Email ou senha incorretos</span>
+                        </div>
+                        
+                        <div class="flex items-center gap-2">
+                            <span class="status-badge status-500">500</span>
+                            <span class="text-gray-700">Erro ao fazer login</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- POST /api/v1/auth/register -->
+                <div class="endpoint-card bg-white rounded-lg shadow-md p-6 border border-gray-200 status-200">
+                    <div class="flex items-start justify-between mb-4">
+                        <div>
+                            <h3 class="text-xl font-semibold">
+                                <span class="endpoint-method method-POST">POST</span> /api/v1/auth/register
+                            </h3>
+                            <p class="text-gray-600 mt-1">Registrar novo usuário</p>
+                        </div>
+                        <i data-lucide="user-plus" class="w-6 h-6 text-blue-500"></i>
+                    </div>
+                    
+                    <div class="space-y-3">
+                        <div class="flex items-center gap-2">
+                            <span class="status-badge status-200">200/201</span>
+                            <span class="text-gray-700">Usuário criado com sucesso!</span>
+                        </div>
+                        
+                        <div class="space-y-2">
+                            <div class="flex items-center gap-2">
+                                <span class="status-badge status-400">400</span>
+                                <span class="text-gray-700">Dados inválidos:</span>
+                            </div>
+                            <ul class="ml-8 space-y-1 text-sm text-gray-600">
+                                <li>• Nome, email e senha são obrigatórios</li>
+                                <li>• Nome deve ter no mínimo 3 caracteres</li>
+                                <li>• Email inválido</li>
+                                <li>• Senha deve ter no mínimo 6 caracteres</li>
+                            </ul>
+                        </div>
+                        
+                        <div class="flex items-center gap-2">
+                            <span class="status-badge status-409">409</span>
+                            <span class="text-gray-700">Já existe um usuário com este email</span>
+                        </div>
+                        
+                        <div class="flex items-center gap-2">
+                            <span class="status-badge status-500">500</span>
+                            <span class="text-gray-700">Erro ao criar usuário</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Response Pattern -->
+        <section class="mb-12 fade-in">
+            <div class="bg-gradient-to-r from-blue-50 to-purple-50 rounded-xl p-6 border border-blue-200">
+                <h2 class="text-2xl font-bold mb-4 flex items-center gap-2">
+                    <i data-lucide="code" class="w-6 h-6 text-blue-500"></i>
+                    Padrão de Resposta
+                </h2>
+                
+                <div class="bg-gray-900 text-gray-100 rounded-lg p-4 font-mono text-sm overflow-x-auto">
+                    <pre>{
+  "data": { ... }, // null em caso de erro
+  "mensagens": ["Mensagem descritiva em português"],
+  "debug": { ... } // opcional, apenas em desenvolvimento
+}</pre>
+                </div>
+                
+                <div class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="bg-white rounded-lg p-4 border border-gray-200">
+                        <h3 class="font-semibold mb-2 text-green-600">✅ Sucesso (200/201)</h3>
+                        <p class="text-sm text-gray-600">Operação realizada com sucesso, dados retornados no campo <code class="message-code">data</code></p>
+                    </div>
+                    
+                    <div class="bg-white rounded-lg p-4 border border-gray-200">
+                        <h3 class="font-semibold mb-2 text-red-600">❌ Erro (400/401/404/409/500)</h3>
+                        <p class="text-sm text-gray-600"><code class="message-code">data</code> será null, mensagem descritiva em <code class="message-code">mensagens</code></p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer class="text-center text-gray-600 py-8 border-t border-gray-200">
+            <p class="mb-2">Documentação gerada automaticamente • API Status Codes v1.0</p>
+            <div class="flex items-center justify-center gap-4">
+                <span class="text-sm">Last updated: <span id="lastUpdated"></span></span>
+                <span class="text-sm">•</span>
+                <span class="text-sm">Total endpoints: <span id="totalEndpoints"></span></span>
+            </div>
+        </footer>
+    </div>
+
+    <script>
+        // Initialize Lucide icons
+        lucide.createIcons();
+        
+        // Set current date
+        document.getElementById('lastUpdated').textContent = new Date().toLocaleString('pt-BR');
+        
+        // Count total endpoints (approximate)
+        document.getElementById('totalEndpoints').textContent = '25+';
+        
+        // Add smooth scroll behavior
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                document.querySelector(this.getAttribute('href')).scrollIntoView({
+                    behavior: 'smooth'
+                });
+            });
+        });
+        
+        // Add dark mode toggle (optional)
+        function toggleDarkMode() {
+            document.body.classList.toggle('dark');
+            localStorage.setItem('darkMode', document.body.classList.contains('dark'));
+        }
+        
+        // Check for saved dark mode preference
+        if (localStorage.getItem('darkMode') === 'true') {
+            document.body.classList.add('dark');
+        }
+        
+        // Add copy to clipboard functionality
+        document.querySelectorAll('.message-code').forEach(code => {
+            code.style.cursor = 'pointer';
+            code.title = 'Clique para copiar';
+            code.addEventListener('click', function() {
+                navigator.clipboard.writeText(this.textContent);
+                const originalText = this.textContent;
+                this.textContent = 'Copiado!';
+                setTimeout(() => {
+                    this.textContent = originalText;
+                }, 1000);
+            });
+        });
+        
+        // Add search functionality
+        function addSearch() {
+            const searchInput = document.createElement('input');
+            searchInput.type = 'text';
+            searchInput.placeholder = 'Buscar endpoints...';
+            searchInput.className = 'w-full p-3 border border-gray-300 rounded-lg mb-6 focus:outline-none focus:ring-2 focus:ring-blue-500';
+            
+            const header = document.querySelector('header');
+            header.insertAdjacentElement('afterend', searchInput);
+            
+            searchInput.addEventListener('input', function(e) {
+                const searchTerm = e.target.value.toLowerCase();
+                const cards = document.querySelectorAll('.endpoint-card');
+                
+                cards.forEach(card => {
+                    const text = card.textContent.toLowerCase();
+                    card.style.display = text.includes(searchTerm) ? 'block' : 'none';
+                });
+            });
+        }
+        
+        // Initialize search
+        addSearch();
+    </script>
+</body>
+</html>
