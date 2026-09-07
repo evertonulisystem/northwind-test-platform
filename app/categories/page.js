@@ -164,7 +164,8 @@ export default function CategoriesPage() {
     }
   };
 
-  const handleUpdate = async () => {
+  const handleUpdate = async (event) => {
+    event.preventDefault();
     if (!validateForm()) {
       toast.error("Corrija os erros antes de salvar");
       return;
@@ -198,8 +199,13 @@ export default function CategoriesPage() {
         return;
       }
 
+      if (!result.data || String(result.data.id) !== String(editingCategory.id)) {
+        toast.error("Não foi possível confirmar a atualização da categoria.");
+        return;
+      }
+
       toast.success("Categoria atualizada com sucesso!");
-      fetchCategories();
+      await fetchCategories();
       setShowEditModal(false);
       setEditingCategory(null);
       setFormData({

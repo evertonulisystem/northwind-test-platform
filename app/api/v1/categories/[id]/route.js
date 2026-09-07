@@ -575,6 +575,10 @@ export async function PUT(request, { params }) {
       throw error;
     }
 
+    if (!data) {
+      throw new Error('Não foi possível confirmar a atualização da categoria.');
+    }
+
     return NextResponse.json(
       normalizeApiBody({
         data, 
@@ -979,6 +983,10 @@ export async function PATCH(request, { params }) {
     if (error) {
       console.log('❌ Erro Supabase PATCH:', error);
       throw error;
+    }
+
+    if (!data) {
+      throw new Error('Não foi possível confirmar a atualização da categoria.');
     }
 
     console.log('✅ Categoria atualizada com PATCH:', data);
