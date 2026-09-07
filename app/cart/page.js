@@ -1,5 +1,6 @@
 "use client";
 
+import ToastMessage from "@/components/ToastMessage";
 import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import {
@@ -45,11 +46,11 @@ export default function CartPage() {
       if (res.ok) {
         setCartItems(result.data || []);
       } else {
-        toast.error(result.mensagens?.[0] || "Erro ao carregar carrinho");
+        toast.error(<ToastMessage testId="cart-cart-page-error-toast">{result.mensagens?.[0] || "Erro ao carregar carrinho"}</ToastMessage>);
       }
     } catch (error) {
       console.error("Erro ao buscar carrinho:", error);
-      toast.error("Erro de conexão ao carregar carrinho");
+      toast.error(<ToastMessage testId="cart-cart-page-error-toast-2">{"Erro de conexão ao carregar carrinho"}</ToastMessage>);
     } finally {
       setLoading(false);
     }
@@ -82,10 +83,10 @@ export default function CartPage() {
           ),
         );
       } else {
-        toast.error(result.mensagens?.[0] || "Erro ao atualizar quantidade");
+        toast.error(<ToastMessage testId="cart-update-quantity-error-toast">{result.mensagens?.[0] || "Erro ao atualizar quantidade"}</ToastMessage>);
       }
     } catch (error) {
-      toast.error("Erro ao atualizar quantidade");
+      toast.error(<ToastMessage testId="cart-update-quantity-error-toast-2">{"Erro ao atualizar quantidade"}</ToastMessage>);
     }
   };
 
@@ -101,13 +102,13 @@ export default function CartPage() {
 
       if (res.ok) {
         setCartItems((prev) => prev.filter((item) => item.id !== itemId));
-        toast.success("Item removido");
+        toast.success(<ToastMessage testId="cart-remove-item-success-toast">{"Item removido"}</ToastMessage>);
       } else {
         const result = await res.json();
-        toast.error(result.mensagens?.[0] || "Erro ao remover item");
+        toast.error(<ToastMessage testId="cart-remove-item-error-toast">{result.mensagens?.[0] || "Erro ao remover item"}</ToastMessage>);
       }
     } catch (error) {
-      toast.error("Erro ao remover item");
+      toast.error(<ToastMessage testId="cart-remove-item-error-toast-2">{"Erro ao remover item"}</ToastMessage>);
     }
   };
 
@@ -137,17 +138,17 @@ export default function CartPage() {
 
       const result = await res.json();
       if (res.ok) {
-        toast.success("Pedido finalizado com sucesso!", {
+        toast.success(<ToastMessage testId="cart-handle-checkout-success-toast">{"Pedido finalizado com sucesso!"}</ToastMessage>, {
           autoClose: 5000,
           icon: "🎉",
         });
         setCartItems([]);
         // Redirecionar após sucesso opcionalmente
       } else {
-        toast.error(result.mensagens?.[0] || "Erro ao finalizar pedido");
+        toast.error(<ToastMessage testId="cart-handle-checkout-error-toast">{result.mensagens?.[0] || "Erro ao finalizar pedido"}</ToastMessage>);
       }
     } catch (error) {
-      toast.error("Erro ao finalizar pedido");
+      toast.error(<ToastMessage testId="cart-handle-checkout-error-toast-2">{"Erro ao finalizar pedido"}</ToastMessage>);
     } finally {
       setCheckoutLoading(false);
     }

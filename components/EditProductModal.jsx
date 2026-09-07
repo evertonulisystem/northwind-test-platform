@@ -1,6 +1,7 @@
 // components/EditProductModal.jsx → VERSÃO FINAL COM VALIDAÇÕES FODA (IGUAL AO ADD)
 'use client';
 
+import ToastMessage from "@/components/ToastMessage";
 import { useState, useEffect } from 'react';
 import { toast } from 'react-toastify';
 import CustomSelect from '@/components/CustomSelect';
@@ -71,7 +72,7 @@ export default function EditProductModal({ product, onClose, onUpdate }) {
           // Produto não tem imagem ou ocorreu erro, tudo bem
         }
       } catch (error) {
-        toast.error('Erro ao carregar dados');
+        toast.error(<ToastMessage testId="edit-product-modal-fetch-data-error-toast">{'Erro ao carregar dados'}</ToastMessage>);
       } finally {
         setLoading(false);
       }
@@ -123,7 +124,7 @@ export default function EditProductModal({ product, onClose, onUpdate }) {
 
   const handleImageUpload = async () => {
     if (!imageFile) {
-      toast.error('Selecione uma imagem primeiro');
+      toast.error(<ToastMessage testId="edit-product-modal-handle-image-upload-error-toast">{'Selecione uma imagem primeiro'}</ToastMessage>);
       return;
     }
 
@@ -131,7 +132,7 @@ export default function EditProductModal({ product, onClose, onUpdate }) {
     try {
       const token = localStorage.getItem('token');
       if (!token) {
-        toast.error('Você precisa estar logado para fazer upload');
+        toast.error(<ToastMessage testId="edit-product-modal-handle-image-upload-error-toast-2">{'Você precisa estar logado para fazer upload'}</ToastMessage>);
         return;
       }
 
@@ -149,16 +150,16 @@ export default function EditProductModal({ product, onClose, onUpdate }) {
       const result = await res.json();
 
       if (!res.ok) {
-        toast.error(result.mensagens?.[0] || 'Erro no upload');
+        toast.error(<ToastMessage testId="edit-product-modal-handle-image-upload-error-toast-3">{result.mensagens?.[0] || 'Erro no upload'}</ToastMessage>);
         return;
       }
 
-      toast.success('Imagem enviada com sucesso!');
+      toast.success(<ToastMessage testId="edit-product-modal-handle-image-upload-success-toast">{'Imagem enviada com sucesso!'}</ToastMessage>);
       setImageFile(null);
       // Atualiza preview com a URL da imagem salva
       setImagePreview(result.data?.url || `/api/v1/products/${product.id}/image`);
     } catch (error) {
-      toast.error('Erro de conexão ao fazer upload');
+      toast.error(<ToastMessage testId="edit-product-modal-handle-image-upload-error-toast-4">{'Erro de conexão ao fazer upload'}</ToastMessage>);
     } finally {
       setUploadingImage(false);
     }
@@ -225,7 +226,7 @@ export default function EditProductModal({ product, onClose, onUpdate }) {
     e.preventDefault();
 
     if (!validateForm()) {
-      toast.error('Corrija os erros antes de salvar');
+      toast.error(<ToastMessage testId="edit-product-modal-handle-submit-error-toast">{'Corrija os erros antes de salvar'}</ToastMessage>);
       return;
     }
 
@@ -244,7 +245,7 @@ export default function EditProductModal({ product, onClose, onUpdate }) {
       const token = localStorage.getItem('token');
       
       if (!token) {
-        toast.error('Você precisa estar logado para editar produtos');
+        toast.error(<ToastMessage testId="edit-product-modal-handle-submit-error-toast-2">{'Você precisa estar logado para editar produtos'}</ToastMessage>);
         setLoading(false);
         return;
       }
@@ -261,16 +262,16 @@ export default function EditProductModal({ product, onClose, onUpdate }) {
       const result = await res.json();
 
       if (!res.ok) {
-        toast.error(result.mensagens?.[0] || 'Erro ao atualizar');
+        toast.error(<ToastMessage testId="edit-product-modal-handle-submit-error-toast-3">{result.mensagens?.[0] || 'Erro ao atualizar'}</ToastMessage>);
         setLoading(false);
         return;
       }
 
-      toast.success('Produto editado com sucesso!');
+      toast.success(<ToastMessage testId="edit-product-modal-handle-submit-success-toast">{'Produto editado com sucesso!'}</ToastMessage>);
       onUpdate?.();
       onClose();
     } catch (error) {
-      toast.error('Erro de rede');
+      toast.error(<ToastMessage testId="edit-product-modal-handle-submit-error-toast-4">{'Erro de rede'}</ToastMessage>);
     } finally {
       setLoading(false);
     }

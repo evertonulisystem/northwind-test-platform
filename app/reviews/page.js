@@ -7,6 +7,7 @@
 // app/reviews/page.js
 "use client";
 
+import ToastMessage from "@/components/ToastMessage";
 import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
@@ -123,7 +124,7 @@ function StarRating({ value, onChange, error }) {
 
       {/* Erro inline quando nenhuma estrela foi selecionada */}
       {error && (
-        <p
+        <p data-testid="reviews-star-rating-error"
           className="text-red-400 text-xs mt-1 flex items-center gap-1"
           role="alert"
         >
@@ -184,7 +185,7 @@ function ReviewModal({ product, onClose, onSuccess }) {
 
       // Tratar 401: redirecionar para login se não autenticado
       if (!token) {
-        toast.error("Você precisa estar logado para avaliar.");
+        toast.error(<ToastMessage testId="reviews-handle-submit-error-toast">{"Você precisa estar logado para avaliar."}</ToastMessage>);
         window.location.href = "/";
         return;
       }
@@ -209,22 +210,22 @@ function ReviewModal({ product, onClose, onSuccess }) {
         // Token expirado ou inválido → redirecionar para login
         localStorage.removeItem("token");
         localStorage.removeItem("user");
-        toast.error("Sessão expirada. Faça login novamente.");
+        toast.error(<ToastMessage testId="reviews-handle-submit-error-toast-2">{"Sessão expirada. Faça login novamente."}</ToastMessage>);
         window.location.href = "/";
         return;
       }
 
       if (!res.ok) {
-        toast.error(data.mensagens?.[0] || "Erro ao enviar avaliação.");
+        toast.error(<ToastMessage testId="reviews-handle-submit-error-toast-3">{data.mensagens?.[0] || "Erro ao enviar avaliação."}</ToastMessage>);
         return;
       }
 
       // Sucesso!
-      toast.success("✅ Avaliação enviada com sucesso!");
+      toast.success(<ToastMessage testId="reviews-handle-submit-success-toast">{"✅ Avaliação enviada com sucesso!"}</ToastMessage>);
       onSuccess();
     } catch (err) {
       console.error("Erro ao enviar avaliação:", err);
-      toast.error("Erro de conexão ao enviar avaliação.");
+      toast.error(<ToastMessage testId="reviews-handle-submit-error-toast-4">{"Erro de conexão ao enviar avaliação."}</ToastMessage>);
     } finally {
       setLoading(false);
     }
@@ -436,7 +437,7 @@ export default function ReviewsPage() {
   function getAuthHeaders() {
     const token = localStorage.getItem("token");
     if (!token) {
-      toast.error("Você precisa estar logado.");
+      toast.error(<ToastMessage testId="reviews-get-auth-headers-error-toast">{"Você precisa estar logado."}</ToastMessage>);
       router.push("/");
       return null;
     }
@@ -471,7 +472,7 @@ export default function ReviewsPage() {
       setProductsPage((page) => Math.min(page, Math.max(1, Math.ceil(products.length / productsPerPage))));
     } catch (err) {
       console.error("Erro ao buscar produtos sem avaliação:", err);
-      toast.error("Erro ao carregar produtos sem avaliação.");
+      toast.error(<ToastMessage testId="reviews-reviews-page-error-toast">{"Erro ao carregar produtos sem avaliação."}</ToastMessage>);
     } finally {
       setLoadingWithout(false);
     }
@@ -506,7 +507,7 @@ export default function ReviewsPage() {
       }
     } catch (err) {
       console.error("Erro ao buscar avaliações:", err);
-      toast.error("Erro ao carregar avaliações.");
+      toast.error(<ToastMessage testId="reviews-reviews-page-error-toast-2">{"Erro ao carregar avaliações."}</ToastMessage>);
     } finally {
       setLoadingReviews(false);
     }

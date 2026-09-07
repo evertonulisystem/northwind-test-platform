@@ -1,5 +1,6 @@
 "use client";
 
+import ToastMessage from "@/components/ToastMessage";
 import { useState, useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { toast } from "react-toastify";
@@ -40,7 +41,7 @@ export default function SupplierProductsPage() {
       const result = await res.json();
 
       if (!res.ok) {
-        toast.error(result.mensagens?.[0] || "Erro ao carregar produtos");
+        toast.error(<ToastMessage testId="suppliers-detail-products-fetch-supplier-products-error-toast">{result.mensagens?.[0] || "Erro ao carregar produtos"}</ToastMessage>);
         return;
       }
 
@@ -67,7 +68,7 @@ export default function SupplierProductsPage() {
         setSupplier({ name: "Fornecedor", id: params.id });
       }
     } catch (error) {
-      toast.error("Erro de conexão");
+      toast.error(<ToastMessage testId="suppliers-detail-products-fetch-supplier-products-error-toast-2">{"Erro de conexão"}</ToastMessage>);
     } finally {
       setLoading(false);
     }
@@ -88,15 +89,15 @@ export default function SupplierProductsPage() {
       });
 
       if (res.ok) {
-        toast.success("Produto desvinculado do fornecedor com sucesso!");
+        toast.success(<ToastMessage testId="suppliers-detail-products-handle-remove-from-supplier-success-toast">{"Produto desvinculado do fornecedor com sucesso!"}</ToastMessage>);
         // Refresh the product list
         fetchSupplierProducts(currentPage);
       } else {
         const result = await res.json();
-        toast.error(result.mensagens?.[0] || "Erro ao desvincular produto");
+        toast.error(<ToastMessage testId="suppliers-detail-products-handle-remove-from-supplier-error-toast">{result.mensagens?.[0] || "Erro ao desvincular produto"}</ToastMessage>);
       }
     } catch (error) {
-      toast.error("Erro de conexão");
+      toast.error(<ToastMessage testId="suppliers-detail-products-handle-remove-from-supplier-error-toast-2">{"Erro de conexão"}</ToastMessage>);
     }
   };
 

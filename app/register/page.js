@@ -1,6 +1,7 @@
 // app/register/page.js
 'use client';
 
+import ToastMessage from "@/components/ToastMessage";
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'react-toastify';
@@ -166,7 +167,7 @@ export default function RegisterPage() {
     // Verifica se há erros após atualização
     if (Object.keys(currentErrors).length > 0) {
       setLoading(false);
-      toast.error('Corrija os erros antes de continuar');
+      toast.error(<ToastMessage testId="register-handle-submit-error-toast">{'Corrija os erros antes de continuar'}</ToastMessage>);
       return;
     }
 
@@ -185,23 +186,23 @@ export default function RegisterPage() {
       const data = await res.json();
 
       if (res.ok) {
-        toast.success('Cadastro realizado com sucesso! Redirecionando...');
+        toast.success(<ToastMessage testId="register-handle-submit-success-toast">{'Cadastro realizado com sucesso! Redirecionando...'}</ToastMessage>);
         setTimeout(() => {
           router.push('/');
         }, 2000);
       } else {
         // Tratamento específico de erros do backend
         if (data.mensagens && Array.isArray(data.mensagens)) {
-          data.mensagens.forEach(msg => toast.error(msg));
+          data.mensagens.forEach(msg => toast.error(<ToastMessage testId="register-handle-submit-error-toast-2">{msg}</ToastMessage>));
         } else if (data.message) {
-          toast.error(data.message);
+          toast.error(<ToastMessage testId="register-handle-submit-error-toast-3">{data.message}</ToastMessage>);
         } else {
-          toast.error('Erro ao cadastrar. Tente novamente.');
+          toast.error(<ToastMessage testId="register-handle-submit-error-toast-4">{'Erro ao cadastrar. Tente novamente.'}</ToastMessage>);
         }
       }
     } catch (error) {
       console.error('Erro no registro:', error);
-      toast.error('Erro de conexão. Tente novamente.');
+      toast.error(<ToastMessage testId="register-handle-submit-error-toast-5">{'Erro de conexão. Tente novamente.'}</ToastMessage>);
     } finally {
       setLoading(false);
     }

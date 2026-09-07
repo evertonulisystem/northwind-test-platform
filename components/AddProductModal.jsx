@@ -1,6 +1,7 @@
 // components/AddProductModal.jsx → VERSÃO FINAL COM VALIDAÇÕES FODA (TEU ESTILO 100%)
 'use client';
 
+import ToastMessage from "@/components/ToastMessage";
 import { useState, useEffect } from 'react';
 import { toast } from 'react-toastify';
 import CustomSelect from '@/components/CustomSelect';
@@ -51,7 +52,7 @@ export default function AddProductModal({ onClose, onAdd, preselectedCategory = 
         setCategories(catData.data || []);
         setSuppliers(supData.data || []);
       } catch (error) {
-        toast.error('Erro ao carregar categorias/fornecedores');
+        toast.error(<ToastMessage testId="add-product-modal-fetch-data-error-toast">{'Erro ao carregar categorias/fornecedores'}</ToastMessage>);
       } finally {
         setLoading(false);
       }
@@ -136,7 +137,7 @@ export default function AddProductModal({ onClose, onAdd, preselectedCategory = 
     e.preventDefault();
 
     if (!validateForm()) {
-      toast.error('Corrija os erros antes de salvar');
+      toast.error(<ToastMessage testId="add-product-modal-handle-submit-error-toast">{'Corrija os erros antes de salvar'}</ToastMessage>);
       return;
     }
 
@@ -153,7 +154,7 @@ export default function AddProductModal({ onClose, onAdd, preselectedCategory = 
       const token = localStorage.getItem('token');
       
       if (!token) {
-        toast.error('Você precisa estar logado para adicionar produtos');
+        toast.error(<ToastMessage testId="add-product-modal-handle-submit-error-toast-2">{'Você precisa estar logado para adicionar produtos'}</ToastMessage>);
         setLoading(false);
         return;
       }
@@ -172,16 +173,16 @@ export default function AddProductModal({ onClose, onAdd, preselectedCategory = 
       const result = await res.json();
 
       if (!res.ok) {
-        toast.error(result.mensagens?.[0] || 'Erro ao adicionar');
+        toast.error(<ToastMessage testId="add-product-modal-handle-submit-error-toast-3">{result.mensagens?.[0] || 'Erro ao adicionar'}</ToastMessage>);
         setLoading(false);
         return;
       }
 
-      toast.success('Produto adicionado com sucesso!');
+      toast.success(<ToastMessage testId="add-product-modal-handle-submit-success-toast">{'Produto adicionado com sucesso!'}</ToastMessage>);
       onAdd?.();
       onClose();
     } catch (error) {
-      toast.error('Erro de conexão');
+      toast.error(<ToastMessage testId="add-product-modal-handle-submit-error-toast-4">{'Erro de conexão'}</ToastMessage>);
     } finally {
       setLoading(false);
     }

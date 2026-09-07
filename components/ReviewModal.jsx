@@ -5,6 +5,7 @@
 // Adicionado em: julho/2026
 // ============================================================
 
+import ToastMessage from "@/components/ToastMessage";
 import { useState } from 'react';
 import { Star, XCircle, Loader2 } from 'lucide-react';
 import { toast } from 'react-toastify';
@@ -52,7 +53,7 @@ function StarRating({ value, onChange, error }) {
         )}
       </div>
       {error && (
-        <p className="text-red-400 text-xs mt-1 flex items-center gap-1" role="alert">
+        <p data-testid="review-modal-star-rating-error" className="text-red-400 text-xs mt-1 flex items-center gap-1" role="alert">
           <XCircle className="w-3.5 h-3.5" />
           {error}
         </p>
@@ -89,7 +90,7 @@ export default function ReviewModal({ product, onClose, onSuccess }) {
     try {
       const token = localStorage.getItem('token');
       if (!token) {
-        toast.error('Você precisa estar logado para avaliar.');
+        toast.error(<ToastMessage testId="review-modal-handle-submit-error-toast">{'Você precisa estar logado para avaliar.'}</ToastMessage>);
         router.push('/');
         return;
       }
@@ -108,14 +109,14 @@ export default function ReviewModal({ product, onClose, onSuccess }) {
       }
       const data = await res.json();
       if (!res.ok) {
-        toast.error(data.mensagens?.[0] || 'Erro ao enviar avaliação');
+        toast.error(<ToastMessage testId="review-modal-handle-submit-error-toast-2">{data.mensagens?.[0] || 'Erro ao enviar avaliação'}</ToastMessage>);
         return;
       }
-      toast.success('Avaliação enviada com sucesso!');
+      toast.success(<ToastMessage testId="review-modal-handle-submit-success-toast">{'Avaliação enviada com sucesso!'}</ToastMessage>);
       onSuccess?.();
       onClose();
     } catch (err) {
-      toast.error('Erro de conexão ao enviar avaliação');
+      toast.error(<ToastMessage testId="review-modal-handle-submit-error-toast-3">{'Erro de conexão ao enviar avaliação'}</ToastMessage>);
     } finally {
       setLoading(false);
     }
@@ -183,7 +184,7 @@ export default function ReviewModal({ product, onClose, onSuccess }) {
             />
             <div className="flex justify-between mt-1">
               {errors.comment ? (
-                <p className="text-red-400 text-xs" role="alert">{errors.comment}</p>
+                <p data-testid="review-modal-review-modal-errors-comment" className="text-red-400 text-xs" role="alert">{errors.comment}</p>
               ) : null}
               <span className={`text-xs ml-auto ${comment.length < 10 ? 'text-slate-500' : 'text-slate-400'}`}>{comment.length}/1000</span>
             </div>

@@ -1,5 +1,6 @@
 "use client";
 
+import ToastMessage from "@/components/ToastMessage";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
@@ -54,13 +55,13 @@ export default function CategoriesPage() {
       const result = await res.json();
 
       if (!res.ok) {
-        toast.error(result.mensagens?.[0] || "Erro ao carregar categorias");
+        toast.error(<ToastMessage testId="categories-fetch-categories-error-toast">{result.mensagens?.[0] || "Erro ao carregar categorias"}</ToastMessage>);
         return;
       }
 
       setCategories(result.data || []);
     } catch (error) {
-      toast.error("Erro de conexão");
+      toast.error(<ToastMessage testId="categories-fetch-categories-error-toast-2">{"Erro de conexão"}</ToastMessage>);
     } finally {
       setLoading(false);
     }
@@ -108,7 +109,7 @@ export default function CategoriesPage() {
     e.preventDefault();
 
     if (!validateForm()) {
-      toast.error("Corrija os erros antes de salvar");
+      toast.error(<ToastMessage testId="categories-handle-submit-error-toast">{"Corrija os erros antes de salvar"}</ToastMessage>);
       return;
     }
 
@@ -118,7 +119,7 @@ export default function CategoriesPage() {
       const token = localStorage.getItem("token");
 
       if (!token) {
-        toast.error("Você precisa estar logado");
+        toast.error(<ToastMessage testId="categories-handle-submit-error-toast-2">{"Você precisa estar logado"}</ToastMessage>);
         setLoading(false);
         return;
       }
@@ -135,16 +136,16 @@ export default function CategoriesPage() {
       const result = await res.json();
 
       if (!res.ok) {
-        toast.error(result.mensagens?.[0] || "Erro ao cadastrar");
+        toast.error(<ToastMessage testId="categories-handle-submit-error-toast-3">{result.mensagens?.[0] || "Erro ao cadastrar"}</ToastMessage>);
         setLoading(false);
         return;
       }
 
       //toast.success("Categoria cadastrada com sucesso!");
  toast.success(
-    <div data-testid="category-success-toast">
+    <ToastMessage testId="categories-handle-submit-success-toast">{<div data-testid="category-success-toast">
       Categoria cadastrada com sucesso!
-    </div>
+    </div>}</ToastMessage>
   );
 
 
@@ -158,7 +159,7 @@ export default function CategoriesPage() {
         description: "",
       });
     } catch (error) {
-      toast.error("Erro de rede");
+      toast.error(<ToastMessage testId="categories-handle-submit-error-toast-4">{"Erro de rede"}</ToastMessage>);
     } finally {
       setLoading(false);
     }
@@ -167,7 +168,7 @@ export default function CategoriesPage() {
   const handleUpdate = async (event) => {
     event.preventDefault();
     if (!validateForm()) {
-      toast.error("Corrija os erros antes de salvar");
+      toast.error(<ToastMessage testId="categories-handle-update-error-toast">{"Corrija os erros antes de salvar"}</ToastMessage>);
       return;
     }
 
@@ -177,7 +178,7 @@ export default function CategoriesPage() {
       const token = localStorage.getItem("token");
 
       if (!token) {
-        toast.error("Você precisa estar logado");
+        toast.error(<ToastMessage testId="categories-handle-update-error-toast-2">{"Você precisa estar logado"}</ToastMessage>);
         setLoading(false);
         return;
       }
@@ -194,17 +195,17 @@ export default function CategoriesPage() {
       const result = await res.json();
 
       if (!res.ok) {
-        toast.error(result.mensagens?.[0] || "Erro ao atualizar");
+        toast.error(<ToastMessage testId="categories-handle-update-error-toast-3">{result.mensagens?.[0] || "Erro ao atualizar"}</ToastMessage>);
         setLoading(false);
         return;
       }
 
       if (!result.data || String(result.data.id) !== String(editingCategory.id)) {
-        toast.error("Não foi possível confirmar a atualização da categoria.");
+        toast.error(<ToastMessage testId="categories-handle-update-error-toast-4">{"Não foi possível confirmar a atualização da categoria."}</ToastMessage>);
         return;
       }
 
-      toast.success("Categoria atualizada com sucesso!");
+      toast.success(<ToastMessage testId="categories-handle-update-success-toast">{"Categoria atualizada com sucesso!"}</ToastMessage>);
       await fetchCategories();
       setShowEditModal(false);
       setEditingCategory(null);
@@ -213,7 +214,7 @@ export default function CategoriesPage() {
         description: "",
       });
     } catch (error) {
-      toast.error("Erro de rede");
+      toast.error(<ToastMessage testId="categories-handle-update-error-toast-5">{"Erro de rede"}</ToastMessage>);
     } finally {
       setLoading(false);
     }
@@ -226,7 +227,7 @@ export default function CategoriesPage() {
       const token = localStorage.getItem("token");
 
       if (!token) {
-        toast.error("Você precisa estar logado");
+        toast.error(<ToastMessage testId="categories-handle-delete-error-toast">{"Você precisa estar logado"}</ToastMessage>);
         return;
       }
 
@@ -243,22 +244,22 @@ export default function CategoriesPage() {
         // Mensagem específica para categoria em uso
         if (result.mensagens?.[0]?.includes("usada por produtos")) {
           toast.error(
-            "⚠️ Esta categoria não pode ser excluída pois está sendo usada por produtos. Primeiro remova ou altere a categoria dos produtos.",
+            <ToastMessage testId="categories-handle-delete-error-toast-2">{"⚠️ Esta categoria não pode ser excluída pois está sendo usada por produtos. Primeiro remova ou altere a categoria dos produtos."}</ToastMessage>,
           );
         } else {
-          toast.error(result.mensagens?.[0] || "Erro ao excluir categoria");
+          toast.error(<ToastMessage testId="categories-handle-delete-error-toast-3">{result.mensagens?.[0] || "Erro ao excluir categoria"}</ToastMessage>);
         }
         setShowConfirm(false);
         setDeleteId(null);
         return;
       }
 
-      toast.success("Categoria excluída com sucesso!");
+      toast.success(<ToastMessage testId="categories-handle-delete-success-toast">{"Categoria excluída com sucesso!"}</ToastMessage>);
       fetchCategories();
       setShowConfirm(false);
       setDeleteId(null);
     } catch (error) {
-      toast.error("Erro de conexão ao excluir categoria");
+      toast.error(<ToastMessage testId="categories-handle-delete-error-toast-4">{"Erro de conexão ao excluir categoria"}</ToastMessage>);
       setShowConfirm(false);
       setDeleteId(null);
     }
@@ -589,7 +590,7 @@ export default function CategoriesPage() {
                   placeholder="Eletrônicos"
                 />
                 {errors.name && (
-                  <p className="text-red-400 text-xs mt-1">{errors.name}</p>
+                  <p data-testid="categories-categories-page-errors-name" className="text-red-400 text-xs mt-1">{errors.name}</p>
                 )}
               </div>
 
@@ -608,7 +609,7 @@ export default function CategoriesPage() {
                   placeholder="Produtos eletrônicos como celulares, computadores, tablets e acessórios..."
                 />
                 {errors.description && (
-                  <p className="text-red-400 text-xs mt-1">
+                  <p data-testid="categories-categories-page-errors-description" className="text-red-400 text-xs mt-1">
                     {errors.description}
                   </p>
                 )}

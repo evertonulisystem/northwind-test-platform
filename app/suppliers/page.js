@@ -1,5 +1,6 @@
 "use client";
 
+import ToastMessage from "@/components/ToastMessage";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
@@ -92,13 +93,13 @@ export default function SuppliersPage() {
       console.log("🔍 DEBUG - suppliers API result:", result);
 
       if (!res.ok) {
-        toast.error(result.mensagens?.[0] || "Erro ao carregar fornecedores");
+        toast.error(<ToastMessage testId="suppliers-fetch-suppliers-error-toast">{result.mensagens?.[0] || "Erro ao carregar fornecedores"}</ToastMessage>);
         return;
       }
 
       setSuppliers(result.data || []);
     } catch (error) {
-      toast.error("Erro de conexão");
+      toast.error(<ToastMessage testId="suppliers-fetch-suppliers-error-toast-2">{"Erro de conexão"}</ToastMessage>);
     } finally {
       setLoading(false);
     }
@@ -182,7 +183,7 @@ export default function SuppliersPage() {
     console.log("🔍 DEBUG - handleSubmit chamado");
 
     if (!validateForm()) {
-      toast.error("Corrija os erros antes de salvar");
+      toast.error(<ToastMessage testId="suppliers-handle-submit-error-toast">{"Corrija os erros antes de salvar"}</ToastMessage>);
       return;
     }
 
@@ -198,7 +199,7 @@ export default function SuppliersPage() {
       const token = localStorage.getItem("token");
 
       if (!token) {
-        toast.error("Você precisa estar logado");
+        toast.error(<ToastMessage testId="suppliers-handle-submit-error-toast-2">{"Você precisa estar logado"}</ToastMessage>);
         setLoading(false);
         return;
       }
@@ -215,17 +216,17 @@ export default function SuppliersPage() {
       const result = await res.json();
 
       if (!res.ok) {
-        toast.error(result.mensagens?.[0] || "Erro ao cadastrar");
+        toast.error(<ToastMessage testId="suppliers-handle-submit-error-toast-3">{result.mensagens?.[0] || "Erro ao cadastrar"}</ToastMessage>);
         setLoading(false);
         return;
       }
 
-      toast.success("Fornecedor cadastrado com sucesso!");
+      toast.success(<ToastMessage testId="suppliers-handle-submit-success-toast">{"Fornecedor cadastrado com sucesso!"}</ToastMessage>);
       fetchSuppliers();
       setShowAddModal(false);
       resetForm();
     } catch (error) {
-      toast.error("Erro de rede");
+      toast.error(<ToastMessage testId="suppliers-handle-submit-error-toast-4">{"Erro de rede"}</ToastMessage>);
     } finally {
       setLoading(false);
     }
@@ -243,7 +244,7 @@ export default function SuppliersPage() {
     };
 
     if (!validateForm()) {
-      toast.error("Corrija os erros antes de salvar");
+      toast.error(<ToastMessage testId="suppliers-handle-update-error-toast">{"Corrija os erros antes de salvar"}</ToastMessage>);
       return;
     }
 
@@ -262,7 +263,7 @@ export default function SuppliersPage() {
       const token = localStorage.getItem("token");
 
       if (!token) {
-        toast.error("Você precisa estar logado");
+        toast.error(<ToastMessage testId="suppliers-handle-update-error-toast-2">{"Você precisa estar logado"}</ToastMessage>);
         setLoading(false);
         return;
       }
@@ -281,19 +282,19 @@ export default function SuppliersPage() {
       console.log("🔍 DEBUG - Resposta da API:", result);
 
       if (!res.ok) {
-        toast.error(result.mensagens?.[0] || "Erro ao atualizar");
+        toast.error(<ToastMessage testId="suppliers-handle-update-error-toast-3">{result.mensagens?.[0] || "Erro ao atualizar"}</ToastMessage>);
         setLoading(false);
         return;
       }
 
-      toast.success("Fornecedor atualizado com sucesso!");
+      toast.success(<ToastMessage testId="suppliers-handle-update-success-toast">{"Fornecedor atualizado com sucesso!"}</ToastMessage>);
       fetchSuppliers();
       setShowEditModal(false);
       setEditingSupplier(null);
       resetForm();
     } catch (error) {
       console.error("🔍 DEBUG - Erro na requisição:", error);
-      toast.error("Erro de rede");
+      toast.error(<ToastMessage testId="suppliers-handle-update-error-toast-4">{"Erro de rede"}</ToastMessage>);
     } finally {
       setLoading(false);
     }
@@ -306,7 +307,7 @@ export default function SuppliersPage() {
       const token = localStorage.getItem("token");
 
       if (!token) {
-        toast.error("Você precisa estar logado");
+        toast.error(<ToastMessage testId="suppliers-handle-delete-error-toast">{"Você precisa estar logado"}</ToastMessage>);
         return;
       }
 
@@ -332,19 +333,19 @@ export default function SuppliersPage() {
             return;
           }
         } else {
-          toast.error(result.mensagens?.[0] || "Erro ao excluir fornecedor");
+          toast.error(<ToastMessage testId="suppliers-handle-delete-error-toast-2">{result.mensagens?.[0] || "Erro ao excluir fornecedor"}</ToastMessage>);
         }
         setShowConfirm(false);
         setDeleteId(null);
         return;
       }
 
-      toast.success("Fornecedor excluído com sucesso!");
+      toast.success(<ToastMessage testId="suppliers-handle-delete-success-toast">{"Fornecedor excluído com sucesso!"}</ToastMessage>);
       fetchSuppliers();
       setShowConfirm(false);
       setDeleteId(null);
     } catch (error) {
-      toast.error("Erro de conexão ao excluir fornecedor");
+      toast.error(<ToastMessage testId="suppliers-handle-delete-error-toast-3">{"Erro de conexão ao excluir fornecedor"}</ToastMessage>);
       setShowConfirm(false);
       setDeleteId(null);
     }
@@ -354,7 +355,7 @@ export default function SuppliersPage() {
     fetchSuppliers();
     setShowUnlinkModal(false);
     setUnlinkingSupplier(null);
-    toast.success("Agora você pode excluir o fornecedor!");
+    toast.success(<ToastMessage testId="suppliers-handle-unlink-success-success-toast">{"Agora você pode excluir o fornecedor!"}</ToastMessage>);
   };
 
   const formatCNPJ = (value) => {
@@ -649,7 +650,7 @@ export default function SuppliersPage() {
                   placeholder="Tech Solutions Ltda"
                 />
                 {errors.company_name && (
-                  <p className="text-red-400 text-xs mt-1">
+                  <p data-testid="suppliers-suppliers-page-errors-company-name" className="text-red-400 text-xs mt-1">
                     {errors.company_name}
                   </p>
                 )}
@@ -670,7 +671,7 @@ export default function SuppliersPage() {
                   placeholder="João Silva"
                 />
                 {errors.contact_name && (
-                  <p className="text-red-400 text-xs mt-1">
+                  <p data-testid="suppliers-suppliers-page-errors-contact-name" className="text-red-400 text-xs mt-1">
                     {errors.contact_name}
                   </p>
                 )}
@@ -691,7 +692,7 @@ export default function SuppliersPage() {
                   placeholder="joao@techsolutions.com"
                 />
                 {errors.email && (
-                  <p className="text-red-400 text-xs mt-1">{errors.email}</p>
+                  <p data-testid="suppliers-suppliers-page-errors-email" className="text-red-400 text-xs mt-1">{errors.email}</p>
                 )}
               </div>
 
@@ -713,7 +714,7 @@ export default function SuppliersPage() {
                   placeholder="(11) 98765-4321"
                 />
                 {errors.phone && (
-                  <p className="text-red-400 text-xs mt-1">{errors.phone}</p>
+                  <p data-testid="suppliers-suppliers-page-errors-phone" className="text-red-400 text-xs mt-1">{errors.phone}</p>
                 )}
               </div>
 
@@ -735,7 +736,7 @@ export default function SuppliersPage() {
                   placeholder="12.345.678/0001-90"
                 />
                 {errors.cnpj && (
-                  <p className="text-red-400 text-xs mt-1">{errors.cnpj}</p>
+                  <p data-testid="suppliers-suppliers-page-errors-cnpj" className="text-red-400 text-xs mt-1">{errors.cnpj}</p>
                 )}
               </div>
 
@@ -758,7 +759,7 @@ export default function SuppliersPage() {
                   maxLength={2}
                 />
                 {errors.uf && (
-                  <p className="text-red-400 text-xs mt-1">{errors.uf}</p>
+                  <p data-testid="suppliers-suppliers-page-errors-uf" className="text-red-400 text-xs mt-1">{errors.uf}</p>
                 )}
               </div>
             </div>
@@ -818,7 +819,7 @@ export default function SuppliersPage() {
                   placeholder="Tech Solutions Ltda"
                 />
                 {errors.company_name && (
-                  <p className="text-red-400 text-xs mt-1">
+                  <p data-testid="suppliers-suppliers-page-errors-company-name-2" className="text-red-400 text-xs mt-1">
                     {errors.company_name}
                   </p>
                 )}
@@ -839,7 +840,7 @@ export default function SuppliersPage() {
                   placeholder="João Silva"
                 />
                 {errors.contact_name && (
-                  <p className="text-red-400 text-xs mt-1">
+                  <p data-testid="suppliers-suppliers-page-errors-contact-name-2" className="text-red-400 text-xs mt-1">
                     {errors.contact_name}
                   </p>
                 )}
@@ -860,7 +861,7 @@ export default function SuppliersPage() {
                   placeholder="joao@techsolutions.com"
                 />
                 {errors.email && (
-                  <p className="text-red-400 text-xs mt-1">{errors.email}</p>
+                  <p data-testid="suppliers-suppliers-page-errors-email-2" className="text-red-400 text-xs mt-1">{errors.email}</p>
                 )}
               </div>
 
@@ -882,7 +883,7 @@ export default function SuppliersPage() {
                   placeholder="(11) 98765-4321"
                 />
                 {errors.phone && (
-                  <p className="text-red-400 text-xs mt-1">{errors.phone}</p>
+                  <p data-testid="suppliers-suppliers-page-errors-phone-2" className="text-red-400 text-xs mt-1">{errors.phone}</p>
                 )}
               </div>
 
@@ -904,7 +905,7 @@ export default function SuppliersPage() {
                   placeholder="12.345.678/0001-90"
                 />
                 {errors.cnpj && (
-                  <p className="text-red-400 text-xs mt-1">{errors.cnpj}</p>
+                  <p data-testid="suppliers-suppliers-page-errors-cnpj-2" className="text-red-400 text-xs mt-1">{errors.cnpj}</p>
                 )}
               </div>
 
@@ -927,7 +928,7 @@ export default function SuppliersPage() {
                   maxLength={2}
                 />
                 {errors.uf && (
-                  <p className="text-red-400 text-xs mt-1">{errors.uf}</p>
+                  <p data-testid="suppliers-suppliers-page-errors-uf-2" className="text-red-400 text-xs mt-1">{errors.uf}</p>
                 )}
               </div>
             </div>

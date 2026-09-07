@@ -8,6 +8,7 @@
 // Adicionado em: agosto/2026
 // ============================================================
 
+import ToastMessage from "@/components/ToastMessage";
 import { Suspense, useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "react-toastify";
@@ -203,7 +204,7 @@ function OrdersPageContent() {
       setLoading(true);
       const token = localStorage.getItem("token");
       if (!token) {
-        toast.error("Você precisa estar logado.");
+        toast.error(<ToastMessage testId="orders-fetch-orders-error-toast">{"Você precisa estar logado."}</ToastMessage>);
         router.push("/");
         return;
       }
@@ -250,7 +251,7 @@ function OrdersPageContent() {
           totalPages: 0,
         });
         setDateError(res.status === 400 ? message : "");
-        toast.error(message);
+        toast.error(<ToastMessage testId="orders-fetch-orders-error-toast-2">{message}</ToastMessage>);
         return;
       }
 
@@ -284,7 +285,7 @@ function OrdersPageContent() {
         total: 0,
         totalPages: 0,
       });
-      toast.error("Erro ao carregar pedidos.");
+      toast.error(<ToastMessage testId="orders-fetch-orders-error-toast-3">{"Erro ao carregar pedidos."}</ToastMessage>);
     } finally {
       setLoading(false);
     }
@@ -319,7 +320,7 @@ function OrdersPageContent() {
 
     if (validationMessage) {
       setDateError(validationMessage);
-      toast.error(validationMessage);
+      toast.error(<ToastMessage testId="orders-handle-apply-filters-error-toast">{validationMessage}</ToastMessage>);
       return;
     }
 

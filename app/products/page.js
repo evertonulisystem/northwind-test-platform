@@ -1,5 +1,6 @@
 "use client";
 
+import ToastMessage from "@/components/ToastMessage";
 import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
@@ -136,7 +137,7 @@ export default function ProductsPage() {
       );
     } catch (error) {
       console.error("🐛 DEBUG PRODUCTS - Erro:", error);
-      toast.error("Erro ao carregar produtos");
+      toast.error(<ToastMessage testId="products-products-page-error-toast">{"Erro ao carregar produtos"}</ToastMessage>);
     } finally {
       setLoading(false);
     }
@@ -219,7 +220,7 @@ export default function ProductsPage() {
       const token = localStorage.getItem("token");
 
       if (!token) {
-        toast.error("Você precisa estar logado para excluir produtos");
+        toast.error(<ToastMessage testId="products-confirm-delete-error-toast">{"Você precisa estar logado para excluir produtos"}</ToastMessage>);
         setShowConfirm(false);
         setDeleteId(null);
         return;
@@ -232,11 +233,11 @@ export default function ProductsPage() {
         },
       });
       if (!res.ok) throw new Error();
-      toast.success("Produto excluído com sucesso!");
+      toast.success(<ToastMessage testId="products-confirm-delete-success-toast">{"Produto excluído com sucesso!"}</ToastMessage>);
       await fetchAllProducts(); // recarrega tudo
     } catch {
       setProducts((prev) => [...prev, deleted]);
-      toast.error("Erro ao excluir");
+      toast.error(<ToastMessage testId="products-confirm-delete-error-toast-2">{"Erro ao excluir"}</ToastMessage>);
     } finally {
       setShowConfirm(false);
       setDeleteId(null);

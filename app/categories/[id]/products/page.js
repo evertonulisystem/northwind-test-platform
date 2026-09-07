@@ -1,5 +1,6 @@
 "use client";
 
+import ToastMessage from "@/components/ToastMessage";
 import { useState, useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { toast } from "react-toastify";
@@ -30,7 +31,7 @@ export default function CategoryProductsPage() {
       const result = await res.json();
 
       if (!res.ok) {
-        toast.error(result.mensagens?.[0] || "Erro ao carregar produtos");
+        toast.error(<ToastMessage testId="categories-detail-products-fetch-category-products-error-toast">{result.mensagens?.[0] || "Erro ao carregar produtos"}</ToastMessage>);
         return;
       }
 
@@ -51,7 +52,7 @@ export default function CategoryProductsPage() {
         setCategory({ name: "Categoria", id: params.id });
       }
     } catch (error) {
-      toast.error("Erro de conexão");
+      toast.error(<ToastMessage testId="categories-detail-products-fetch-category-products-error-toast-2">{"Erro de conexão"}</ToastMessage>);
     } finally {
       setLoading(false);
     }
@@ -72,17 +73,17 @@ export default function CategoryProductsPage() {
       });
 
       if (res.ok) {
-        toast.success("Produto removido da categoria com sucesso!");
+        toast.success(<ToastMessage testId="categories-detail-products-handle-remove-from-category-success-toast">{"Produto removido da categoria com sucesso!"}</ToastMessage>);
         // Refresh the product list
         fetchCategoryProducts();
       } else {
         const result = await res.json();
         toast.error(
-          result.mensagens?.[0] || "Erro ao remover produto da categoria",
+          <ToastMessage testId="categories-detail-products-handle-remove-from-category-error-toast">{result.mensagens?.[0] || "Erro ao remover produto da categoria"}</ToastMessage>,
         );
       }
     } catch (error) {
-      toast.error("Erro de conexão");
+      toast.error(<ToastMessage testId="categories-detail-products-handle-remove-from-category-error-toast-2">{"Erro de conexão"}</ToastMessage>);
     }
   };
 
