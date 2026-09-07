@@ -409,6 +409,14 @@ export default function ReviewsPage() {
   // ── Estado: produtos sem avaliação ──────────────────────────
   const [productsWithoutReviews, setProductsWithoutReviews] = useState([]);
   const [loadingWithout, setLoadingWithout] = useState(true);
+  const [productsPage, setProductsPage] = useState(1);
+  const productsPerPage = 8;
+  const productsTotalPages = Math.ceil(productsWithoutReviews.length / productsPerPage);
+  const safeProductsPage = Math.min(productsPage, Math.max(1, productsTotalPages));
+  const visibleProducts = productsWithoutReviews.slice(
+    (safeProductsPage - 1) * productsPerPage,
+    safeProductsPage * productsPerPage,
+  );
 
   // ── Estado: avaliações aprovadas ─────────────────────────────
   const [reviews, setReviews] = useState([]);
@@ -416,7 +424,7 @@ export default function ReviewsPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const [pagination, setPagination] = useState({
     page: 1,
-    limit: 10,
+    limit: 6,
     total: 0,
     totalPages: 0,
   });
@@ -457,7 +465,10 @@ export default function ReviewsPage() {
       }
 
       const data = await res.json();
-      setProductsWithoutReviews(data.data || []);
+      if (!res.ok) throw new Error(data.mensagens?.[0] || "Erro ao carregar produtos");
+      const products = data.data || [];
+      setProductsWithoutReviews(products);
+      setProductsPage((page) => Math.min(page, Math.max(1, Math.ceil(products.length / productsPerPage))));
     } catch (err) {
       console.error("Erro ao buscar produtos sem avaliação:", err);
       toast.error("Erro ao carregar produtos sem avaliação.");
@@ -474,7 +485,7 @@ export default function ReviewsPage() {
       const token = localStorage.getItem("token");
       if (!token) return;
 
-      const res = await fetch(`/api/v1/reviews?page=${page}&limit=10`, {
+      const res = await fetch(`/api/v1/reviews?page=${page}&limit=6`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -488,6 +499,7 @@ export default function ReviewsPage() {
       }
 
       const data = await res.json();
+      if (!res.ok) throw new Error(data.mensagens?.[0] || "Erro ao carregar avaliações");
       setReviews(data.data || []);
       if (data.pagination) {
         setPagination(data.pagination);
@@ -504,8 +516,11 @@ export default function ReviewsPage() {
   // Carrega ambas as listas ao montar a página
   useEffect(() => {
     fetchProductsWithoutReviews();
+  }, [fetchProductsWithoutReviews]);
+
+  useEffect(() => {
     fetchReviews(currentPage);
-  }, [fetchProductsWithoutReviews, fetchReviews, currentPage]);
+  }, [fetchReviews, currentPage]);
 
   // ── Handler: após envio da avaliação com sucesso ─────────────
   // Fecha o modal e recarrega ambas as listas para refletir o estado atual
@@ -638,7 +653,7 @@ export default function ReviewsPage() {
                       </tr>
                     </thead>
                     <tbody>
-                      {productsWithoutReviews.map((product) => (
+                      {visibleProducts.map((product) => (
                         <tr
                           key={product.id}
                           data-testid={`without-review-row-${product.id}`}
@@ -701,6 +716,19 @@ export default function ReviewsPage() {
                 </div>
               )}
             </div>
+            {!loadingWithout && productsTotalPages > 1 && (
+              <nav aria-label="Paginação de produtos sem avaliação" data-testid="without-reviews-pagination" className="flex flex-wrap justify-center items-center gap-4 mt-8">
+                <button type="button" onClick={() => setProductsPage(safeProductsPage - 1)} disabled={safeProductsPage === 1}
+                  className="px-4 py-2 rounded-lg bg-slate-800 border border-slate-600 text-white hover:bg-slate-700 disabled:opacity-50 disabled:cursor-not-allowed transition">
+                  Anterior
+                </button>
+                <span className="text-slate-300" aria-live="polite">Página <span className="font-bold text-white">{safeProductsPage}</span> de <span className="font-bold text-white">{productsTotalPages}</span></span>
+                <button type="button" onClick={() => setProductsPage(safeProductsPage + 1)} disabled={safeProductsPage === productsTotalPages}
+                  className="px-4 py-2 rounded-lg bg-slate-800 border border-slate-600 text-white hover:bg-slate-700 disabled:opacity-50 disabled:cursor-not-allowed transition">
+                  Próxima
+                </button>
+              </nav>
+            )}
           </section>
 
           {/* ════════════════════════════════════════════════════
@@ -832,7 +860,7 @@ export default function ReviewsPage() {
                 </div>
 
                 {pagination.totalPages > 1 && (
-                  <div className="flex justify-center items-center gap-4 mt-8">
+                  <nav aria-label="Paginação de avaliações" data-testid="reviews-pagination" className="flex flex-wrap justify-center items-center gap-4 mt-8">
                     <button
                       onClick={() =>
                         setCurrentPage((prev) => Math.max(1, prev - 1))
@@ -863,7 +891,7 @@ export default function ReviewsPage() {
                     >
                       Próxima
                     </button>
-                  </div>
+                  </nav>
                 )}
               </>
             )}
