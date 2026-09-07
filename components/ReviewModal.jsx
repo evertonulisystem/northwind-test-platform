@@ -172,7 +172,8 @@ export default function ReviewModal({ product, onClose, onSuccess }) {
                 setComment(e.target.value);
                 if (errors.comment && e.target.value.trim().length >= 10) {
                   setErrors(prev => ({ ...prev, comment: null }));
-                }}
+                }
+              }}
               placeholder="Conte sua experiência com este produto..."
               rows={4}
               maxLength={1000}
