@@ -1,3 +1,4 @@
+import { normalizeApiBody } from '@/lib/api-envelope';
 // app/api/suppliers/[id]/route.js
 import { supabase } from '@/lib/supabase';
 import { NextResponse } from 'next/server';
@@ -33,10 +34,10 @@ export async function GET(request, { params }) {
     const token = getTokenFromRequest(request);
     if (!token) {
       return NextResponse.json(
-        { 
+        normalizeApiBody({
           data: null,
           mensagens: ['Token ausente'] 
-        }, 
+        }),
         { status: 401 }
       );
     }
@@ -45,11 +46,11 @@ export async function GET(request, { params }) {
     if (!payload || payload.error) {
       const message = payload?.message || 'Token inválido';
       return NextResponse.json(
-        { 
+        normalizeApiBody({
           data: null,
           mensagens: [message],
           expires_at: payload?.expires_at || null
-        }, 
+        }),
         { status: 401 }
       );
     }
@@ -60,10 +61,10 @@ export async function GET(request, { params }) {
 
     if (isNaN(idNum) || idNum <= 0) {
       return NextResponse.json(
-        { 
+        normalizeApiBody({
           data: null, 
           mensagens: ['ID do fornecedor inválido. Deve ser um número positivo.'] 
-        },
+        }),
         { status: 400 }
       );
     }
@@ -77,10 +78,10 @@ export async function GET(request, { params }) {
 
     if (error || !supplier) {
       return NextResponse.json(
-        { 
+        normalizeApiBody({
           data: null, 
           mensagens: [`Fornecedor com ID ${idNum} não encontrado.`] 
-        },
+        }),
         { status: 404 }
       );
     }
@@ -92,16 +93,16 @@ export async function GET(request, { params }) {
     };
     delete formattedSupplier.state;
 
-    return NextResponse.json({ 
+    return NextResponse.json(normalizeApiBody({
       data: formattedSupplier,
       mensagens: ['Fornecedor encontrado com sucesso.']
-    });
+    }));
   } catch (error) {
     return NextResponse.json(
-      { 
+      normalizeApiBody({
         data: null, 
         mensagens: ['Erro interno ao buscar detalhes do fornecedor.'] 
-      },
+      }),
       { status: 500 }
     );
   }
@@ -177,10 +178,10 @@ export async function PUT(request, { params }) {
     const token = getTokenFromRequest(request);
     if (!token) {
       return NextResponse.json(
-        { 
+        normalizeApiBody({
           data: null,
           mensagens: ['Token ausente'] 
-        }, 
+        }),
         { status: 401 }
       );
     }
@@ -189,11 +190,11 @@ export async function PUT(request, { params }) {
     if (!payload || payload.error) {
       const message = payload?.message || 'Token inválido';
       return NextResponse.json(
-        { 
+        normalizeApiBody({
           data: null,
           mensagens: [message],
           expires_at: payload?.expires_at || null
-        }, 
+        }),
         { status: 401 }
       );
     }
@@ -204,10 +205,10 @@ export async function PUT(request, { params }) {
 
     if (isNaN(idNum) || idNum <= 0) {
       return NextResponse.json(
-        { 
+        normalizeApiBody({
           data: null, 
           mensagens: ['ID do fornecedor inválido. Deve ser um número positivo.'] 
-        },
+        }),
         { status: 400 }
       );
     }
@@ -217,20 +218,20 @@ export async function PUT(request, { params }) {
       body = await request.json();
     } catch (jsonError) {
       return NextResponse.json(
-        { 
+        normalizeApiBody({
           data: null, 
           mensagens: ['Dados inválidos. Verifique se todos os campos foram preenchidos corretamente.'] 
-        },
+        }),
         { status: 400 }
       );
     }
 
     if (!body || Object.keys(body).length === 0) {
       return NextResponse.json(
-        { 
+        normalizeApiBody({
           data: null, 
           mensagens: ['Nenhum dado informado. Preencha os campos do fornecedor.'] 
-        },
+        }),
         { status: 400 }
       );
     }
@@ -240,60 +241,60 @@ export async function PUT(request, { params }) {
     
     if (!company_name || !company_name.trim()) {
       return NextResponse.json(
-        { 
+        normalizeApiBody({
           data: null, 
           mensagens: ['Razão social da empresa é obrigatória.'] 
-        },
+        }),
         { status: 400 }
       );
     }
 
     if (!contact_name || !contact_name.trim()) {
       return NextResponse.json(
-        { 
+        normalizeApiBody({
           data: null, 
           mensagens: ['Nome do contato é obrigatório.'] 
-        },
+        }),
         { status: 400 }
       );
     }
 
     if (!email || !email.trim()) {
       return NextResponse.json(
-        { 
+        normalizeApiBody({
           data: null, 
           mensagens: ['E-mail do fornecedor é obrigatório.'] 
-        },
+        }),
         { status: 400 }
       );
     }
 
     if (!phone || !phone.trim()) {
       return NextResponse.json(
-        { 
+        normalizeApiBody({
           data: null, 
           mensagens: ['Telefone do fornecedor é obrigatório.'] 
-        },
+        }),
         { status: 400 }
       );
     }
 
     if (!cnpj || !cnpj.trim()) {
       return NextResponse.json(
-        { 
+        normalizeApiBody({
           data: null, 
           mensagens: ['CNPJ do fornecedor é obrigatório.'] 
-        },
+        }),
         { status: 400 }
       );
     }
 
     if (!uf || !uf.trim()) {
       return NextResponse.json(
-        { 
+        normalizeApiBody({
           data: null, 
           mensagens: ['UF do fornecedor é obrigatória.'] 
-        },
+        }),
         { status: 400 }
       );
     }
@@ -301,40 +302,40 @@ export async function PUT(request, { params }) {
     // Validação de tamanho
     if (company_name.trim().length < 3) {
       return NextResponse.json(
-        { 
+        normalizeApiBody({
           data: null, 
           mensagens: ['Razão social deve ter no mínimo 3 caracteres.'] 
-        },
+        }),
         { status: 400 }
       );
     }
 
     if (company_name.trim().length > 100) {
       return NextResponse.json(
-        { 
+        normalizeApiBody({
           data: null, 
           mensagens: ['Razão social deve ter no máximo 100 caracteres.'] 
-        },
+        }),
         { status: 400 }
       );
     }
 
     if (contact_name.trim().length < 5) {
       return NextResponse.json(
-        { 
+        normalizeApiBody({
           data: null, 
           mensagens: ['Nome do contato deve ter no mínimo 5 caracteres.'] 
-        },
+        }),
         { status: 400 }
       );
     }
 
     if (contact_name.trim().length > 80) {
       return NextResponse.json(
-        { 
+        normalizeApiBody({
           data: null, 
           mensagens: ['Nome do contato deve ter no máximo 80 caracteres.'] 
-        },
+        }),
         { status: 400 }
       );
     }
@@ -343,10 +344,10 @@ export async function PUT(request, { params }) {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email.trim())) {
       return NextResponse.json(
-        { 
+        normalizeApiBody({
           data: null, 
           mensagens: ['E-mail inválido. Informe um e-mail válido.'] 
-        },
+        }),
         { status: 400 }
       );
     }
@@ -354,10 +355,10 @@ export async function PUT(request, { params }) {
     const phoneRegex = /^\([0-9]{2}\) [0-9]{5}-[0-9]{4}$/;
     if (!phoneRegex.test(phone.trim())) {
       return NextResponse.json(
-        { 
+        normalizeApiBody({
           data: null, 
           mensagens: ['Telefone inválido. Use o formato (XX) XXXXX-XXXX.'] 
-        },
+        }),
         { status: 400 }
       );
     }
@@ -366,10 +367,10 @@ export async function PUT(request, { params }) {
     const cleanCnpj = cnpj.replace(/[^\d]/g, '');
     if (!cnpjRegex.test(cleanCnpj)) {
       return NextResponse.json(
-        { 
+        normalizeApiBody({
           data: null, 
           mensagens: ['CNPJ inválido. Informe apenas os 14 números do CNPJ.'] 
-        },
+        }),
         { status: 400 }
       );
     }
@@ -377,10 +378,10 @@ export async function PUT(request, { params }) {
     const ufRegex = /^[A-Z]{2}$/;
     if (!ufRegex.test(uf.trim().toUpperCase())) {
       return NextResponse.json(
-        { 
+        normalizeApiBody({
           data: null, 
           mensagens: ['UF inválida. Informe a sigla de 2 letras do estado (ex: SP, RJ, MG).'] 
-        },
+        }),
         { status: 400 }
       );
     }
@@ -396,10 +397,10 @@ export async function PUT(request, { params }) {
 
     if (!existing) {
       return NextResponse.json(
-        { 
+        normalizeApiBody({
           data: null, 
           mensagens: [`Fornecedor com ID ${idNum} não encontrado.`] 
-        },
+        }),
         { status: 404 }
       );
     }
@@ -414,10 +415,10 @@ export async function PUT(request, { params }) {
 
     if (emailDuplicate) {
       return NextResponse.json(
-        { 
+        normalizeApiBody({
           data: null, 
           mensagens: ['Já existe um fornecedor com este e-mail.'] 
-        },
+        }),
         { status: 409 }
       );
     }
@@ -432,10 +433,10 @@ export async function PUT(request, { params }) {
 
     if (cnpjDuplicate) {
       return NextResponse.json(
-        { 
+        normalizeApiBody({
           data: null, 
           mensagens: ['Já existe um fornecedor com este CNPJ.'] 
-        },
+        }),
         { status: 409 }
       );
     }
@@ -461,10 +462,10 @@ export async function PUT(request, { params }) {
     }
 
     return NextResponse.json(
-      { 
+      normalizeApiBody({
         data, 
         mensagens: ['Fornecedor atualizado com sucesso!'] 
-      },
+      }),
       { status: 200 }
     );
   } catch (error) {
@@ -498,10 +499,10 @@ export async function PUT(request, { params }) {
     }
     
     return NextResponse.json(
-      { 
+      normalizeApiBody({
         data: null, 
         mensagens: [errorMessage] 
-      },
+      }),
       { status: 500 }
     );
   }
@@ -535,10 +536,10 @@ export async function DELETE(request, { params }) {
     const token = getTokenFromRequest(request);
     if (!token) {
       return NextResponse.json(
-        { 
+        normalizeApiBody({
           data: null,
           mensagens: ['Token ausente'] 
-        }, 
+        }),
         { status: 401 }
       );
     }
@@ -547,11 +548,11 @@ export async function DELETE(request, { params }) {
     if (!payload || payload.error) {
       const message = payload?.message || 'Token inválido';
       return NextResponse.json(
-        { 
+        normalizeApiBody({
           data: null,
           mensagens: [message],
           expires_at: payload?.expires_at || null
-        }, 
+        }),
         { status: 401 }
       );
     }
@@ -562,10 +563,10 @@ export async function DELETE(request, { params }) {
 
     if (isNaN(idNum) || idNum <= 0) {
       return NextResponse.json(
-        { 
+        normalizeApiBody({
           data: null, 
           mensagens: ['ID do fornecedor inválido. Deve ser um número positivo.'] 
-        },
+        }),
         { status: 400 }
       );
     }
@@ -581,10 +582,10 @@ export async function DELETE(request, { params }) {
 
     if (!existing) {
       return NextResponse.json(
-        { 
+        normalizeApiBody({
           data: null, 
           mensagens: [`Fornecedor com ID ${idNum} não encontrado.`] 
-        },
+        }),
         { status: 404 }
       );
     }
@@ -600,10 +601,10 @@ export async function DELETE(request, { params }) {
 
     if (productsUsing && productsUsing.length > 0) {
       return NextResponse.json(
-        { 
+        normalizeApiBody({
           data: null, 
           mensagens: ['Não é possível excluir. Este fornecedor está sendo usado por produtos.'] 
-        },
+        }),
         { status: 400 }
       );
     }
@@ -617,10 +618,10 @@ export async function DELETE(request, { params }) {
     if (deleteError) throw deleteError;
 
     return NextResponse.json(
-      { 
+      normalizeApiBody({
         data: null, 
         mensagens: ['Fornecedor excluído com sucesso!'] 
-      },
+      }),
       { status: 200 }
     );
   } catch (error) {
@@ -644,10 +645,10 @@ export async function DELETE(request, { params }) {
     }
     
     return NextResponse.json(
-      { 
+      normalizeApiBody({
         data: null, 
         mensagens: [errorMessage] 
-      },
+      }),
       { status: 500 }
     );
   }

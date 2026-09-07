@@ -261,7 +261,7 @@ export default function EditProductModal({ product, onClose, onUpdate }) {
       const result = await res.json();
 
       if (!res.ok) {
-        toast.error(result.message || 'Erro ao atualizar');
+        toast.error(result.mensagens?.[0] || 'Erro ao atualizar');
         setLoading(false);
         return;
       }

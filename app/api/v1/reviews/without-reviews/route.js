@@ -1,3 +1,4 @@
+import { normalizeApiBody } from '@/lib/api-envelope';
 // ============================================================
 // 🆕 NOVA FUNCIONALIDADE — Avaliações de Produtos
 // Módulo: Reviews | Cenário: Produtos vendidos sem avaliação
@@ -33,7 +34,7 @@ export async function GET(request) {
   const token = getTokenFromRequest(request);
   if (!token) {
     return NextResponse.json(
-      { data: null, mensagens: ['Token ausente'] },
+      normalizeApiBody({ data: null, mensagens: ['Token ausente'] }),
       { status: 401 }
     );
   }
@@ -41,7 +42,7 @@ export async function GET(request) {
   const payload = await verifyToken(token);
   if (!payload || payload.error) {
     return NextResponse.json(
-      { data: null, mensagens: [payload?.message || 'Token inválido'] },
+      normalizeApiBody({ data: null, mensagens: [payload?.message || 'Token inválido'] }),
       { status: 401 }
     );
   }
@@ -92,7 +93,7 @@ export async function GET(request) {
       throw error;
     }
 
-    return NextResponse.json({
+    return NextResponse.json(normalizeApiBody({
       data: data || [],
       total: data?.length || 0,
       mensagens: [
@@ -100,12 +101,12 @@ export async function GET(request) {
           ? `${data.length} produto(s) com vendas aguardando avaliação.`
           : 'Todos os produtos vendidos já foram avaliados!',
       ],
-    });
+    }));
 
   } catch (error) {
     console.error('Erro fatal GET /api/v1/reviews/without-reviews:', error);
     return NextResponse.json(
-      { data: null, mensagens: ['Erro interno ao buscar produtos sem avaliação.'] },
+      normalizeApiBody({ data: null, mensagens: ['Erro interno ao buscar produtos sem avaliação.'] }),
       { status: 500 }
     );
   }

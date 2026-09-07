@@ -1,3 +1,4 @@
+import { normalizeApiBody } from '@/lib/api-envelope';
 import { NextResponse } from 'next/server';
 
 export const dynamic = "force-dynamic";
@@ -16,12 +17,12 @@ export async function GET(request) {
   });
   console.log('Todos headers:', allHeaders);
   
-  return NextResponse.json({
+  return NextResponse.json(normalizeApiBody({
     message: 'Debug simples',
     authHeader: authHeader,
     headers: allHeaders,
     timestamp: new Date().toISOString()
-  });
+  }));
 }
 
 // Handler OPTIONS para CORS

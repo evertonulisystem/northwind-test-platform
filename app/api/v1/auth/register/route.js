@@ -1,3 +1,4 @@
+import { normalizeApiBody } from '@/lib/api-envelope';
 // app/api/auth/register/route.js
 import { supabase } from '@/lib/supabase';
 import { generateToken } from '@/lib/jwt';
@@ -59,10 +60,10 @@ export async function POST(request) {
 
     if (missingFields.length > 0) {
       return Response.json(
-        { 
+        normalizeApiBody({
           data: null,
           mensagens: missingFields
-        },
+        }),
         { status: 400 }
       );
     }
@@ -71,20 +72,20 @@ export async function POST(request) {
     const trimmedName = full_name.trim();
     if (trimmedName.length < 3) {
       return Response.json(
-        { 
+        normalizeApiBody({
           data: null,
           mensagens: ['Nome deve ter no mínimo 3 caracteres']
-        },
+        }),
         { status: 400 }
       );
     }
 
     if (trimmedName.length > 100) {
       return Response.json(
-        { 
+        normalizeApiBody({
           data: null,
           mensagens: ['Nome deve ter no máximo 100 caracteres']
-        },
+        }),
         { status: 400 }
       );
     }
@@ -92,10 +93,10 @@ export async function POST(request) {
     // Nome deve conter apenas letras e espaços
     if (!/^[a-zA-ZÀ-ÿ\s]+$/.test(trimmedName)) {
       return Response.json(
-        { 
+        normalizeApiBody({
           data: null,
           mensagens: ['Nome deve conter apenas letras e espaços']
-        },
+        }),
         { status: 400 }
       );
     }
@@ -103,10 +104,10 @@ export async function POST(request) {
     // Não permite nomes com espaços duplicados
     if (/\s{2,}/.test(trimmedName)) {
       return Response.json(
-        { 
+        normalizeApiBody({
           data: null,
           mensagens: ['Nome não pode ter espaços duplicados']
-        },
+        }),
         { status: 400 }
       );
     }
@@ -117,10 +118,10 @@ export async function POST(request) {
     
     if (!emailRegex.test(trimmedEmail)) {
       return Response.json(
-        { 
+        normalizeApiBody({
           data: null,
           mensagens: ['Formato de email inválido. Exemplo: usuario@dominio.com']
-        },
+        }),
         { status: 400 }
       );
     }
@@ -128,10 +129,10 @@ export async function POST(request) {
     // Email não pode começar ou terminar com pontos ou hífens
     if (/^[.-]|[.-]$/.test(trimmedEmail.split('@')[0])) {
       return Response.json(
-        { 
+        normalizeApiBody({
           data: null,
           mensagens: ['Email não pode começar ou terminar com ponto ou hífen']
-        },
+        }),
         { status: 400 }
       );
     }
@@ -139,20 +140,20 @@ export async function POST(request) {
     // Email não pode ter pontos consecutivos
     if (/\.{2,}/.test(trimmedEmail)) {
       return Response.json(
-        { 
+        normalizeApiBody({
           data: null,
           mensagens: ['Email não pode ter pontos consecutivos']
-        },
+        }),
         { status: 400 }
       );
     }
 
     if (trimmedEmail.length > 255) {
       return Response.json(
-        { 
+        normalizeApiBody({
           data: null,
           mensagens: ['Email deve ter no máximo 255 caracteres']
-        },
+        }),
         { status: 400 }
       );
     }
@@ -161,10 +162,10 @@ export async function POST(request) {
     const passwordErrors = validatePassword(password);
     if (passwordErrors.length > 0) {
       return Response.json(
-        { 
+        normalizeApiBody({
           data: null,
           mensagens: ['Senha inválida', ...passwordErrors]
-        },
+        }),
         { status: 400 }
       );
     }
@@ -172,20 +173,20 @@ export async function POST(request) {
     // Senha não pode conter o email ou nome
     if (password.toLowerCase().includes(trimmedEmail.toLowerCase().split('@')[0])) {
       return Response.json(
-        { 
+        normalizeApiBody({
           data: null,
           mensagens: ['Senha não pode conter partes do seu email']
-        },
+        }),
         { status: 400 }
       );
     }
 
     if (password.toLowerCase().includes(trimmedName.toLowerCase().replace(/\s/g, ''))) {
       return Response.json(
-        { 
+        normalizeApiBody({
           data: null,
           mensagens: ['Senha não pode conter partes do seu nome']
-        },
+        }),
         { status: 400 }
       );
     }
@@ -193,10 +194,10 @@ export async function POST(request) {
     // 6. Validar confirmação de senha
     if (password !== confirmPassword) {
       return Response.json(
-        { 
+        normalizeApiBody({
           data: null,
           mensagens: ['As senhas não coincidem. Verifique e tente novamente']
-        },
+        }),
         { status: 400 }
       );
     }
@@ -210,10 +211,10 @@ export async function POST(request) {
 
     if (existingUser) {
       return Response.json(
-        { 
+        normalizeApiBody({
           data: null,
           mensagens: ['Email já cadastrado. Tente fazer login ou use outro email']
-        },
+        }),
         { status: 409 }
       );
     }
@@ -238,10 +239,10 @@ export async function POST(request) {
     if (insertError) {
       console.error('Erro ao inserir usuário:', insertError);
       return Response.json(
-        { 
+        normalizeApiBody({
           data: null,
           mensagens: ['Erro ao criar usuário. Tente novamente mais tarde']
-        },
+        }),
         { status: 500 }
       );
     }
@@ -250,7 +251,7 @@ export async function POST(request) {
     const token = await generateToken(newUser);
 
     // 11. Retornar sucesso
-    return Response.json({
+    return Response.json(normalizeApiBody({
       data: {
         token,
         user: {
@@ -261,15 +262,15 @@ export async function POST(request) {
         }
       },
       mensagens: 'Usuário cadastrado com sucesso'
-    }, { status: 201 });
+    }), { status: 201 });
 
   } catch (error) {
     console.error('Erro no registro:', error);
     return Response.json(
-      { 
+      normalizeApiBody({
         data: null,
         mensagens: ['Erro interno do servidor. Tente novamente mais tarde']
-      },
+      }),
       { status: 500 }
     );
   }

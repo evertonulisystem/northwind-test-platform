@@ -1,3 +1,4 @@
+import { normalizeApiBody } from '@/lib/api-envelope';
 // app/api/v1/shippers/route.js
 import { supabase } from '@/lib/supabase';
 import { NextResponse } from 'next/server';
@@ -28,14 +29,14 @@ async function getShippers(request) {
 
     if (error) throw error;
 
-    return NextResponse.json({
+    return NextResponse.json(normalizeApiBody({
       data: data || [],
       mensagens: ['Transportadoras carregadas com sucesso.']
-    });
+    }));
   } catch (error) {
     console.error('Erro ao buscar transportadoras:', error);
     return NextResponse.json(
-      { data: null, mensagens: ['Erro ao buscar transportadoras.'] },
+      normalizeApiBody({ data: null, mensagens: ['Erro ao buscar transportadoras.'] }),
       { status: 500 }
     );
   }

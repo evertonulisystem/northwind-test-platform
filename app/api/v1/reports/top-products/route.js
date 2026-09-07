@@ -1,3 +1,4 @@
+import { normalizeApiBody } from '@/lib/api-envelope';
 // ============================================================
 // 🆕 NOVA FUNCIONALIDADE — Relatório de Vendas por Produto
 // Módulo: Reports | Rota: GET /api/v1/reports/top-products
@@ -64,10 +65,10 @@ async function getTopProducts(request, { user }) {
         !ALLOWED_TOP_VALUES.includes(parsedTop)
       ) {
         return NextResponse.json(
-          {
+          normalizeApiBody({
             data: null,
             mensagens: ["Valor de top inválido. Use 10, 20, 50 ou 100."],
-          },
+          }),
           { status: 400 },
         );
       }
@@ -95,7 +96,7 @@ async function getTopProducts(request, { user }) {
     if (error) throw error;
 
     if (!items || items.length === 0) {
-      return NextResponse.json({
+      return NextResponse.json(normalizeApiBody({
         data: [],
         pagination: {
           page: 1,
@@ -104,7 +105,7 @@ async function getTopProducts(request, { user }) {
           totalPages: 0,
         },
         mensagens: ["Nenhuma venda encontrada."],
-      });
+      }));
     }
 
     const grouped = {};
@@ -158,7 +159,7 @@ async function getTopProducts(request, { user }) {
     const start = (safePage - 1) * limit;
     const paginatedRanking = ranking.slice(start, start + limit);
 
-    return NextResponse.json({
+    return NextResponse.json(normalizeApiBody({
       data: paginatedRanking,
       meta: {
         total_products_sold: total,
@@ -182,11 +183,11 @@ async function getTopProducts(request, { user }) {
         totalPages,
       },
       mensagens: ["Relatório de top produtos gerado com sucesso."],
-    });
+    }));
   } catch (error) {
     console.error("Erro ao gerar relatório de top produtos:", error);
     return NextResponse.json(
-      { data: null, mensagens: ["Erro interno ao gerar relatório."] },
+      normalizeApiBody({ data: null, mensagens: ["Erro interno ao gerar relatório."] }),
       { status: 500 },
     );
   }

@@ -1,3 +1,4 @@
+import { normalizeApiBody } from '@/lib/api-envelope';
 import { supabase } from '@/lib/supabase';
 import { NextResponse } from 'next/server';
 import fs from 'fs/promises';
@@ -33,10 +34,10 @@ export async function DELETE(request) {
     const expectedKey = process.env.ADMIN_CLEANUP_KEY || 'senha-secreta-do-everton';
 
     if (!adminKey || adminKey !== expectedKey) {
-      return NextResponse.json({ 
+      return NextResponse.json(normalizeApiBody({
         data: null, 
         mensagens: ['Acesso negado. Você não tem permissão para limpar o storage. Passe a chave correta no header "x-admin-key".'] 
-      }, { status: 403 });
+      }), { status: 403 });
     }
 
     const isVercel = !!process.env.VERCEL;
@@ -47,20 +48,20 @@ export async function DELETE(request) {
 
       if (error) {
         console.error('Supabase emptyBucket error:', error);
-        return NextResponse.json({ 
+        return NextResponse.json(normalizeApiBody({
           data: null, 
           mensagens: [
             'Erro ao limpar o bucket no Supabase.', 
             error.message || JSON.stringify(error),
             'DICA: O seu usuário do Supabase precisa ter permissão de DELETE no bucket (Policies).'
           ] 
-        }, { status: 500 });
+        }), { status: 500 });
       }
 
-      return NextResponse.json({
+      return NextResponse.json(normalizeApiBody({
         data: { origin: 'supabase' },
         mensagens: ['FAXINA CONCLUÍDA: Todos os arquivos do bucket "products" na nuvem foram apagados!']
-      });
+      }));
 
     } else {
       // No Localhost: Apaga a pasta física inteira
@@ -73,14 +74,14 @@ export async function DELETE(request) {
         if (err.code !== 'ENOENT') throw err;
       }
 
-      return NextResponse.json({
+      return NextResponse.json(normalizeApiBody({
         data: { origin: 'localhost' },
         mensagens: ['FAXINA CONCLUÍDA: Todos os arquivos locais da pasta products foram apagados!']
-      });
+      }));
     }
 
   } catch (error) {
     console.error('Erro no cleanup:', error);
-    return NextResponse.json({ data: null, mensagens: ['Erro interno ao executar a faxina.', error.message || String(error)] }, { status: 500 });
+    return NextResponse.json(normalizeApiBody({ data: null, mensagens: ['Erro interno ao executar a faxina.', error.message || String(error)] }), { status: 500 });
   }
 }

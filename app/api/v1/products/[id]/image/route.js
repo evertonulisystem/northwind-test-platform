@@ -1,3 +1,4 @@
+import { normalizeApiBody } from '@/lib/api-envelope';
 import { supabase } from '@/lib/supabase';
 import { NextResponse } from 'next/server';
 import { verifyToken, getTokenFromRequest } from '@/lib/jwt';
@@ -57,14 +58,14 @@ export async function POST(request, { params }) {
     const idNum = parseInt(id, 10);
 
     if (isNaN(idNum) || idNum <= 0) {
-      return NextResponse.json({ data: null, mensagens: ['ID do produto inválido.'] }, { status: 400 });
+      return NextResponse.json(normalizeApiBody({ data: null, mensagens: ['ID do produto inválido.'] }), { status: 400 });
     }
 
     // 2. Verificar autenticação
     const token = getTokenFromRequest(request);
     const payload = await verifyToken(token);
     if (!payload || payload.error) {
-      return NextResponse.json({ data: null, mensagens: [payload?.message || 'Token inválido'] }, { status: 401 });
+      return NextResponse.json(normalizeApiBody({ data: null, mensagens: [payload?.message || 'Token inválido'] }), { status: 401 });
     }
 
     // 3. Verificar existência do produto (opcional mas recomendado)
@@ -75,7 +76,7 @@ export async function POST(request, { params }) {
       .single();
 
     if (fetchError || !product) {
-      return NextResponse.json({ data: null, mensagens: [`Produto com ID ${idNum} não encontrado.`] }, { status: 404 });
+      return NextResponse.json(normalizeApiBody({ data: null, mensagens: [`Produto com ID ${idNum} não encontrado.`] }), { status: 404 });
     }
 
     // 4. Processar Upload
@@ -83,7 +84,7 @@ export async function POST(request, { params }) {
     const file = formData.get('file');
 
     if (!file || typeof file === 'string') {
-      return NextResponse.json({ data: null, mensagens: ['Nenhum arquivo enviado ou campo "file" ausente.'] }, { status: 400 });
+      return NextResponse.json(normalizeApiBody({ data: null, mensagens: ['Nenhum arquivo enviado ou campo "file" ausente.'] }), { status: 400 });
     }
 
     // Validar tipo (PNG)
@@ -91,23 +92,23 @@ export async function POST(request, { params }) {
     const isPngExt = file.name.toLowerCase().endsWith('.png');
 
     if (!isPngType || !isPngExt) {
-      return NextResponse.json({ 
+      return NextResponse.json(normalizeApiBody({
         data: null, 
         mensagens: [
           'Apenas arquivos PNG são permitidos para imagem do produto.',
           `Recebido: nome="${file.name}", tipo="${file.type}".`,
           'Certifique-se de que o arquivo tem a extensão .png e o tipo image/png.'
         ] 
-      }, { status: 400 });
+      }), { status: 400 });
     }
 
     // Validar tamanho (2MB = 2 * 1024 * 1024 bytes)
     const maxSize = 2 * 1024 * 1024; // 2MB
     if (file.size > maxSize) {
-      return NextResponse.json({ 
+      return NextResponse.json(normalizeApiBody({
         data: null, 
         mensagens: [`Arquivo muito grande. Tamanho máximo permitido: 2MB. Tamanho atual: ${(file.size / 1024 / 1024).toFixed(2)}MB`] 
-      }, { status: 400 });
+      }), { status: 400 });
     }
 
     const fileId = crypto.randomUUID();
@@ -130,7 +131,7 @@ export async function POST(request, { params }) {
 
       if (uploadError) {
         console.error('Supabase upload error:', uploadError);
-        return NextResponse.json({ data: null, mensagens: ['Erro ao fazer upload para o storage na nuvem.', uploadError.message || JSON.stringify(uploadError)] }, { status: 500 });
+        return NextResponse.json(normalizeApiBody({ data: null, mensagens: ['Erro ao fazer upload para o storage na nuvem.', uploadError.message || JSON.stringify(uploadError)] }), { status: 500 });
       }
     } else {
       // Caminho destino local (fallback)
@@ -140,7 +141,7 @@ export async function POST(request, { params }) {
       await fs.writeFile(filePath, buffer);
     }
 
-    return NextResponse.json({
+    return NextResponse.json(normalizeApiBody({
       data: {
         id: fileId,
         filename: filename,
@@ -150,11 +151,11 @@ export async function POST(request, { params }) {
         url: `/api/v1/products/${id}/image/${fileId}`
       },
       mensagens: ['Upload da imagem realizado com sucesso!']
-    });
+    }));
 
   } catch (error) {
     console.error('Erro no upload de imagem:', error);
-    return NextResponse.json({ data: null, mensagens: ['Erro interno ao processar upload.', error.message || String(error)] }, { status: 500 });
+    return NextResponse.json(normalizeApiBody({ data: null, mensagens: ['Erro interno ao processar upload.', error.message || String(error)] }), { status: 500 });
   }
 }
 
@@ -211,10 +212,10 @@ export async function GET(request, { params }) {
         });
       }
     }
-    return NextResponse.json({ data: filesList, mensagens: ['Lista de imagens recuperada com sucesso.'] });
+    return NextResponse.json(normalizeApiBody({ data: filesList, mensagens: ['Lista de imagens recuperada com sucesso.'] }));
 
   } catch (error) {
     console.error('Erro na listagem de imagens:', error);
-    return NextResponse.json({ data: null, mensagens: ['Erro ao buscar imagens.', error.message || String(error)] }, { status: 500 });
+    return NextResponse.json(normalizeApiBody({ data: null, mensagens: ['Erro ao buscar imagens.', error.message || String(error)] }), { status: 500 });
   }
 }

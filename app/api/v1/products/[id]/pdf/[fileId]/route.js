@@ -1,3 +1,4 @@
+import { normalizeApiBody } from '@/lib/api-envelope';
 import { supabase } from '@/lib/supabase';
 import { NextResponse } from 'next/server';
 import fs from 'fs/promises';
@@ -50,7 +51,7 @@ export async function GET(request, { params }) {
       }
 
       if (!targetFileName) {
-        return NextResponse.json({ data: null, mensagens: ['PDF não encontrado para este ID.'] }, { status: 404 });
+        return NextResponse.json(normalizeApiBody({ data: null, mensagens: ['PDF não encontrado para este ID.'] }), { status: 404 });
       }
 
       const { data: downloadData, error: downloadError } = await supabase.storage
@@ -58,7 +59,7 @@ export async function GET(request, { params }) {
         .download(`${idNum}/${targetFileName}`);
 
       if (downloadError || !downloadData) {
-        return NextResponse.json({ data: null, mensagens: ['Erro ao baixar o PDF do storage.'] }, { status: 404 });
+        return NextResponse.json(normalizeApiBody({ data: null, mensagens: ['Erro ao baixar o PDF do storage.'] }), { status: 404 });
       }
 
       const fileBuffer = Buffer.from(await downloadData.arrayBuffer());
@@ -77,7 +78,7 @@ export async function GET(request, { params }) {
       }
 
       if (!targetFileName) {
-        return NextResponse.json({ data: null, mensagens: ['PDF não encontrado para este ID.'] }, { status: 404 });
+        return NextResponse.json(normalizeApiBody({ data: null, mensagens: ['PDF não encontrado para este ID.'] }), { status: 404 });
       }
 
       const filePath = path.join(productDir, targetFileName);
@@ -93,6 +94,6 @@ export async function GET(request, { params }) {
 
   } catch (error) {
     console.error('Erro no download de PDF por ID:', error);
-    return NextResponse.json({ data: null, mensagens: ['Erro interno ao buscar o PDF.', error.message || String(error)] }, { status: 500 });
+    return NextResponse.json(normalizeApiBody({ data: null, mensagens: ['Erro interno ao buscar o PDF.', error.message || String(error)] }), { status: 500 });
   }
 }

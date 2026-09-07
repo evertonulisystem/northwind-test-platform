@@ -1,3 +1,4 @@
+import { normalizeApiBody } from '@/lib/api-envelope';
 // app/api/debug/token/route.js
 import { getTokenFromRequest } from '@/lib/jwt';
 
@@ -26,7 +27,7 @@ export async function GET(request) {
   }
   
   // Retornar com headers CORS
-  return new Response(JSON.stringify({
+  return new Response(JSON.stringify(normalizeApiBody({
     timestamp: new Date().toISOString(),
     path: '/api/v1/debug/token',
     headers: allHeaders,
@@ -34,7 +35,7 @@ export async function GET(request) {
     authHeader: authHeader,
     tokenExtracted: token ? 'SIM' : 'NÃO',
     tokenPreview: token ? token.substring(0, 50) + '...' : null
-  }), {
+  })), {
     status: 200,
     headers: {
       'Content-Type': 'application/json',

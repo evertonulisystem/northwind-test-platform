@@ -1,3 +1,4 @@
+import { normalizeApiBody } from '@/lib/api-envelope';
 // app/api/v1/categories/route.js
 import { supabase } from '@/lib/supabase';
 import { NextResponse } from 'next/server';
@@ -20,59 +21,87 @@ export const dynamic = "force-dynamic";
  *           type: integer
  *           minimum: 1
  *           default: 1
- *         description: Número da página (padrão: 1)
+ *         description: "Número da página (padrão: 1)"
  *       - in: query
  *         name: limit
  *         schema:
  *           type: integer
  *           minimum: 1
- *           maximum: 100
+ *           maximum: 1000
  *           default: 10
- *         description: Quantidade de itens por página (padrão: 10, máximo: 100)
+ *         description: "Quantidade de itens por página (padrão: 10, máximo: 1000)"
  *     responses:
  *       200:
  *         description: Lista de categorias com informações de paginação
  *         content:
  *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 data:
- *                   type: array
- *                   items:
- *                     $ref: '#/components/schemas/Category'
- *                 pagination:
- *                   type: object
- *                   properties:
- *                     currentPage:
- *                       type: integer
- *                       example: 1
- *                     totalPages:
- *                       type: integer
- *                       example: 3
- *                     totalItems:
- *                       type: integer
- *                       example: 25
- *                     itemsPerPage:
- *                       type: integer
- *                       example: 10
- *                     hasNextPage:
- *                       type: boolean
- *                       example: true
- *                     hasPreviousPage:
- *                       type: boolean
- *                       example: false
- *                 mensagens:
- *                   type: array
- *                   items:
- *                     type: string
- *                   example: ["10 categorias carregadas com sucesso! (Página 1 de 3)"]
+ *             example:
+ *               data:
+ *                 - id: 1
+ *                   name: Periféricos
+ *                   description: Teclados, mouses e acessórios para PC
+ *                   slug: perifericos
+ *                   created_at: "2026-08-15T10:30:00.000Z"
+ *                   updated_at: "2026-09-01T14:20:00.000Z"
+ *                 - id: 2
+ *                   name: Eletrônicos
+ *                   description: Produtos de tecnologia em geral
+ *                   slug: eletronicos
+ *                   created_at: "2026-08-10T09:00:00.000Z"
+ *                   updated_at: "2026-09-02T18:10:00.000Z"
+ *               pagination:
+ *                 currentPage: 1
+ *                 totalPages: 3
+ *                 totalItems: 25
+ *                 itemsPerPage: 10
+ *                 hasNextPage: true
+ *                 hasPreviousPage: false
+ *               mensagens:
+ *                 - "10 categorias carregadas com sucesso! (Página 1 de 3)"
  *       400:
  *         description: Parâmetros de paginação inválidos
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *             examples:
+ *               PaginaInvalida:
+ *                 summary: Página menor que 1
+ *                 value:
+ *                   data: null
+ *                   mensagens: ["Página deve ser maior que 0."]
+ *               LimiteInvalido:
+ *                 summary: Limite fora da faixa permitida (1-1000)
+ *                 value:
+ *                   data: null
+ *                   mensagens: ["Limite deve estar entre 1 e 1000."]
  *       401:
- *         description: Não autorizado
+ *         description: Token ausente ou inválido
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *             examples:
+ *               TokenAusente:
+ *                 summary: Sem token no header Authorization
+ *                 value:
+ *                   data: null
+ *                   mensagens: ["Token ausente"]
+ *               TokenInvalido:
+ *                 summary: Token expirado ou com assinatura inválida
+ *                 value:
+ *                   data: null
+ *                   mensagens: ["Token inválido"]
+ *                   expires_at: "2026-09-05T10:00:00.000Z"
  *       500:
- *         description: Erro interno
+ *         description: Erro interno no banco ou na consulta
+ *         content:
+ *           application/json:
+ *             example:
+ *               data: null
+ *               mensagens:
+ *                 - "Erro ao carregar categorias."
+ *                 - "connection refused"
  */
 export async function GET(request) {
   try {
@@ -80,7 +109,7 @@ export async function GET(request) {
     
     if (!token) {
       return NextResponse.json(
-        { data: null, mensagens: ['Token ausente'] }, 
+        normalizeApiBody({ data: null, mensagens: ['Token ausente'] }),
         { status: 401 }
       );
     }
@@ -89,7 +118,7 @@ export async function GET(request) {
     if (!payload || payload.error) {
       const message = payload?.message || 'Token inválido';
       return NextResponse.json(
-        { data: null, mensagens: [message] }, 
+        normalizeApiBody({ data: null, mensagens: [message] }),
         { status: 401 }
       );
     }
@@ -102,14 +131,14 @@ export async function GET(request) {
     // Validação dos parâmetros
     if (page < 1) {
       return NextResponse.json(
-        { data: null, mensagens: ['Página deve ser maior que 0.'] }, 
+        normalizeApiBody({ data: null, mensagens: ['Página deve ser maior que 0.'] }),
         { status: 400 }
       );
     }
     
     if (limit < 1 || limit > 1000) {
       return NextResponse.json(
-        { data: null, mensagens: ['Limite deve estar entre 1 e 1000.'] }, 
+        normalizeApiBody({ data: null, mensagens: ['Limite deve estar entre 1 e 1000.'] }),
         { status: 400 }
       );
     }
@@ -148,7 +177,7 @@ export async function GET(request) {
     const hasPreviousPage = page > 1;
 
     return NextResponse.json(
-      { 
+      normalizeApiBody({
         data: data || [],
         pagination: {
           currentPage: page,
@@ -159,13 +188,13 @@ export async function GET(request) {
           hasPreviousPage: hasPreviousPage
         },
         mensagens: [`${data?.length || 0} categorias carregadas com sucesso! (Página ${page} de ${totalPages})`]
-      },
+      }),
       { status: 200 }
     );
   } catch (error) {
     console.error('❌ Erro no GET categories:', error);
     return NextResponse.json(
-      { data: null, mensagens: ['Erro ao carregar categorias.', error.message] },
+      normalizeApiBody({ data: null, mensagens: ['Erro ao carregar categorias.', error.message] }),
       { status: 500 }
     );
   }
@@ -185,21 +214,25 @@ export async function GET(request) {
  *         application/json:
  *           schema:
  *             $ref: '#/components/schemas/CategoryCreateRequest'
+ *           example:
+ *             name: Eletrodomésticos
+ *             description: Aparelhos eletrodomésticos para casa e cozinha
  *     responses:
  *       201:
  *         description: Categoria criada com sucesso
  *         content:
  *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 data:
- *                   $ref: '#/components/schemas/Category'
- *                 mensagens:
- *                   type: array
- *                   items:
- *                     type: string
- *                   example: ["Categoria criada com sucesso!", "Verificado: Salvo no banco Supabase (seu-projeto.supabase.co)"]
+ *             example:
+ *               data:
+ *                 id: 13
+ *                 name: Eletrodomésticos
+ *                 description: Aparelhos eletrodomésticos para casa e cozinha
+ *                 slug: eletrodomesticos
+ *                 created_at: "2026-09-06T12:00:00.000Z"
+ *                 updated_at: "2026-09-06T12:00:00.000Z"
+ *               mensagens:
+ *                 - "Categoria criada com sucesso!"
+ *                 - "Verificado: Salvo no banco Supabase (abcdef123.supabase.co)"
  *       400:
  *         description: Dados inválidos, campos obrigatórios ausentes ou validações não atendidas
  *         content:
@@ -208,27 +241,32 @@ export async function GET(request) {
  *               $ref: '#/components/schemas/ErrorResponse'
  *             examples:
  *               CamposObrigatorios:
- *                 summary: Campos obrigatórios não preenchidos
+ *                 summary: Campos name e/ou description não informados
  *                 value:
  *                   data: null
  *                   mensagens: ["Nome e descrição são obrigatórios."]
- *               NomeInvalido:
- *                 summary: Nome da categoria inválido (tamanho)
+ *               NomeMuitoCurto:
+ *                 summary: Nome com menos de 3 caracteres
  *                 value:
  *                   data: null
  *                   mensagens: ["Nome da categoria deve ter entre 3 e 100 caracteres."]
- *               DescricaoInvalida:
- *                 summary: Descrição muito longa
+ *               NomeMuitoLongo:
+ *                 summary: Nome ultrapassa 100 caracteres
  *                 value:
  *                   data: null
- *                   mensagens: ["Descrição da categoria deve ter no máximo 500 caracteres."]
+ *                   mensagens: ["Nome da categoria deve ter no máximo 100 caracteres."]
+ *               DescricaoMuitoLonga:
+ *                 summary: Descrição ultrapassa 200 caracteres
+ *                 value:
+ *                   data: null
+ *                   mensagens: ["Descrição deve ter no máximo 200 caracteres."]
  *               NomeDuplicado:
- *                 summary: Nome da categoria já existe
+ *                 summary: Nome da categoria já existe no banco
  *                 value:
  *                   data: null
  *                   mensagens: ["Já existe uma categoria com este nome."]
  *       401:
- *         description: Não autorizado - token ausente ou inválido
+ *         description: Token ausente ou inválido
  *         content:
  *           application/json:
  *             schema:
@@ -242,19 +280,13 @@ export async function GET(request) {
  *                 value:
  *                   data: null
  *                   mensagens: ["Token inválido"]
- *       500:
- *         description: Erro interno do servidor
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/ErrorResponse'
  */
 export async function POST(request) {
   try {
     const token = getTokenFromRequest(request);
     if (!token) {
       return NextResponse.json(
-        { data: null, mensagens: ['Token ausente'] }, 
+        normalizeApiBody({ data: null, mensagens: ['Token ausente'] }),
         { status: 401 }
       );
     }
@@ -262,7 +294,7 @@ export async function POST(request) {
     const payload = await verifyToken(token);
     if (!payload || payload.error) {
       return NextResponse.json(
-        { data: null, mensagens: ['Token inválido'] }, 
+        normalizeApiBody({ data: null, mensagens: ['Token inválido'] }),
         { status: 401 }
       );
     }
@@ -272,17 +304,17 @@ export async function POST(request) {
 
     if (!name || !description) {
       return NextResponse.json(
-        { data: null, mensagens: ['Nome e descrição são obrigatórios.'] },
+        normalizeApiBody({ data: null, mensagens: ['Nome e descrição são obrigatórios.'] }),
         { status: 400 }
       );
     }
 
     if (description.trim().length > 200) {
       return NextResponse.json(
-        { 
+        normalizeApiBody({
           data: null, 
           mensagens: ['Descrição deve ter no máximo 200 caracteres.'] 
-        },
+        }),
         { status: 400 }
       );
     }
@@ -300,13 +332,13 @@ export async function POST(request) {
     const projectHost = supabaseUrl ? new URL(supabaseUrl).host : 'desconhecido';
 
     return NextResponse.json(
-      { 
+      normalizeApiBody({
         data, 
         mensagens: [
           'Categoria criada com sucesso!',
           `Verificado: Salvo no banco Supabase (${projectHost})`
         ] 
-      },
+      }),
       { status: 201 }
     );
   } catch (error) {
@@ -338,10 +370,10 @@ export async function POST(request) {
     }
     
     return NextResponse.json(
-      { 
+      normalizeApiBody({
         data: null, 
         mensagens: [errorMessage] 
-      },
+      }),
       { status: 400 }
     );
   }
@@ -351,7 +383,7 @@ export async function POST(request) {
  * @swagger
  * /api/v1/categories/{id}:
  *   patch:
- *     summary: Atualiza uma categoria existente
+ *     summary: Atualiza uma categoria existente (PATCH - arquivo route.js raiz)
  *     tags: [Categories]
  *     security:
  *       - bearerAuth: []
@@ -361,29 +393,79 @@ export async function POST(request) {
  *         required: true
  *         schema:
  *           type: integer
+ *         example: 3
  *     requestBody:
  *       required: true
  *       content:
  *         application/json:
  *           schema:
  *             type: object
+ *             minProperties: 1
  *             properties:
  *               name:
  *                 type: string
+ *                 example: "Games e Console"
  *               description:
  *                 type: string
+ *                 example: "Jogos, consoles e acessórios de videogame"
  *     responses:
  *       200:
- *         description: Categoria atualizada
+ *         description: Categoria atualizada com sucesso
+ *         content:
+ *           application/json:
+ *             example:
+ *               data:
+ *                 id: 3
+ *                 name: Games e Console
+ *                 description: Jogos, consoles e acessórios de videogame
+ *                 slug: games-e-console
+ *                 created_at: "2026-08-12T08:00:00.000Z"
+ *                 updated_at: "2026-09-06T12:15:00.000Z"
+ *               mensagens:
+ *                 - "Categoria atualizada com sucesso!"
+ *       400:
+ *         description: Dados inválidos - nenhum campo informado
+ *         content:
+ *           application/json:
+ *             example:
+ *               data: null
+ *               mensagens: ["Pelo menos um campo (name ou description) deve ser fornecido."]
+ *       401:
+ *         description: Token ausente ou inválido
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *             examples:
+ *               TokenAusente:
+ *                 value:
+ *                   data: null
+ *                   mensagens: ["Token ausente"]
+ *               TokenInvalido:
+ *                 value:
+ *                   data: null
+ *                   mensagens: ["Token inválido"]
  *       404:
  *         description: Categoria não encontrada
+ *         content:
+ *           application/json:
+ *             example:
+ *               data: null
+ *               mensagens: ["Categoria não encontrada."]
+ *       500:
+ *         description: Erro interno ao atualizar
+ *         content:
+ *           application/json:
+ *             example:
+ *               data: null
+ *               mensagens: ["Erro ao atualizar categoria."]
  */
 export async function PATCH(request, { params }) {
   try {
     const token = getTokenFromRequest(request);
     if (!token) {
       return NextResponse.json(
-        { data: null, mensagens: ['Token ausente'] }, 
+        normalizeApiBody({ data: null, mensagens: ['Token ausente'] }),
         { status: 401 }
       );
     }
@@ -391,7 +473,7 @@ export async function PATCH(request, { params }) {
     const payload = await verifyToken(token);
     if (!payload || payload.error) {
       return NextResponse.json(
-        { data: null, mensagens: ['Token inválido'] }, 
+        normalizeApiBody({ data: null, mensagens: ['Token inválido'] }),
         { status: 401 }
       );
     }
@@ -402,7 +484,7 @@ export async function PATCH(request, { params }) {
     // Para PATCH, pelo menos um campo deve ser fornecido
     if (!name && !description) {
       return NextResponse.json(
-        { data: null, mensagens: ['Pelo menos um campo (name ou description) deve ser fornecido.'] },
+        normalizeApiBody({ data: null, mensagens: ['Pelo menos um campo (name ou description) deve ser fornecido.'] }),
         { status: 400 }
       );
     }
@@ -421,7 +503,7 @@ export async function PATCH(request, { params }) {
 
     if (fetchError || !existingCategory) {
       return NextResponse.json(
-        { data: null, mensagens: ['Categoria não encontrada.'] },
+        normalizeApiBody({ data: null, mensagens: ['Categoria não encontrada.'] }),
         { status: 404 }
       );
     }
@@ -446,12 +528,12 @@ export async function PATCH(request, { params }) {
     if (error) throw error;
 
     return NextResponse.json(
-      { data, mensagens: ['Categoria atualizada com sucesso!'] },
+      normalizeApiBody({ data, mensagens: ['Categoria atualizada com sucesso!'] }),
       { status: 200 }
     );
   } catch (error) {
     return NextResponse.json(
-      { data: null, mensagens: ['Erro ao atualizar categoria.'] },
+      normalizeApiBody({ data: null, mensagens: ['Erro ao atualizar categoria.'] }),
       { status: 500 }
     );
   }

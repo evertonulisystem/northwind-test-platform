@@ -1,3 +1,4 @@
+import { normalizeApiBody } from '@/lib/api-envelope';
 // app/api/v1/orders/[id]/route.js
 import { supabase } from "@/lib/supabase";
 import { NextResponse } from "next/server";
@@ -46,17 +47,17 @@ async function getOrderDetail(request, { params, user }) {
     if (orderError) {
       console.error("Erro ao buscar pedido:", orderError);
       return NextResponse.json(
-        {
+        normalizeApiBody({
           data: null,
           mensagens: ["Erro interno ao buscar detalhes do pedido."],
-        },
+        }),
         { status: 500 },
       );
     }
 
     if (!order) {
       return NextResponse.json(
-        { data: null, mensagens: ["Pedido não encontrado."] },
+        normalizeApiBody({ data: null, mensagens: ["Pedido não encontrado."] }),
         { status: 404 },
       );
     }
@@ -82,17 +83,17 @@ async function getOrderDetail(request, { params, user }) {
 
     if (itemsError) throw itemsError;
 
-    return NextResponse.json({
+    return NextResponse.json(normalizeApiBody({
       data: {
         ...order,
         items: items || [],
       },
       mensagens: ["Detalhes do pedido carregados com sucesso."],
-    });
+    }));
   } catch (error) {
     console.error("Erro ao buscar detalhes do pedido:", error);
     return NextResponse.json(
-      { data: null, mensagens: ["Erro ao buscar detalhes do pedido."] },
+      normalizeApiBody({ data: null, mensagens: ["Erro ao buscar detalhes do pedido."] }),
       { status: 500 },
     );
   }

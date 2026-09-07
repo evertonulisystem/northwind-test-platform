@@ -1,0 +1,507 @@
+{
+  "source": "https://northwind-test-platform.vercel.app/api/v1/swagger.json",
+  "capturedAt": "2026-09-07T01:20:05.402Z",
+  "openapi": "3.0.0",
+  "paths": {
+    "/api/v1/categories": {
+      "get": {
+        "tags": [
+          "Categories"
+        ],
+        "summary": "Lista categorias com paginação",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "page",
+            "schema": {
+              "type": "integer",
+              "default": 1
+            },
+            "description": "Número da página"
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "type": "integer",
+              "default": 10
+            },
+            "description": "Quantidade de itens por página"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Lista paginada de categorias",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Category"
+                      }
+                    },
+                    "pagination": {
+                      "$ref": "#/components/schemas/Pagination"
+                    },
+                    "mensagens": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Categories"
+        ],
+        "summary": "Adiciona uma nova categoria",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "name",
+                  "description"
+                ],
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "maxLength": 25,
+                    "example": "Eletrônicos"
+                  },
+                  "description": {
+                    "type": "string",
+                    "minLength": 6,
+                    "maxLength": 40,
+                    "example": "Produtos eletrônicos variados"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Categoria criada"
+          },
+          "400": {
+            "description": "Dados inválidos"
+          },
+          "409": {
+            "description": "Categoria duplicada"
+          }
+        }
+      }
+    },
+    "/api/v1/categories/{id}": {
+      "get": {
+        "tags": [
+          "Categories"
+        ],
+        "summary": "Lista produtos de uma categoria",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Lista de produtos da categoria",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Product"
+                      }
+                    },
+                    "mensagens": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Categoria não encontrada"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Categories"
+        ],
+        "summary": "Atualiza uma categoria existente",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "name",
+                  "description"
+                ],
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "maxLength": 25,
+                    "example": "Eletrônicos"
+                  },
+                  "description": {
+                    "type": "string",
+                    "minLength": 6,
+                    "maxLength": 40,
+                    "example": "Produtos eletrônicos variados"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Categoria atualizada"
+          },
+          "400": {
+            "description": "Dados inválidos"
+          },
+          "404": {
+            "description": "Categoria não encontrada"
+          },
+          "409": {
+            "description": "Categoria duplicada"
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "Categories"
+        ],
+        "summary": "Atualiza parcialmente uma categoria",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "maxLength": 25,
+                    "example": "Eletrônicos"
+                  },
+                  "description": {
+                    "type": "string",
+                    "minLength": 6,
+                    "maxLength": 40,
+                    "example": "Produtos eletrônicos variados"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Categoria atualizada parcialmente"
+          },
+          "400": {
+            "description": "Dados inválidos"
+          },
+          "404": {
+            "description": "Categoria não encontrada"
+          },
+          "409": {
+            "description": "Categoria duplicada"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Categories"
+        ],
+        "summary": "Exclui uma categoria",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Categoria excluída"
+          },
+          "400": {
+            "description": "Categoria em uso"
+          },
+          "404": {
+            "description": "Categoria não encontrada"
+          }
+        }
+      }
+    },
+    "/api/v1/categories/{id}/products": {
+      "get": {
+        "tags": [
+          "Categories"
+        ],
+        "summary": "Lista produtos de uma categoria",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "ID da categoria"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Lista de produtos da categoria",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Product"
+                      }
+                    },
+                    "mensagens": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Token ausente ou inválido"
+          },
+          "404": {
+            "description": "Categoria não encontrada"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Category": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "description": "Identificador único da categoria (gerado automaticamente)"
+          },
+          "name": {
+            "type": "string",
+            "minLength": 3,
+            "maxLength": 100,
+            "example": "Eletrônicos",
+            "description": "Nome da categoria (obrigatório, 3-100 caracteres, único)"
+          },
+          "description": {
+            "type": "string",
+            "maxLength": 500,
+            "example": "Produtos eletrônicos variados",
+            "description": "Descrição da categoria (obrigatório, até 500 caracteres)"
+          },
+          "slug": {
+            "type": "string",
+            "example": "eletronicos",
+            "description": "Slug gerado do nome da categoria (gerado automaticamente)"
+          }
+        }
+      },
+      "Pagination": {
+        "type": "object",
+        "properties": {
+          "page": {
+            "type": "integer",
+            "example": 1
+          },
+          "totalPages": {
+            "type": "integer",
+            "example": 5
+          },
+          "total": {
+            "type": "integer",
+            "example": 47
+          }
+        }
+      },
+      "Product": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "description": "Identificador único do produto (gerado automaticamente)"
+          },
+          "name": {
+            "type": "string",
+            "minLength": 6,
+            "maxLength": 40,
+            "pattern": "^[a-zA-ZÀ-ÿ\\s]+$",
+            "example": "Mouse Gamer RGB Pro Wireless",
+            "description": "Nome completo do produto (obrigatório, 6-40 caracteres, sem números ou caracteres especiais, sem espaços duplicados, único)"
+          },
+          "price": {
+            "type": "number",
+            "minimum": 0.01,
+            "maximum": 999999.99,
+            "multipleOf": 0.01,
+            "example": 299.9,
+            "description": "Preço de venda do produto (obrigatório, valor > 0, máximo 999999.99, 2 casas decimais)"
+          },
+          "stock_quantity": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 999,
+            "example": 50,
+            "description": "Quantidade em estoque (obrigatório, número inteiro, 0-999)"
+          },
+          "sku": {
+            "type": "string",
+            "minLength": 5,
+            "maxLength": 20,
+            "pattern": "^[A-Z][A-Z0-9\\-]*$",
+            "example": "MGP-2024W",
+            "description": "SKU do produto (obrigatório, 5-20 caracteres, inicia com letra maiúscula, apenas letras maiúsculas, números e hífen, único)"
+          },
+          "category_id": {
+            "type": "integer",
+            "minimum": 1,
+            "description": "ID da categoria (obrigatório, deve existir na tabela categories)"
+          },
+          "supplier_id": {
+            "type": "integer",
+            "minimum": 1,
+            "description": "ID do fornecedor (obrigatório, deve existir na tabela suppliers)"
+          },
+          "slug": {
+            "type": "string",
+            "example": "mouse-gamer-rgb-pro-wireless",
+            "description": "Slug gerado do nome do produto (gerado automaticamente)"
+          },
+          "is_active": {
+            "type": "boolean",
+            "description": "Indica se o produto está ativo",
+            "default": true
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Data e hora de criação do produto (gerado automaticamente)"
+          },
+          "categories": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string"
+              }
+            }
+          },
+          "suppliers": {
+            "type": "object",
+            "properties": {
+              "company_name": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

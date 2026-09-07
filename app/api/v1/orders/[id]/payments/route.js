@@ -1,3 +1,4 @@
+import { normalizeApiBody } from '@/lib/api-envelope';
 // ============================================================
 // 🆕 NOVA FUNCIONALIDADE — Detalhamento de Pedido Completo
 // Módulo: Pagamentos | Rota: GET /api/v1/orders/[id]/payments
@@ -45,7 +46,7 @@ async function getOrderPayments(request, { params, user }) {
 
     if (orderError || !order) {
       return NextResponse.json(
-        { data: null, mensagens: ["Pedido não encontrado ou sem permissão."] },
+        normalizeApiBody({ data: null, mensagens: ["Pedido não encontrado ou sem permissão."] }),
         { status: 404 },
       );
     }
@@ -76,22 +77,22 @@ async function getOrderPayments(request, { params, user }) {
 
     if (!payments || payments.length === 0) {
       return NextResponse.json(
-        {
+        normalizeApiBody({
           data: [],
           mensagens: ["Nenhum pagamento encontrado para este pedido."],
-        },
+        }),
         { status: 404 },
       );
     }
 
-    return NextResponse.json({
+    return NextResponse.json(normalizeApiBody({
       data: payments,
       mensagens: ["Pagamentos carregados com sucesso."],
-    });
+    }));
   } catch (error) {
     console.error("Erro ao buscar pagamentos do pedido:", error);
     return NextResponse.json(
-      { data: null, mensagens: ["Erro interno ao buscar pagamentos."] },
+      normalizeApiBody({ data: null, mensagens: ["Erro interno ao buscar pagamentos."] }),
       { status: 500 },
     );
   }

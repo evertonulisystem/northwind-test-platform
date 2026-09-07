@@ -1,3 +1,4 @@
+import { normalizeApiBody } from '@/lib/api-envelope';
 export const dynamic = 'force-dynamic'
 
 import { supabase } from '@/lib/supabase'
@@ -24,14 +25,14 @@ export async function GET() {
       })
     if (error) throw error
 
-    return NextResponse.json({
+    return NextResponse.json(normalizeApiBody({
       status: 'ok',
       message: 'Supabase ativo'
-    })
+    }))
 
   } catch (error) {
     return NextResponse.json(
-      { status: 'error', message: error.message },
+      normalizeApiBody({ status: 'error', message: error.message }),
       { status: 500 }
     )
   }

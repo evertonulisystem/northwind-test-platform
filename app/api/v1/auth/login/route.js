@@ -1,3 +1,4 @@
+import { normalizeApiBody } from '@/lib/api-envelope';
 import { supabase } from '@/lib/supabase';
 import { generateToken } from '@/lib/jwt';
 import bcrypt from 'bcryptjs';
@@ -73,10 +74,10 @@ export async function POST(request) {
 
     if (!email || !password) {
       return Response.json(
-        { 
+        normalizeApiBody({
           data: null,
           mensagens: ['Email e senha são obrigatórios']
-        },
+        }),
         { status: 400 }
       );
     }
@@ -90,10 +91,10 @@ export async function POST(request) {
     if (!emailRegex.test(email.trim())) {
       console.log('❌ DEBUG LOGIN - Email inválido!');
       return Response.json(
-        { 
+        normalizeApiBody({
           data: null,
           mensagens: ['Formato de email inválido. Use: nome@dominio.com']
-        },
+        }),
         { status: 400 }
       );
     }
@@ -101,10 +102,10 @@ export async function POST(request) {
     // Validação básica da senha
     if (password.length < 6) {
       return Response.json(
-        { 
+        normalizeApiBody({
           data: null,
           mensagens: ['Senha deve ter pelo menos 6 caracteres']
-        },
+        }),
         { status: 400 }
       );
     }
@@ -118,10 +119,10 @@ export async function POST(request) {
 
     if (error || !user) {
       return Response.json(
-        { 
+        normalizeApiBody({
           data: null,
           mensagens: ['Usuário não encontrado. Verifique o email ou cadastre-se.']
-        },
+        }),
         { status: 404 }
       );
     }
@@ -129,10 +130,10 @@ export async function POST(request) {
     // Verifica se usuário está ativo
     if (!user.is_active) {
       return Response.json(
-        { 
+        normalizeApiBody({
           data: null,
           mensagens: ['Usuário inativo']
-        },
+        }),
         { status: 403 }
       );
     }
@@ -142,10 +143,10 @@ export async function POST(request) {
     
     if (!validPassword) {
       return Response.json(
-        { 
+        normalizeApiBody({
           data: null,
           mensagens: ['Email ou senha inválidos']
-        },
+        }),
         { status: 401 }
       );
     }
@@ -160,7 +161,7 @@ export async function POST(request) {
     const token = await generateToken(user);
     console.log('✅ Login successful, token (first 15 chars):', token.substring(0, 15) + '...');
 
-    return Response.json({
+    return Response.json(normalizeApiBody({
       data: {
         token,
         user: {
@@ -171,15 +172,15 @@ export async function POST(request) {
         }
       },
       mensagens: 'Login realizado com sucesso'
-    }, { status: 200 });
+    }), { status: 200 });
 
   } catch (error) {
     console.error('Erro no login:', error);
     return Response.json(
-      { 
+      normalizeApiBody({
         data: null,
         mensagens: ['Erro interno do servidor']
-      },
+      }),
       { status: 500 }
     );
   }

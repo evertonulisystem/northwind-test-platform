@@ -1,3 +1,4 @@
+import { normalizeApiBody } from '@/lib/api-envelope';
 // app/api/v1/suppliers/[id]/products/route.js
 import { supabase } from '@/lib/supabase';
 import { NextResponse } from 'next/server';
@@ -45,10 +46,10 @@ export async function GET(request, { params }) {
     const token = getTokenFromRequest(request);
     if (!token) {
       return NextResponse.json(
-        { 
+        normalizeApiBody({
           data: null,
           mensagens: ['Token ausente'] 
-        }, 
+        }),
         { status: 401 }
       );
     }
@@ -57,11 +58,11 @@ export async function GET(request, { params }) {
     if (!payload || payload.error) {
       const message = payload?.message || 'Token inválido';
       return NextResponse.json(
-        { 
+        normalizeApiBody({
           data: null, 
           mensagens: [message],
           expires_at: payload?.expires_at || null
-        }, 
+        }),
         { status: 401 }
       );
     }
@@ -72,10 +73,10 @@ export async function GET(request, { params }) {
 
     if (isNaN(idNum) || idNum <= 0) {
       return NextResponse.json(
-        { 
+        normalizeApiBody({
           data: null, 
           mensagens: ['ID do fornecedor inválido. Deve ser um número positivo.'] 
-        },
+        }),
         { status: 400 }
       );
     }
@@ -95,10 +96,10 @@ export async function GET(request, { params }) {
 
     if (supError || !supplier) {
       return NextResponse.json(
-        { 
+        normalizeApiBody({
           data: null, 
           mensagens: [`Fornecedor com ID ${idNum} não encontrado.`] 
-        },
+        }),
         { status: 404 }
       );
     }
@@ -116,10 +117,10 @@ export async function GET(request, { params }) {
 
     if (error) {
       return NextResponse.json(
-        { 
+        normalizeApiBody({
           data: null, 
           mensagens: [error.message] 
-        },
+        }),
         { status: 500 }
       );
     }
@@ -127,7 +128,7 @@ export async function GET(request, { params }) {
     const total = count || 0;
     const totalPages = Math.ceil(total / limit);
 
-    return NextResponse.json({ 
+    return NextResponse.json(normalizeApiBody({
       data: products || [],
       pagination: {
         page,
@@ -138,13 +139,13 @@ export async function GET(request, { params }) {
       mensagens: products?.length > 0 
         ? [`${total} produtos encontrados para o fornecedor ${supplier.company_name}.`]
         : [`Nenhum produto cadastrado para o fornecedor ${supplier.company_name}.`]
-    });
+    }));
   } catch (error) {
     return NextResponse.json(
-      { 
+      normalizeApiBody({
         data: null, 
         mensagens: ['Erro interno ao buscar produtos do fornecedor.'] 
-      },
+      }),
       { status: 500 }
     );
   }

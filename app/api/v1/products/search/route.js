@@ -1,3 +1,4 @@
+import { normalizeApiBody } from '@/lib/api-envelope';
 // app/api/products/search/route.js
 import { supabase } from '@/lib/supabase';
 import { NextResponse } from 'next/server';
@@ -50,10 +51,10 @@ export async function GET(request) {
     const token = getTokenFromRequest(request);
     if (!token) {
       return NextResponse.json(
-        { 
+        normalizeApiBody({
           data: null,
           mensagens: ['Token ausente'] 
-        }, 
+        }),
         { status: 401 }
       );
     }
@@ -62,11 +63,11 @@ export async function GET(request) {
     if (!payload || payload.error) {
       const message = payload?.message || 'Token inválido';
       return NextResponse.json(
-        { 
+        normalizeApiBody({
           data: null,
           mensagens: [message],
           expires_at: payload?.expires_at || null
-        }, 
+        }),
         { status: 401 }
       );
     }
@@ -79,10 +80,10 @@ export async function GET(request) {
     // Validação: pelo menos um parâmetro deve ser fornecido
     if (!id && !sku && !slug) {
       return NextResponse.json(
-        { 
+        normalizeApiBody({
           data: null,
           mensagens: ['Pelo menos um parâmetro deve ser fornecido: id, sku ou slug.'] 
-        }, 
+        }),
         { status: 400 }
       );
     }
@@ -109,10 +110,10 @@ export async function GET(request) {
       const productId = parseInt(id);
       if (isNaN(productId) || productId <= 0) {
         return NextResponse.json(
-          { 
+          normalizeApiBody({
             data: null,
             mensagens: ['ID deve ser um número positivo válido.'] 
-          }, 
+          }),
           { status: 400 }
         );
       }
@@ -131,10 +132,10 @@ export async function GET(request) {
       if (error.code === 'PGRST116') {
         // Produto não encontrado
         return NextResponse.json(
-          { 
+          normalizeApiBody({
             data: null,
             mensagens: ['Produto não encontrado.'] 
-          }, 
+          }),
           { status: 404 }
         );
       }
@@ -144,26 +145,26 @@ export async function GET(request) {
 
     if (!data) {
       return NextResponse.json(
-        { 
+        normalizeApiBody({
           data: null,
           mensagens: ['Produto não encontrado.'] 
-        }, 
+        }),
         { status: 404 }
       );
     }
 
     console.log('Produto encontrado:', data.name);
     
-    return NextResponse.json({
+    return NextResponse.json(normalizeApiBody({
       data,
       mensagens: ['Produto encontrado com sucesso.'],
-    });
+    }));
 
   } catch (error) {
     console.error('Erro fatal:', error);
-    return NextResponse.json({
+    return NextResponse.json(normalizeApiBody({
       data: null,
       mensagens: ['Erro interno ao buscar produto.']
-    }, { status: 500 });
+    }), { status: 500 });
   }
 }

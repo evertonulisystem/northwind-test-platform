@@ -1,3 +1,4 @@
+import { normalizeApiBody } from '@/lib/api-envelope';
 // app/api/auth/register/route.js
 import { NextResponse } from 'next/server';
 import { hash } from 'bcryptjs';
@@ -15,7 +16,7 @@ export async function POST(request) {
     // VALIDAÇÃO 1: Campos obrigatórios
     if (!email || !password) {
       return NextResponse.json(
-        { error: 'Email and password are required' },
+        normalizeApiBody({ error: 'Email and password are required' }),
         { status: 400 }
       );
     }
@@ -23,7 +24,7 @@ export async function POST(request) {
     // VALIDAÇÃO 2: Formato de email
     if (!validateEmail(email)) {
       return NextResponse.json(
-        { error: 'Invalid email format' },
+        normalizeApiBody({ error: 'Invalid email format' }),
         { status: 400 }
       );
     }
@@ -32,7 +33,7 @@ export async function POST(request) {
     const passwordValidation = validatePassword(password);
     if (!passwordValidation.valid) {
       return NextResponse.json(
-        { error: passwordValidation.message },
+        normalizeApiBody({ error: passwordValidation.message }),
         { status: 400 }
       );
     }
@@ -41,7 +42,7 @@ export async function POST(request) {
     const existingUser = users.find(u => u.email === email);
     if (existingUser) {
       return NextResponse.json(
-        { error: 'Email already exists' },
+        normalizeApiBody({ error: 'Email already exists' }),
         { status: 400 }
       );
     }
@@ -73,7 +74,7 @@ export async function POST(request) {
 
     // RETORNAR token junto com os dados
     return NextResponse.json(
-      {
+      normalizeApiBody({
         success: true,
         message: 'User created successfully',
         data: {
@@ -85,14 +86,14 @@ export async function POST(request) {
           },
           token // 👈 TOKEN JWT AQUI!
         }
-      },
+      }),
       { status: 201 }
     );
 
   } catch (error) {
     console.error('Register error:', error);
     return NextResponse.json(
-      { error: 'Internal server error' },
+      normalizeApiBody({ error: 'Internal server error' }),
       { status: 500 }
     );
   }

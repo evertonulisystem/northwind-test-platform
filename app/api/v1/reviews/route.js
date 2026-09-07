@@ -1,3 +1,4 @@
+import { normalizeApiBody } from '@/lib/api-envelope';
 // ============================================================
 // 🆕 NOVA FUNCIONALIDADE — Avaliações de Produtos
 // Módulo: Reviews | Cenário: Listagem e criação de avaliações
@@ -30,7 +31,7 @@ export async function GET(request) {
   const token = getTokenFromRequest(request);
   if (!token) {
     return NextResponse.json(
-      { data: null, mensagens: ['Token ausente'] },
+      normalizeApiBody({ data: null, mensagens: ['Token ausente'] }),
       { status: 401 }
     );
   }
@@ -38,7 +39,7 @@ export async function GET(request) {
   const payload = await verifyToken(token);
   if (!payload || payload.error) {
     return NextResponse.json(
-      { data: null, mensagens: [payload?.message || 'Token inválido'] },
+      normalizeApiBody({ data: null, mensagens: [payload?.message || 'Token inválido'] }),
       { status: 401 }
     );
   }
@@ -87,7 +88,7 @@ export async function GET(request) {
     const total = count || 0;
     const totalPages = Math.ceil(total / limit);
 
-    return NextResponse.json({
+    return NextResponse.json(normalizeApiBody({
       data: data || [],
       pagination: {
         page,
@@ -96,12 +97,12 @@ export async function GET(request) {
         totalPages,
       },
       mensagens: ['Avaliações carregadas com sucesso.'],
-    });
+    }));
 
   } catch (error) {
     console.error('Erro fatal GET /api/v1/reviews:', error);
     return NextResponse.json(
-      { data: null, mensagens: ['Erro interno ao carregar avaliações.'] },
+      normalizeApiBody({ data: null, mensagens: ['Erro interno ao carregar avaliações.'] }),
       { status: 500 }
     );
   }
@@ -129,7 +130,7 @@ export async function POST(request) {
   const token = getTokenFromRequest(request);
   if (!token) {
     return NextResponse.json(
-      { data: null, mensagens: ['Token ausente'] },
+      normalizeApiBody({ data: null, mensagens: ['Token ausente'] }),
       { status: 401 }
     );
   }
@@ -137,11 +138,11 @@ export async function POST(request) {
   const payload = await verifyToken(token);
   if (!payload || payload.error) {
     return NextResponse.json(
-      {
+      normalizeApiBody({
         data: null,
         mensagens: [payload?.message || 'Token inválido'],
         expires_at: payload?.expires_at || null,
-      },
+      }),
       { status: 401 }
     );
   }
@@ -152,7 +153,7 @@ export async function POST(request) {
     body = await request.json();
   } catch {
     return NextResponse.json(
-      { data: null, mensagens: ['Corpo da requisição inválido.'] },
+      normalizeApiBody({ data: null, mensagens: ['Corpo da requisição inválido.'] }),
       { status: 400 }
     );
   }
@@ -163,7 +164,7 @@ export async function POST(request) {
 
   if (!product_id) {
     return NextResponse.json(
-      { data: null, mensagens: ['O campo product_id é obrigatório.'] },
+      normalizeApiBody({ data: null, mensagens: ['O campo product_id é obrigatório.'] }),
       { status: 400 }
     );
   }
@@ -173,7 +174,7 @@ export async function POST(request) {
   const ratingInt = parseInt(rating, 10);
   if (!rating || isNaN(ratingInt) || ratingInt < 1 || ratingInt > 5) {
     return NextResponse.json(
-      { data: null, mensagens: ['O campo rating deve ser um inteiro entre 1 e 5.'] },
+      normalizeApiBody({ data: null, mensagens: ['O campo rating deve ser um inteiro entre 1 e 5.'] }),
       { status: 400 }
     );
   }
@@ -187,7 +188,7 @@ export async function POST(request) {
 
   if (productError || !productExists) {
     return NextResponse.json(
-      { data: null, mensagens: ['Produto não encontrado.'] },
+      normalizeApiBody({ data: null, mensagens: ['Produto não encontrado.'] }),
       { status: 404 }
     );
   }
@@ -235,17 +236,17 @@ export async function POST(request) {
     }
 
     return NextResponse.json(
-      {
+      normalizeApiBody({
         data: newReview,
         mensagens: ['Avaliação criada com sucesso!'],
-      },
+      }),
       { status: 201 }
     );
 
   } catch (error) {
     console.error('Erro fatal POST /api/v1/reviews:', error);
     return NextResponse.json(
-      { data: null, mensagens: ['Erro interno ao criar avaliação.'] },
+      normalizeApiBody({ data: null, mensagens: ['Erro interno ao criar avaliação.'] }),
       { status: 500 }
     );
   }

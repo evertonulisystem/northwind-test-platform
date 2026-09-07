@@ -172,7 +172,7 @@ export default function AddProductModal({ onClose, onAdd, preselectedCategory = 
       const result = await res.json();
 
       if (!res.ok) {
-        toast.error(result.message || 'Erro ao adicionar');
+        toast.error(result.mensagens?.[0] || 'Erro ao adicionar');
         setLoading(false);
         return;
       }

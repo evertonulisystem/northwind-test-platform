@@ -1,3 +1,4 @@
+import { normalizeApiBody } from '@/lib/api-envelope';
 // app/api/v1/cart/route.js
 import { supabase } from '@/lib/supabase';
 import { NextResponse } from 'next/server';
@@ -42,19 +43,19 @@ async function getCart(request, { user }) {
     
     if (!data || data.length === 0) {
       return NextResponse.json(
-        { data: [], mensagens: ['Seu carrinho está vazio.'] },
+        normalizeApiBody({ data: [], mensagens: ['Seu carrinho está vazio.'] }),
         { status: 404 }
       );
     }
 
-    return NextResponse.json({
+    return NextResponse.json(normalizeApiBody({
       data: data,
       mensagens: ['Carrinho carregado com sucesso.']
-    });
+    }));
   } catch (error) {
     console.error('Erro ao buscar carrinho:', error);
     return NextResponse.json(
-      { data: null, mensagens: ['Erro ao buscar itens do carrinho.'] },
+      normalizeApiBody({ data: null, mensagens: ['Erro ao buscar itens do carrinho.'] }),
       { status: 500 }
     );
   }
@@ -95,7 +96,7 @@ async function addToCart(request, { user }) {
 
     if (!product_id || !quantity || quantity <= 0) {
       return NextResponse.json(
-        { data: null, mensagens: ['product_id e quantity (positivo) são obrigatórios.'] },
+        normalizeApiBody({ data: null, mensagens: ['product_id e quantity (positivo) são obrigatórios.'] }),
         { status: 400 }
       );
     }
@@ -109,14 +110,14 @@ async function addToCart(request, { user }) {
 
     if (prodError || !product) {
       return NextResponse.json(
-        { data: null, mensagens: ['Produto não encontrado.'] },
+        normalizeApiBody({ data: null, mensagens: ['Produto não encontrado.'] }),
         { status: 404 }
       );
     }
 
     if (product.stock_quantity < quantity) {
       return NextResponse.json(
-        { data: null, mensagens: [`Estoque insuficiente. Disponível: ${product.stock_quantity}`] },
+        normalizeApiBody({ data: null, mensagens: [`Estoque insuficiente. Disponível: ${product.stock_quantity}`] }),
         { status: 400 }
       );
     }
@@ -139,7 +140,7 @@ async function addToCart(request, { user }) {
       // Re-verificar estoque para a nova quantidade total
       if (product.stock_quantity < newQuantity) {
         return NextResponse.json(
-          { data: null, mensagens: [`Estoque insuficiente para a quantidade total desejada. Disponível: ${product.stock_quantity}`] },
+          normalizeApiBody({ data: null, mensagens: [`Estoque insuficiente para a quantidade total desejada. Disponível: ${product.stock_quantity}`] }),
           { status: 400 }
         );
       }
@@ -170,14 +171,14 @@ async function addToCart(request, { user }) {
     }
 
     return NextResponse.json(
-      { data: result, mensagens: ['Item adicionado ao carrinho com sucesso!'] },
+      normalizeApiBody({ data: result, mensagens: ['Item adicionado ao carrinho com sucesso!'] }),
       { status: existingItem ? 200 : 201 }
     );
 
   } catch (error) {
     console.error('Erro ao adicionar ao carrinho:', error);
     return NextResponse.json(
-      { data: null, mensagens: ['Erro interno ao processar carrinho.'] },
+      normalizeApiBody({ data: null, mensagens: ['Erro interno ao processar carrinho.'] }),
       { status: 500 }
     );
   }
@@ -204,14 +205,14 @@ async function clearCart(request, { user }) {
 
     if (error) throw error;
 
-    return NextResponse.json({
+    return NextResponse.json(normalizeApiBody({
       data: null,
       mensagens: ['Carrinho limpo com sucesso.']
-    });
+    }));
   } catch (error) {
     console.error('Erro ao limpar carrinho:', error);
     return NextResponse.json(
-      { data: null, mensagens: ['Erro ao limpar carrinho.'] },
+      normalizeApiBody({ data: null, mensagens: ['Erro ao limpar carrinho.'] }),
       { status: 500 }
     );
   }
