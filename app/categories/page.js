@@ -303,7 +303,7 @@ export default function CategoriesPage() {
                 Nova Categoria
               </button>
 
-              <button
+              <button data-testid="categories-back-to-products-btn"
                 onClick={() => window.open("/products", "_blank")}
                 className="bg-slate-700 hover:bg-slate-600 text-white px-8 py-3 rounded-xl font-semibold shadow-lg transition flex items-center gap-2"
               >
@@ -347,7 +347,7 @@ export default function CategoriesPage() {
                   : "Nenhuma categoria cadastrada"}
               </p>
               {!searchTerm && (
-                <button
+                <button data-testid="create-first-category-btn"
                   onClick={() => setShowAddModal(true)}
                   className="bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-2 rounded-lg transition"
                 >
@@ -393,7 +393,7 @@ export default function CategoriesPage() {
                     </div>
 
                     <div className="flex flex-wrap gap-2 pt-4 border-t border-slate-700 mt-auto">
-                      <button
+                      <button data-testid={`category-view-products-${category.id}`}
                         onClick={() =>
                           router.push(`/categories/${category.id}/products`)
                         }
@@ -402,7 +402,7 @@ export default function CategoriesPage() {
                         <Eye className="w-4 h-4" />
                         Ver Produtos
                       </button>
-                      <button
+                      <button data-testid={`edit-category-${category.id}`}
                         onClick={() => {
                           setEditingCategory(category);
                           setFormData({
@@ -416,7 +416,7 @@ export default function CategoriesPage() {
                         <Edit className="w-4 h-4" />
                         Editar
                       </button>
-                      <button
+                      <button data-testid={`delete-category-${category.id}`}
                         onClick={() => {
                           setDeleteId(category.id);
                           setShowConfirm(true);
@@ -434,7 +434,7 @@ export default function CategoriesPage() {
               {/* Pagination Controls */}
               {totalPages > 1 && (
                 <div className="flex justify-center items-center gap-4 mt-8">
-                  <button
+                  <button data-testid="categories-previous-page-btn"
                     onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
                     disabled={currentPage === 1}
                     className="px-4 py-2 rounded-lg bg-slate-800 border border-slate-600 text-white hover:bg-slate-700 disabled:opacity-50 disabled:cursor-not-allowed transition"
@@ -447,7 +447,7 @@ export default function CategoriesPage() {
                     de{" "}
                     <span className="font-bold text-white">{totalPages}</span>
                   </span>
-                  <button
+                  <button data-testid="categories-next-page-btn"
                     onClick={() =>
                       setCurrentPage((p) => Math.min(totalPages, p + 1))
                     }
@@ -616,7 +616,7 @@ export default function CategoriesPage() {
             </form>
 
             <div className="p-6 border-t border-slate-700 flex gap-3">
-              <button
+              <button data-testid="update-category-btn"
                 type="submit"
                 form="edit-category-form"
                 disabled={loading}
@@ -656,13 +656,13 @@ export default function CategoriesPage() {
               Tem certeza que deseja excluir esta categoria?
             </p>
             <div className="flex gap-3">
-              <button
+              <button data-testid="confirm-delete-category-btn"
                 onClick={handleDelete}
                 className="flex-1 bg-red-600 text-white py-2 rounded-lg hover:bg-red-700 transition font-semibold"
               >
                 Excluir
               </button>
-              <button
+              <button data-testid="cancel-delete-category-btn"
                 onClick={() => {
                   setShowConfirm(false);
                   setDeleteId(null);

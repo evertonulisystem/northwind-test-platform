@@ -124,7 +124,7 @@ export default function SupplierProductsPage() {
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="mb-8 text-center">
-          <button
+          <button data-testid="supplier-products-back-btn"
             onClick={() => router.push("/suppliers")}
             className="inline-flex items-center gap-2 text-white hover:text-blue-300 mb-4 transition"
           >
@@ -225,7 +225,7 @@ export default function SupplierProductsPage() {
                           {product.stock_quantity} unid.
                         </td>
                         <td className="px-4 py-2 text-center">
-                          <button
+                          <button data-testid={`supplier-unlink-product-${product.id}`}
                             onClick={() => handleRemoveFromSupplier(product.id)}
                             className="bg-orange-600 hover:bg-orange-700 text-white px-3 py-1.5 rounded-lg transition flex items-center justify-center gap-1 mx-auto"
                           >
@@ -245,7 +245,7 @@ export default function SupplierProductsPage() {
                 </p>
                 {pagination.totalPages > 1 && (
                   <div className="flex items-center gap-3">
-                    <button
+                    <button data-testid="supplier-products-previous-page-btn"
                       onClick={() =>
                         setCurrentPage((prev) => Math.max(1, prev - 1))
                       }
@@ -264,7 +264,7 @@ export default function SupplierProductsPage() {
                         {pagination.totalPages}
                       </span>
                     </span>
-                    <button
+                    <button data-testid="supplier-products-next-page-btn"
                       onClick={() =>
                         setCurrentPage((prev) =>
                           Math.min(pagination.totalPages, prev + 1),

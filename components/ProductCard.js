@@ -28,7 +28,7 @@ export default function ProductCard({ product }) {
           <span className="text-2xl font-bold text-white">
             R$ {product.price.toFixed(2).replace('.', ',')}
           </span>
-          <button className="bg-white text-purple-600 px-4 py-2 rounded-full font-medium hover:bg-pink-50 transition">
+          <button data-testid={`product-card-add-${product.id}`} className="bg-white text-purple-600 px-4 py-2 rounded-full font-medium hover:bg-pink-50 transition">
             Adicionar
           </button>
         </div>

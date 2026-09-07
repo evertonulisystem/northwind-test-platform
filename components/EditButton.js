@@ -9,7 +9,7 @@ export default function EditButton({ product, onUpdate }) {
 
   return (
     <>
-      <button
+      <button data-testid={`edit-product-${product.id}`}
         onClick={() => setIsOpen(true)}
         className="bg-blue-500 text-white px-3 py-1 rounded-md hover:bg-blue-600 transition text-sm mr-2"
       >

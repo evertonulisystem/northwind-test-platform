@@ -205,7 +205,7 @@ export default function CategoryProductsPage() {
                           {product.stock_quantity} unid.
                         </td>
                         <td className="px-4 py-2 text-center">
-                          <button
+                          <button data-testid={`category-remove-product-${product.id}`}
                             onClick={() => handleRemoveFromCategory(product.id)}
                             className="bg-red-600 hover:bg-red-700 text-white px-3 py-1.5 rounded-lg transition flex items-center justify-center gap-1 mx-auto"
                           >

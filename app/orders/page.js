@@ -509,7 +509,7 @@ function OrdersPageContent() {
               />
             </div>
 
-            <button
+            <button data-testid="orders-apply-filters-btn"
               type="button"
               onClick={() => {
                 // Push selected filters into URL and reload
@@ -528,7 +528,7 @@ function OrdersPageContent() {
               Aplicar filtros
             </button>
 
-            <button
+            <button data-testid="orders-clear-filters-btn"
               type="button"
               onClick={handleClearFilters}
               className="bg-slate-800/90 hover:bg-slate-700 text-pink-100 border border-pink-300/15 px-5 py-3 rounded-xl font-semibold transition"
@@ -573,7 +573,7 @@ function OrdersPageContent() {
             <p className="text-slate-400 mt-2">
               Seus pedidos aparecem aqui após o checkout.
             </p>
-            <button
+            <button data-testid="orders-view-products-btn"
               onClick={() => router.push("/products")}
               className="mt-6 bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-xl font-semibold transition"
             >

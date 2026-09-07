@@ -718,12 +718,12 @@ export default function ReviewsPage() {
             </div>
             {!loadingWithout && productsTotalPages > 1 && (
               <nav aria-label="Paginação de produtos sem avaliação" data-testid="without-reviews-pagination" className="flex flex-wrap justify-center items-center gap-4 mt-8">
-                <button type="button" onClick={() => setProductsPage(safeProductsPage - 1)} disabled={safeProductsPage === 1}
+                <button data-testid="without-reviews-previous-page-btn" type="button" onClick={() => setProductsPage(safeProductsPage - 1)} disabled={safeProductsPage === 1}
                   className="px-4 py-2 rounded-lg bg-slate-800 border border-slate-600 text-white hover:bg-slate-700 disabled:opacity-50 disabled:cursor-not-allowed transition">
                   Anterior
                 </button>
                 <span className="text-slate-300" aria-live="polite">Página <span className="font-bold text-white">{safeProductsPage}</span> de <span className="font-bold text-white">{productsTotalPages}</span></span>
-                <button type="button" onClick={() => setProductsPage(safeProductsPage + 1)} disabled={safeProductsPage === productsTotalPages}
+                <button data-testid="without-reviews-next-page-btn" type="button" onClick={() => setProductsPage(safeProductsPage + 1)} disabled={safeProductsPage === productsTotalPages}
                   className="px-4 py-2 rounded-lg bg-slate-800 border border-slate-600 text-white hover:bg-slate-700 disabled:opacity-50 disabled:cursor-not-allowed transition">
                   Próxima
                 </button>
@@ -861,7 +861,7 @@ export default function ReviewsPage() {
 
                 {pagination.totalPages > 1 && (
                   <nav aria-label="Paginação de avaliações" data-testid="reviews-pagination" className="flex flex-wrap justify-center items-center gap-4 mt-8">
-                    <button
+                    <button data-testid="reviews-previous-page-btn"
                       onClick={() =>
                         setCurrentPage((prev) => Math.max(1, prev - 1))
                       }
@@ -880,7 +880,7 @@ export default function ReviewsPage() {
                         {pagination.totalPages}
                       </span>
                     </span>
-                    <button
+                    <button data-testid="reviews-next-page-btn"
                       onClick={() =>
                         setCurrentPage((prev) =>
                           Math.min(pagination.totalPages, prev + 1),

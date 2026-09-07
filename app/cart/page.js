@@ -177,7 +177,7 @@ export default function CartPage() {
         <div className="max-w-7xl mx-auto py-12">
           <header className="mb-12 flex justify-between items-center">
             <h1 className="text-4xl font-bold tracking-tight">Seu Carrinho</h1>
-            <button
+            <button data-testid="cart-back-to-products-btn"
               onClick={() => router.push("/products")}
               className="flex items-center gap-2 text-[#10b981] hover:bg-[#10b981]/10 px-4 py-2 rounded-xl transition font-semibold"
             >
@@ -195,7 +195,7 @@ export default function CartPage() {
               Parece que o seu carrinho de compras ainda não tem itens. Explore
               nossa vitrine e descubra produtos incríveis!
             </p>
-            <button
+            <button data-testid="cart-start-shopping-btn"
               onClick={() => router.push("/products")}
               className="bg-[#10b981] hover:bg-[#059669] text-white px-10 py-4 rounded-2xl font-bold text-lg transition transform hover:scale-105 shadow-xl shadow-emerald-900/20"
             >
@@ -229,7 +229,7 @@ export default function CartPage() {
                 : "itens selecionados"}
             </p>
           </div>
-          <button
+          <button data-testid="cart-continue-shopping-btn"
             onClick={() => router.push("/products")}
             className="flex items-center gap-2 text-[#10b981] hover:bg-[#10b981]/10 px-6 py-3 rounded-2xl transition font-bold border border-[#10b981]/20 backdrop-blur-sm self-start"
           >

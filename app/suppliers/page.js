@@ -415,7 +415,7 @@ export default function SuppliersPage() {
             </p>
 
             <div className="flex justify-center gap-4">
-              <button
+              <button data-testid="new-supplier-btn"
                 onClick={() => setShowAddModal(true)}
                 className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-xl font-semibold shadow-lg transition transform hover:scale-105 flex items-center gap-2"
               >
@@ -423,7 +423,7 @@ export default function SuppliersPage() {
                 Novo Fornecedor
               </button>
 
-              <button
+              <button data-testid="suppliers-back-to-products-btn"
                 onClick={() => window.open("/products", "_blank")}
                 className="bg-slate-700 hover:bg-slate-600 text-white px-8 py-3 rounded-xl font-semibold shadow-lg transition flex items-center gap-2"
               >
@@ -467,7 +467,7 @@ export default function SuppliersPage() {
                   : "Nenhum fornecedor cadastrado"}
               </p>
               {!searchTerm && (
-                <button
+                <button data-testid="create-first-supplier-btn"
                   onClick={() => setShowAddModal(true)}
                   className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg transition"
                 >
@@ -536,7 +536,7 @@ export default function SuppliersPage() {
                       </div>
 
                       <div className="flex flex-wrap gap-2 pt-4 border-t border-slate-700 mt-auto">
-                        <button
+                        <button data-testid={`supplier-view-products-${supplier.id}`}
                           onClick={() =>
                             router.push(`/suppliers/${supplier.id}/products`)
                           }
@@ -545,7 +545,7 @@ export default function SuppliersPage() {
                           <Eye className="w-4 h-4" />
                           Ver Produtos
                         </button>
-                        <button
+                        <button data-testid={`edit-supplier-${supplier.id}`}
                           onClick={() => {
                             setEditingSupplier(supplier);
                             setFormData({
@@ -563,7 +563,7 @@ export default function SuppliersPage() {
                           <Edit className="w-4 h-4" />
                           Editar
                         </button>
-                        <button
+                        <button data-testid={`unlink-supplier-${supplier.id}`}
                           onClick={() => {
                             setUnlinkingSupplier(supplier);
                             setShowUnlinkModal(true);
@@ -574,7 +574,7 @@ export default function SuppliersPage() {
                           <Unlink className="w-4 h-4" />
                           Desvincular
                         </button>
-                        <button
+                        <button data-testid={`delete-supplier-${supplier.id}`}
                           onClick={() => {
                             setDeleteId(supplier.id);
                             setShowConfirm(true);
@@ -593,7 +593,7 @@ export default function SuppliersPage() {
               {/* Pagination Controls */}
               {totalPages > 1 && (
                 <div className="flex justify-center items-center gap-4 mt-8">
-                  <button
+                  <button data-testid="suppliers-previous-page-btn"
                     onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
                     disabled={currentPage === 1}
                     className="px-4 py-2 rounded-lg bg-slate-800 border border-slate-600 text-white hover:bg-slate-700 disabled:opacity-50 disabled:cursor-not-allowed transition"
@@ -606,7 +606,7 @@ export default function SuppliersPage() {
                     de{" "}
                     <span className="font-bold text-white">{totalPages}</span>
                   </span>
-                  <button
+                  <button data-testid="suppliers-next-page-btn"
                     onClick={() =>
                       setCurrentPage((p) => Math.min(totalPages, p + 1))
                     }
@@ -764,7 +764,7 @@ export default function SuppliersPage() {
             </div>
 
             <div className="p-6 border-t border-slate-700 flex gap-3">
-              <button
+              <button data-testid="save-supplier-btn"
                 type="button"
                 onClick={(e) => {
                   e.preventDefault();
@@ -776,7 +776,7 @@ export default function SuppliersPage() {
               >
                 {loading ? "Salvando..." : "Salvar"}
               </button>
-              <button
+              <button data-testid="cancel-add-supplier-btn"
                 type="button"
                 onClick={() => {
                   setShowAddModal(false);
@@ -933,7 +933,7 @@ export default function SuppliersPage() {
             </div>
 
             <div className="p-6 border-t border-slate-700 flex gap-3">
-              <button
+              <button data-testid="update-supplier-btn"
                 type="button"
                 onClick={(e) => {
                   e.preventDefault();
@@ -945,7 +945,7 @@ export default function SuppliersPage() {
               >
                 {loading ? "Atualizando..." : "Atualizar"}
               </button>
-              <button
+              <button data-testid="cancel-edit-supplier-btn"
                 type="button"
                 onClick={() => {
                   setShowEditModal(false);
@@ -972,13 +972,13 @@ export default function SuppliersPage() {
               Tem certeza que deseja excluir este fornecedor?
             </p>
             <div className="flex gap-3">
-              <button
+              <button data-testid="confirm-delete-supplier-btn"
                 onClick={handleDelete}
                 className="flex-1 bg-red-600 text-white py-2 rounded-lg hover:bg-red-700 transition font-semibold"
               >
                 Excluir
               </button>
-              <button
+              <button data-testid="cancel-delete-supplier-btn"
                 onClick={() => {
                   setShowConfirm(false);
                   setDeleteId(null);

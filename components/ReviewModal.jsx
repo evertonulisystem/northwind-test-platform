@@ -24,7 +24,7 @@ function StarRating({ value, onChange, error }) {
         aria-label="Selecione uma nota de 1 a 5 estrelas"
       >
         {[1,2,3,4,5].map((star) => (
-          <button
+          <button data-testid={`review-modal-star-${star}`}
             key={star}
             type="button"
             onClick={() => onChange(star)}
@@ -136,7 +136,7 @@ export default function ReviewModal({ product, onClose, onSuccess }) {
             <p className="text-slate-400 text-xs uppercase tracking-widest mb-1">Avaliar produto</p>
             <h2 className="text-xl font-bold text-white">{product.name}</h2>
           </div>
-          <button
+          <button data-testid="review-modal-close-btn"
             onClick={onClose}
             className="text-slate-400 hover:text-white transition rounded-lg p-1.5 hover:bg-slate-700">
             <XCircle className="w-6 h-6" />
@@ -189,10 +189,10 @@ export default function ReviewModal({ product, onClose, onSuccess }) {
             </div>
           </div>
           <div className="flex gap-3 pt-2">
-            <button type="button" onClick={onClose} className="flex-1 px-4 py-2.5 bg-slate-700 hover:bg-slate-600 text-slate-300 rounded-lg font-medium text-sm">
+            <button data-testid="review-modal-cancel-btn" type="button" onClick={onClose} className="flex-1 px-4 py-2.5 bg-slate-700 hover:bg-slate-600 text-slate-300 rounded-lg font-medium text-sm">
               Cancelar
             </button>
-            <button type="submit" disabled={loading}
+            <button data-testid="review-modal-submit-btn" type="submit" disabled={loading}
               className="flex-1 px-4 py-2.5 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-lg font-semibold text-sm transition flex items-center justify-center gap-2"
             >
               {loading ? (
