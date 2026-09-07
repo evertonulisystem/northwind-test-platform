@@ -23,6 +23,11 @@ import { verifyToken, getTokenFromRequest } from '@/lib/jwt';
  *         name: slug
  *         schema: { type: string }
  *         description: Slug do produto para busca
+ *       - in: query
+ *         name: name
+ *         schema: { type: string }
+ *         description: Nome completo e exato do produto (prioridade id, sku, slug, name)
+ *         example: Mouse Gamer RGB Pro Wireless
  *     responses:
  *       200:
  *         description: Produto encontrado
@@ -76,13 +81,14 @@ export async function GET(request) {
     const id = searchParams.get('id');
     const sku = searchParams.get('sku');
     const slug = searchParams.get('slug');
+    const name = searchParams.get('name')?.trim();
 
     // Validação: pelo menos um parâmetro deve ser fornecido
-    if (!id && !sku && !slug) {
+    if (!id && !sku && !slug && !name) {
       return NextResponse.json(
         normalizeApiBody({
           data: null,
-          mensagens: ['Pelo menos um parâmetro deve ser fornecido: id, sku ou slug.'] 
+          mensagens: ['Pelo menos um parâmetro deve ser fornecido: id, sku, slug ou name.']
         }),
         { status: 400 }
       );
@@ -122,6 +128,8 @@ export async function GET(request) {
       query = query.eq('sku', sku.trim().toUpperCase());
     } else if (slug) {
       query = query.eq('slug', slug.trim().toLowerCase());
+    } else if (name) {
+      query = query.eq('name', name);
     }
 
     const { data, error } = await query.single();
