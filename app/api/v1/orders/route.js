@@ -1,3 +1,4 @@
+import { normalizeApiBody } from '@/lib/api-envelope';
 // app/api/v1/orders/route.js
 import { supabase } from "@/lib/supabase";
 import { NextResponse } from "next/server";
@@ -71,7 +72,7 @@ async function getOrders(request, { user }) {
 
     if (status && !ALLOWED_ORDER_STATUSES.includes(status)) {
       return NextResponse.json(
-        { data: null, mensagens: ["Status de pedido inválido."] },
+        normalizeApiBody({ data: null, mensagens: ["Status de pedido inválido."] }),
         { status: 400 },
       );
     }
@@ -84,12 +85,12 @@ async function getOrders(request, { user }) {
       (maxTotalRaw && Number.isNaN(maxTotal))
     ) {
       return NextResponse.json(
-        {
+        normalizeApiBody({
           data: null,
           mensagens: [
             "Filtro de valor inválido. Use números para min_total/max_total.",
           ],
-        },
+        }),
         { status: 400 },
       );
     }
@@ -99,10 +100,10 @@ async function getOrders(request, { user }) {
 
     if (hasFrom !== hasTo) {
       return NextResponse.json(
-        {
+        normalizeApiBody({
           data: null,
           mensagens: ["Preencha as duas datas para filtrar por período."],
-        },
+        }),
         { status: 400 },
       );
     }
@@ -113,31 +114,31 @@ async function getOrders(request, { user }) {
 
     if ((hasFrom && !fromDate) || (hasTo && !toDate)) {
       return NextResponse.json(
-        { data: null, mensagens: ["Data inválida informada para o filtro."] },
+        normalizeApiBody({ data: null, mensagens: ["Data inválida informada para o filtro."] }),
         { status: 400 },
       );
     }
 
     if (fromDate && fromDate.getTime() > today.getTime()) {
       return NextResponse.json(
-        { data: null, mensagens: ["A data não pode ser maior que hoje."] },
+        normalizeApiBody({ data: null, mensagens: ["A data não pode ser maior que hoje."] }),
         { status: 400 },
       );
     }
 
     if (toDate && toDate.getTime() > today.getTime()) {
       return NextResponse.json(
-        { data: null, mensagens: ["A data não pode ser maior que hoje."] },
+        normalizeApiBody({ data: null, mensagens: ["A data não pode ser maior que hoje."] }),
         { status: 400 },
       );
     }
 
     if (fromDate && toDate && toDate.getTime() < fromDate.getTime()) {
       return NextResponse.json(
-        {
+        normalizeApiBody({
           data: null,
           mensagens: ["A data final não pode ser anterior à data inicial."],
-        },
+        }),
         { status: 400 },
       );
     }
@@ -205,7 +206,7 @@ async function getOrders(request, { user }) {
           : "Você ainda não possui pedidos.";
 
       return NextResponse.json(
-        {
+        normalizeApiBody({
           data: [],
           pagination: {
             page,
@@ -214,12 +215,12 @@ async function getOrders(request, { user }) {
             totalPages: Math.ceil((count || 0) / limit),
           },
           mensagens: [noFilterMessage],
-        },
+        }),
         { status: 200 },
       );
     }
 
-    return NextResponse.json({
+    return NextResponse.json(normalizeApiBody({
       data: data,
       pagination: {
         page,
@@ -228,15 +229,15 @@ async function getOrders(request, { user }) {
         totalPages: Math.ceil((count || 0) / limit),
       },
       mensagens: ["Histórico de pedidos carregado."],
-    });
+    }));
   } catch (error) {
     console.error("Erro ao buscar pedidos:", error);
     return NextResponse.json(
-      {
+      normalizeApiBody({
         data: [],
         pagination: { page: 1, limit: 10, total: 0, totalPages: 0 },
         mensagens: ["Erro ao buscar histórico de pedidos."],
-      },
+      }),
       { status: 500 },
     );
   }
@@ -294,7 +295,7 @@ async function checkout(request, { user }) {
     if (cartError) throw cartError;
     if (!cartItems || cartItems.length === 0) {
       return NextResponse.json(
-        { data: null, mensagens: ["Seu carrinho está vazio."] },
+        normalizeApiBody({ data: null, mensagens: ["Seu carrinho está vazio."] }),
         { status: 400 },
       );
     }
@@ -304,12 +305,12 @@ async function checkout(request, { user }) {
     for (const item of cartItems) {
       if (item.products.stock_quantity < item.quantity) {
         return NextResponse.json(
-          {
+          normalizeApiBody({
             data: null,
             mensagens: [
               `Estoque insuficiente para o produto: ${item.products.name}. Disponível: ${item.products.stock_quantity}`,
             ],
-          },
+          }),
           { status: 400 },
         );
       }
@@ -364,27 +365,27 @@ async function checkout(request, { user }) {
     await supabase.from("cart_items").delete().eq("user_id", user.id);
 
     return NextResponse.json(
-      {
+      normalizeApiBody({
         data: {
           id: order.id,
           order_number: order.order_number,
           total: totalAmount,
         },
         mensagens: ["Pedido realizado com sucesso!"],
-      },
+      }),
       { status: 201 },
     );
   } catch (error) {
     console.error("Erro no checkout:", error);
     return NextResponse.json(
-      {
+      normalizeApiBody({
         data: null,
         mensagens: [
           "Erro ao processar pedido.",
           error.message || "Erro desconhecido",
         ],
         debug: error,
-      },
+      }),
       { status: 500 },
     );
   }

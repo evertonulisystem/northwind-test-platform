@@ -1,5 +1,6 @@
 "use client";
 
+import ToastMessage from "@/components/ToastMessage";
 import { useState, useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { toast } from "react-toastify";
@@ -40,7 +41,7 @@ export default function SupplierProductsPage() {
       const result = await res.json();
 
       if (!res.ok) {
-        toast.error(result.mensagens?.[0] || "Erro ao carregar produtos");
+        toast.error(<ToastMessage testId="suppliers-detail-products-fetch-supplier-products-error-toast">{result.mensagens?.[0] || "Erro ao carregar produtos"}</ToastMessage>);
         return;
       }
 
@@ -67,7 +68,7 @@ export default function SupplierProductsPage() {
         setSupplier({ name: "Fornecedor", id: params.id });
       }
     } catch (error) {
-      toast.error("Erro de conexão");
+      toast.error(<ToastMessage testId="suppliers-detail-products-fetch-supplier-products-error-toast-2">{"Erro de conexão"}</ToastMessage>);
     } finally {
       setLoading(false);
     }
@@ -88,15 +89,15 @@ export default function SupplierProductsPage() {
       });
 
       if (res.ok) {
-        toast.success("Produto desvinculado do fornecedor com sucesso!");
+        toast.success(<ToastMessage testId="suppliers-detail-products-handle-remove-from-supplier-success-toast">{"Produto desvinculado do fornecedor com sucesso!"}</ToastMessage>);
         // Refresh the product list
         fetchSupplierProducts(currentPage);
       } else {
         const result = await res.json();
-        toast.error(result.mensagens?.[0] || "Erro ao desvincular produto");
+        toast.error(<ToastMessage testId="suppliers-detail-products-handle-remove-from-supplier-error-toast">{result.mensagens?.[0] || "Erro ao desvincular produto"}</ToastMessage>);
       }
     } catch (error) {
-      toast.error("Erro de conexão");
+      toast.error(<ToastMessage testId="suppliers-detail-products-handle-remove-from-supplier-error-toast-2">{"Erro de conexão"}</ToastMessage>);
     }
   };
 
@@ -124,7 +125,7 @@ export default function SupplierProductsPage() {
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="mb-8 text-center">
-          <button
+          <button data-testid="supplier-products-back-btn"
             onClick={() => router.push("/suppliers")}
             className="inline-flex items-center gap-2 text-white hover:text-blue-300 mb-4 transition"
           >
@@ -225,7 +226,7 @@ export default function SupplierProductsPage() {
                           {product.stock_quantity} unid.
                         </td>
                         <td className="px-4 py-2 text-center">
-                          <button
+                          <button data-testid={`supplier-unlink-product-${product.id}`}
                             onClick={() => handleRemoveFromSupplier(product.id)}
                             className="bg-orange-600 hover:bg-orange-700 text-white px-3 py-1.5 rounded-lg transition flex items-center justify-center gap-1 mx-auto"
                           >
@@ -245,7 +246,7 @@ export default function SupplierProductsPage() {
                 </p>
                 {pagination.totalPages > 1 && (
                   <div className="flex items-center gap-3">
-                    <button
+                    <button data-testid="supplier-products-previous-page-btn"
                       onClick={() =>
                         setCurrentPage((prev) => Math.max(1, prev - 1))
                       }
@@ -264,7 +265,7 @@ export default function SupplierProductsPage() {
                         {pagination.totalPages}
                       </span>
                     </span>
-                    <button
+                    <button data-testid="supplier-products-next-page-btn"
                       onClick={() =>
                         setCurrentPage((prev) =>
                           Math.min(pagination.totalPages, prev + 1),

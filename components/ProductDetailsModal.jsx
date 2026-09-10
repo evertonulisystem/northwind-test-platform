@@ -1,4 +1,5 @@
 // app/components/ProductDetailsModal.jsx
+import ToastMessage from "@/components/ToastMessage";
 import { X, Search, ShoppingCart, Plus, Minus, Loader2 } from 'lucide-react';
 import { useState } from 'react';
 import { toast } from 'react-toastify';
@@ -52,7 +53,7 @@ export default function ProductDetailsModal({ product, onClose }) {
       setAddingToCart(true);
       const token = localStorage.getItem('token');
       if (!token) {
-        toast.error('Você precisa estar logado para adicionar ao carrinho.');
+        toast.error(<ToastMessage testId="product-details-modal-handle-add-to-cart-error-toast">{'Você precisa estar logado para adicionar ao carrinho.'}</ToastMessage>);
         return;
       }
 
@@ -70,15 +71,15 @@ export default function ProductDetailsModal({ product, onClose }) {
 
       const result = await res.json();
       if (res.ok) {
-        toast.success(`${product.name} adicionado ao carrinho!`, {
+        toast.success(<ToastMessage testId="product-details-modal-handle-add-to-cart-success-toast">{`${product.name} adicionado ao carrinho!`}</ToastMessage>, {
           icon: '🛒',
         });
         onClose();
       } else {
-        toast.error(result.mensagens?.[0] || 'Erro ao adicionar ao carrinho');
+        toast.error(<ToastMessage testId="product-details-modal-handle-add-to-cart-error-toast-2">{result.mensagens?.[0] || 'Erro ao adicionar ao carrinho'}</ToastMessage>);
       }
     } catch (error) {
-      toast.error('Erro de conexão ao adicionar ao carrinho');
+      toast.error(<ToastMessage testId="product-details-modal-handle-add-to-cart-error-toast-3">{'Erro de conexão ao adicionar ao carrinho'}</ToastMessage>);
     } finally {
       setAddingToCart(false);
     }

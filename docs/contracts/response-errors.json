@@ -1,0 +1,1891 @@
+{
+  "post /api/v1/admin/hash-password": {
+    "errors": {
+      "400": {
+        "example": {
+          "error": "Password required"
+        },
+        "source": "app/api/v1/admin/hash-password/route.js:8"
+      },
+      "500": {
+        "example": {
+          "error": "Exemplo de erro retornado pela API"
+        },
+        "source": "app/api/v1/admin/hash-password/route.js:20"
+      }
+    },
+    "source": "app/api/v1/admin/hash-password/route.js"
+  },
+  "post /api/v1/auth/login": {
+    "errors": {
+      "400": {
+        "example": {
+          "data": null,
+          "mensagens": [
+            "Senha deve ter pelo menos 6 caracteres"
+          ]
+        },
+        "source": "app/api/v1/auth/login/route.js:103"
+      },
+      "401": {
+        "example": {
+          "data": null,
+          "mensagens": [
+            "Email ou senha inválidos"
+          ]
+        },
+        "source": "app/api/v1/auth/login/route.js:144"
+      },
+      "403": {
+        "example": {
+          "data": null,
+          "mensagens": [
+            "Usuário inativo"
+          ]
+        },
+        "source": "app/api/v1/auth/login/route.js:131"
+      },
+      "404": {
+        "example": {
+          "data": null,
+          "mensagens": [
+            "Usuário não encontrado. Verifique o email ou cadastre-se."
+          ]
+        },
+        "source": "app/api/v1/auth/login/route.js:120"
+      },
+      "500": {
+        "example": {
+          "data": null,
+          "mensagens": [
+            "Erro interno do servidor"
+          ]
+        },
+        "source": "app/api/v1/auth/login/route.js:178"
+      }
+    },
+    "source": "app/api/v1/auth/login/route.js"
+  },
+  "get /api/v1/auth/me": {
+    "errors": {
+      "401": {
+        "example": {
+          "data": null,
+          "mensagens": [
+            "Exemplo de erro retornado pela API"
+          ]
+        },
+        "source": "app/api/v1/auth/me/route.js:35"
+      },
+      "404": {
+        "example": {
+          "data": null,
+          "mensagens": [
+            "Usuário não encontrado"
+          ]
+        },
+        "source": "app/api/v1/auth/me/route.js:59"
+      }
+    },
+    "source": "app/api/v1/auth/me/route.js"
+  },
+  "post /api/v1/auth/register": {
+    "errors": {
+      "400": {
+        "example": {
+          "data": null,
+          "mensagens": [
+            "As senhas não coincidem. Verifique e tente novamente"
+          ]
+        },
+        "source": "app/api/v1/auth/register/route.js:195"
+      },
+      "409": {
+        "example": {
+          "data": null,
+          "mensagens": [
+            "Email já cadastrado. Tente fazer login ou use outro email"
+          ]
+        },
+        "source": "app/api/v1/auth/register/route.js:212"
+      },
+      "500": {
+        "example": {
+          "data": null,
+          "mensagens": [
+            "Erro interno do servidor. Tente novamente mais tarde"
+          ]
+        },
+        "source": "app/api/v1/auth/register/route.js:268"
+      }
+    },
+    "source": "app/api/v1/auth/register/route.js"
+  },
+  "post /api/v1/auth/validate": {
+    "errors": {
+      "400": {
+        "example": {
+          "valid": false,
+          "message": "Campo não suportado para validação"
+        },
+        "source": "app/api/v1/auth/validate/route.js:96"
+      },
+      "500": {
+        "example": {
+          "valid": false,
+          "message": "Erro interno de validação"
+        },
+        "source": "app/api/v1/auth/validate/route.js:108"
+      }
+    },
+    "source": "app/api/v1/auth/validate/route.js"
+  },
+  "get /api/v1/cart": {
+    "errors": {
+      "401": {
+        "example": {
+          "error": "No token provided"
+        },
+        "source": "lib/auth.js:requireAuth"
+      },
+      "404": {
+        "example": {
+          "data": [],
+          "mensagens": [
+            "Seu carrinho está vazio."
+          ]
+        },
+        "source": "app/api/v1/cart/route.js:44"
+      },
+      "500": {
+        "example": {
+          "data": null,
+          "mensagens": [
+            "Erro ao buscar itens do carrinho."
+          ]
+        },
+        "source": "app/api/v1/cart/route.js:56"
+      }
+    },
+    "source": "app/api/v1/cart/route.js"
+  },
+  "post /api/v1/cart": {
+    "errors": {
+      "400": {
+        "example": {
+          "data": null,
+          "mensagens": [
+            "Estoque insuficiente para a quantidade total desejada. Disponível: 1"
+          ]
+        },
+        "source": "app/api/v1/cart/route.js:141"
+      },
+      "401": {
+        "example": {
+          "error": "No token provided"
+        },
+        "source": "lib/auth.js:requireAuth"
+      },
+      "404": {
+        "example": {
+          "data": null,
+          "mensagens": [
+            "Produto não encontrado."
+          ]
+        },
+        "source": "app/api/v1/cart/route.js:111"
+      },
+      "500": {
+        "example": {
+          "data": null,
+          "mensagens": [
+            "Erro interno ao processar carrinho."
+          ]
+        },
+        "source": "app/api/v1/cart/route.js:179"
+      }
+    },
+    "source": "app/api/v1/cart/route.js"
+  },
+  "delete /api/v1/cart": {
+    "errors": {
+      "401": {
+        "example": {
+          "error": "No token provided"
+        },
+        "source": "lib/auth.js:requireAuth"
+      },
+      "500": {
+        "example": {
+          "data": null,
+          "mensagens": [
+            "Erro ao limpar carrinho."
+          ]
+        },
+        "source": "app/api/v1/cart/route.js:213"
+      }
+    },
+    "source": "app/api/v1/cart/route.js"
+  },
+  "patch /api/v1/cart/{id}": {
+    "errors": {
+      "400": {
+        "example": {
+          "data": null,
+          "mensagens": [
+            "Estoque insuficiente. Disponível: 1"
+          ]
+        },
+        "source": "app/api/v1/cart/[id]/route.js:74"
+      },
+      "401": {
+        "example": {
+          "error": "No token provided"
+        },
+        "source": "lib/auth.js:requireAuth"
+      },
+      "403": {
+        "example": {
+          "data": null,
+          "mensagens": [
+            "Acesso negado."
+          ]
+        },
+        "source": "app/api/v1/cart/[id]/route.js:67"
+      },
+      "404": {
+        "example": {
+          "data": null,
+          "mensagens": [
+            "Item do carrinho não encontrado."
+          ]
+        },
+        "source": "app/api/v1/cart/[id]/route.js:59"
+      },
+      "500": {
+        "example": {
+          "data": null,
+          "mensagens": [
+            "Erro ao atualizar item."
+          ]
+        },
+        "source": "app/api/v1/cart/[id]/route.js:96"
+      }
+    },
+    "source": "app/api/v1/cart/[id]/route.js"
+  },
+  "delete /api/v1/cart/{id}": {
+    "errors": {
+      "401": {
+        "example": {
+          "error": "No token provided"
+        },
+        "source": "lib/auth.js:requireAuth"
+      },
+      "403": {
+        "example": {
+          "data": null,
+          "mensagens": [
+            "Acesso negado."
+          ]
+        },
+        "source": "app/api/v1/cart/[id]/route.js:139"
+      },
+      "404": {
+        "example": {
+          "data": null,
+          "mensagens": [
+            "Item não encontrado no carrinho."
+          ]
+        },
+        "source": "app/api/v1/cart/[id]/route.js:132"
+      },
+      "500": {
+        "example": {
+          "data": null,
+          "mensagens": [
+            "Erro ao remover item."
+          ]
+        },
+        "source": "app/api/v1/cart/[id]/route.js:159"
+      }
+    },
+    "source": "app/api/v1/cart/[id]/route.js"
+  },
+  "get /api/v1/categories": {
+    "errors": {
+      "400": {
+        "example": {
+          "data": null,
+          "mensagens": [
+            "Limite deve estar entre 1 e 1000."
+          ]
+        },
+        "source": "app/api/v1/categories/route.js:139"
+      },
+      "401": {
+        "example": {
+          "data": null,
+          "mensagens": [
+            "Exemplo de erro retornado pela API"
+          ]
+        },
+        "source": "app/api/v1/categories/route.js:119"
+      },
+      "500": {
+        "example": {
+          "data": null,
+          "mensagens": [
+            "Erro ao carregar categorias.",
+            "Exemplo de erro retornado pela API"
+          ]
+        },
+        "source": "app/api/v1/categories/route.js:195"
+      }
+    },
+    "source": "app/api/v1/categories/route.js"
+  },
+  "post /api/v1/categories": {
+    "errors": {
+      "400": {
+        "example": {
+          "data": null,
+          "mensagens": [
+            "Exemplo de erro retornado pela API"
+          ]
+        },
+        "source": "app/api/v1/categories/route.js:371"
+      },
+      "401": {
+        "example": {
+          "data": null,
+          "mensagens": [
+            "Token inválido"
+          ]
+        },
+        "source": "app/api/v1/categories/route.js:295"
+      }
+    },
+    "source": "app/api/v1/categories/route.js"
+  },
+  "patch /api/v1/categories": {
+    "errors": {
+      "400": {
+        "example": {
+          "data": null,
+          "mensagens": [
+            "Pelo menos um campo (name ou description) deve ser fornecido."
+          ]
+        },
+        "source": "app/api/v1/categories/route.js:485"
+      },
+      "401": {
+        "example": {
+          "data": null,
+          "mensagens": [
+            "Token inválido"
+          ]
+        },
+        "source": "app/api/v1/categories/route.js:474"
+      },
+      "404": {
+        "example": {
+          "data": null,
+          "mensagens": [
+            "Categoria não encontrada."
+          ]
+        },
+        "source": "app/api/v1/categories/route.js:504"
+      },
+      "500": {
+        "example": {
+          "data": null,
+          "mensagens": [
+            "Erro ao atualizar categoria."
+          ]
+        },
+        "source": "app/api/v1/categories/route.js:534"
+      }
+    },
+    "source": "app/api/v1/categories/route.js"
+  },
+  "get /api/v1/categories/{id}/products": {
+    "errors": {
+      "400": {
+        "example": {
+          "data": null,
+          "mensagens": [
+            "ID da categoria inválido. Deve ser um número positivo."
+          ]
+        },
+        "source": "app/api/v1/categories/[id]/products/route.js:147"
+      },
+      "401": {
+        "example": {
+          "data": null,
+          "mensagens": [
+            "Exemplo de erro retornado pela API"
+          ],
+          "expires_at": null
+        },
+        "source": "app/api/v1/categories/[id]/products/route.js:132"
+      },
+      "404": {
+        "example": {
+          "data": null,
+          "mensagens": [
+            "Categoria com ID 1 não encontrada."
+          ]
+        },
+        "source": "app/api/v1/categories/[id]/products/route.js:170"
+      },
+      "500": {
+        "example": {
+          "data": null,
+          "mensagens": [
+            "Erro interno ao buscar produtos da categoria."
+          ]
+        },
+        "source": "app/api/v1/categories/[id]/products/route.js:250"
+      }
+    },
+    "source": "app/api/v1/categories/[id]/products/route.js"
+  },
+  "get /api/v1/categories/{id}": {
+    "errors": {
+      "400": {
+        "example": {
+          "data": null,
+          "mensagens": [
+            "ID da categoria inválido. Deve ser um número positivo."
+          ]
+        },
+        "source": "app/api/v1/categories/[id]/route.js:120"
+      },
+      "401": {
+        "example": {
+          "data": null,
+          "mensagens": [
+            "Exemplo de erro retornado pela API"
+          ],
+          "expires_at": null
+        },
+        "source": "app/api/v1/categories/[id]/route.js:105"
+      },
+      "404": {
+        "example": {
+          "data": null,
+          "mensagens": [
+            "Categoria com ID 1 não encontrada."
+          ]
+        },
+        "source": "app/api/v1/categories/[id]/route.js:148"
+      },
+      "500": {
+        "example": {
+          "data": null,
+          "mensagens": [
+            "Erro interno ao buscar categoria."
+          ]
+        },
+        "source": "app/api/v1/categories/[id]/route.js:162"
+      }
+    },
+    "source": "app/api/v1/categories/[id]/route.js"
+  },
+  "put /api/v1/categories/{id}": {
+    "errors": {
+      "400": {
+        "example": {
+          "data": null,
+          "mensagens": [
+            "Campos obrigatórios não foram preenchidos."
+          ]
+        },
+        "source": "app/api/v1/categories/[id]/route.js:566"
+      },
+      "401": {
+        "example": {
+          "data": null,
+          "mensagens": [
+            "Exemplo de erro retornado pela API"
+          ],
+          "expires_at": null
+        },
+        "source": "app/api/v1/categories/[id]/route.js:415"
+      },
+      "404": {
+        "example": {
+          "data": null,
+          "mensagens": [
+            "Categoria com ID 1 não encontrada."
+          ]
+        },
+        "source": "app/api/v1/categories/[id]/route.js:526"
+      },
+      "409": {
+        "example": {
+          "data": null,
+          "mensagens": [
+            "Já existe uma categoria com este nome."
+          ]
+        },
+        "source": "app/api/v1/categories/[id]/route.js:544"
+      },
+      "500": {
+        "example": {
+          "data": null,
+          "mensagens": [
+            "Exemplo de erro retornado pela API"
+          ]
+        },
+        "source": "app/api/v1/categories/[id]/route.js:585"
+      }
+    },
+    "source": "app/api/v1/categories/[id]/route.js"
+  },
+  "patch /api/v1/categories/{id}": {
+    "errors": {
+      "400": {
+        "example": {
+          "data": null,
+          "mensagens": [
+            "Descrição deve ter no máximo 200 caracteres."
+          ]
+        },
+        "source": "app/api/v1/categories/[id]/route.js:958"
+      },
+      "401": {
+        "example": {
+          "data": null,
+          "mensagens": [
+            "Exemplo de erro retornado pela API"
+          ],
+          "expires_at": null
+        },
+        "source": "app/api/v1/categories/[id]/route.js:815"
+      },
+      "404": {
+        "example": {
+          "data": null,
+          "mensagens": [
+            "Categoria com ID 1 não encontrada."
+          ]
+        },
+        "source": "app/api/v1/categories/[id]/route.js:872"
+      },
+      "409": {
+        "example": {
+          "data": null,
+          "mensagens": [
+            "Já existe uma categoria com este nome."
+          ]
+        },
+        "source": "app/api/v1/categories/[id]/route.js:921"
+      },
+      "500": {
+        "example": {
+          "data": null,
+          "mensagens": [
+            "Exemplo de erro retornado pela API"
+          ]
+        },
+        "source": "app/api/v1/categories/[id]/route.js:993"
+      }
+    },
+    "source": "app/api/v1/categories/[id]/route.js"
+  },
+  "delete /api/v1/categories/{id}": {
+    "errors": {
+      "400": {
+        "example": {
+          "data": null,
+          "mensagens": [
+            "Não é possível excluir. Esta categoria está sendo usada por produtos."
+          ]
+        },
+        "source": "app/api/v1/categories/[id]/route.js:1073"
+      },
+      "401": {
+        "example": {
+          "data": null,
+          "mensagens": [
+            "Exemplo de erro retornado pela API"
+          ],
+          "expires_at": null
+        },
+        "source": "app/api/v1/categories/[id]/route.js:1020"
+      },
+      "404": {
+        "example": {
+          "data": null,
+          "mensagens": [
+            "Categoria com ID 1 não encontrada."
+          ]
+        },
+        "source": "app/api/v1/categories/[id]/route.js:1054"
+      },
+      "500": {
+        "example": {
+          "data": null,
+          "mensagens": [
+            "Exemplo de erro retornado pela API"
+          ]
+        },
+        "source": "app/api/v1/categories/[id]/route.js:1117"
+      }
+    },
+    "source": "app/api/v1/categories/[id]/route.js"
+  },
+  "get /api/v1/debug/error-500": {
+    "errors": {
+      "401": {
+        "example": {
+          "data": null,
+          "mensagens": [
+            "Exemplo de erro retornado pela API"
+          ]
+        },
+        "source": "app/api/v1/debug/error-500/route.js:30"
+      },
+      "500": {
+        "example": {
+          "data": null,
+          "mensagens": [
+            "Exemplo de erro retornado pela API"
+          ]
+        },
+        "source": "app/api/v1/debug/error-500/route.js:50"
+      }
+    },
+    "source": "app/api/v1/debug/error-500/route.js"
+  },
+  "get /api/v1/debug/simple": {
+    "errors": {},
+    "source": "app/api/v1/debug/simple/route.js"
+  },
+  "get /api/v1/debug/token": {
+    "errors": {},
+    "source": "app/api/v1/debug/token/route.js"
+  },
+  "get /api/v1/health": {
+    "errors": {
+      "503": {
+        "example": {
+          "status": "error",
+          "message": "Supabase inativo",
+          "timestamp": "Exemplo de erro retornado pela API",
+          "error": "Exemplo de erro retornado pela API",
+          "services": {
+            "database": {
+              "status": "disconnected",
+              "error": "Exemplo de erro retornado pela API"
+            },
+            "auth": {
+              "status": "unknown"
+            }
+          }
+        },
+        "source": "app/api/v1/health/route.js:146"
+      }
+    },
+    "source": "app/api/v1/health/route.js"
+  },
+  "get /api/v1/keepalive": {
+    "errors": {
+      "500": {
+        "example": {
+          "status": "error",
+          "message": "Exemplo de erro retornado pela API"
+        },
+        "source": "app/api/v1/keepalive/route.js:33"
+      }
+    },
+    "source": "app/api/v1/keepalive/route.js"
+  },
+  "get /api/v1/orders": {
+    "errors": {
+      "400": {
+        "example": {
+          "data": null,
+          "mensagens": [
+            "A data final não pode ser anterior à data inicial."
+          ]
+        },
+        "source": "app/api/v1/orders/route.js:136"
+      },
+      "401": {
+        "example": {
+          "error": "No token provided"
+        },
+        "source": "lib/auth.js:requireAuth"
+      },
+      "500": {
+        "example": {
+          "data": [],
+          "pagination": {
+            "page": 1,
+            "limit": 10,
+            "total": 0,
+            "totalPages": 0
+          },
+          "mensagens": [
+            "Erro ao buscar histórico de pedidos."
+          ]
+        },
+        "source": "app/api/v1/orders/route.js:234"
+      }
+    },
+    "source": "app/api/v1/orders/route.js"
+  },
+  "post /api/v1/orders": {
+    "errors": {
+      "400": {
+        "example": {
+          "data": null,
+          "mensagens": [
+            "Estoque insuficiente para o produto: 1. Disponível: 1"
+          ]
+        },
+        "source": "app/api/v1/orders/route.js:306"
+      },
+      "401": {
+        "example": {
+          "error": "No token provided"
+        },
+        "source": "lib/auth.js:requireAuth"
+      },
+      "500": {
+        "example": {
+          "data": null,
+          "mensagens": [
+            "Erro ao processar pedido.",
+            "Exemplo de erro retornado pela API"
+          ],
+          "debug": "Exemplo de erro retornado pela API"
+        },
+        "source": "app/api/v1/orders/route.js:379"
+      }
+    },
+    "source": "app/api/v1/orders/route.js"
+  },
+  "get /api/v1/orders/{id}/history": {
+    "errors": {
+      "401": {
+        "example": {
+          "error": "No token provided"
+        },
+        "source": "lib/auth.js:requireAuth"
+      },
+      "404": {
+        "example": {
+          "data": null,
+          "mensagens": [
+            "Pedido não encontrado ou sem permissão."
+          ]
+        },
+        "source": "app/api/v1/orders/[id]/history/route.js:51"
+      },
+      "500": {
+        "example": {
+          "data": null,
+          "mensagens": [
+            "Erro interno ao buscar histórico."
+          ]
+        },
+        "source": "app/api/v1/orders/[id]/history/route.js:88"
+      }
+    },
+    "source": "app/api/v1/orders/[id]/history/route.js"
+  },
+  "get /api/v1/orders/{id}/payments": {
+    "errors": {
+      "401": {
+        "example": {
+          "error": "No token provided"
+        },
+        "source": "lib/auth.js:requireAuth"
+      },
+      "404": {
+        "example": {
+          "data": [],
+          "mensagens": [
+            "Nenhum pagamento encontrado para este pedido."
+          ]
+        },
+        "source": "app/api/v1/orders/[id]/payments/route.js:78"
+      },
+      "500": {
+        "example": {
+          "data": null,
+          "mensagens": [
+            "Erro interno ao buscar pagamentos."
+          ]
+        },
+        "source": "app/api/v1/orders/[id]/payments/route.js:93"
+      }
+    },
+    "source": "app/api/v1/orders/[id]/payments/route.js"
+  },
+  "get /api/v1/orders/{id}": {
+    "errors": {
+      "401": {
+        "example": {
+          "error": "No token provided"
+        },
+        "source": "lib/auth.js:requireAuth"
+      },
+      "404": {
+        "example": {
+          "data": null,
+          "mensagens": [
+            "Pedido não encontrado."
+          ]
+        },
+        "source": "app/api/v1/orders/[id]/route.js:58"
+      },
+      "500": {
+        "example": {
+          "data": null,
+          "mensagens": [
+            "Erro ao buscar detalhes do pedido."
+          ]
+        },
+        "source": "app/api/v1/orders/[id]/route.js:94"
+      }
+    },
+    "source": "app/api/v1/orders/[id]/route.js"
+  },
+  "get /api/v1/products": {
+    "errors": {
+      "400": {
+        "example": {
+          "data": null,
+          "mensagens": [
+            "Ordem '1' não é permitida. Use: asc ou desc."
+          ]
+        },
+        "source": "app/api/v1/products/route.js:246"
+      },
+      "401": {
+        "example": {
+          "data": null,
+          "mensagens": [
+            "Exemplo de erro retornado pela API"
+          ],
+          "expires_at": null
+        },
+        "source": "app/api/v1/products/route.js:153"
+      },
+      "404": {
+        "example": {
+          "data": null,
+          "mensagens": [
+            "Nenhum produto encontrado para os filtros aplicados."
+          ]
+        },
+        "source": "app/api/v1/products/route.js:270"
+      },
+      "500": {
+        "example": {
+          "data": [],
+          "pagination": {
+            "page": 1,
+            "limit": 10,
+            "total": 0,
+            "totalPages": 0
+          },
+          "mensagens": [
+            "Erro interno ao carregar produtos."
+          ]
+        },
+        "source": "app/api/v1/products/route.js:304"
+      }
+    },
+    "source": "app/api/v1/products/route.js"
+  },
+  "post /api/v1/products": {
+    "errors": {
+      "400": {
+        "example": {
+          "data": null,
+          "mensagens": [
+            "Exemplo de erro retornado pela API"
+          ]
+        },
+        "source": "app/api/v1/products/route.js:599"
+      },
+      "401": {
+        "example": {
+          "data": null,
+          "mensagens": [
+            "Exemplo de erro retornado pela API"
+          ],
+          "expires_at": null
+        },
+        "source": "app/api/v1/products/route.js:432"
+      },
+      "409": {
+        "example": {
+          "data": null,
+          "mensagens": [
+            "Já existe um produto com esse SKU."
+          ]
+        },
+        "source": "app/api/v1/products/route.js:530"
+      }
+    },
+    "source": "app/api/v1/products/route.js"
+  },
+  "get /api/v1/products/search": {
+    "errors": {
+      "400": {
+        "example": {
+          "data": null,
+          "mensagens": [
+            "ID deve ser um número positivo válido."
+          ]
+        },
+        "source": "app/api/v1/products/search/route.js:111"
+      },
+      "401": {
+        "example": {
+          "data": null,
+          "mensagens": [
+            "Exemplo de erro retornado pela API"
+          ],
+          "expires_at": null
+        },
+        "source": "app/api/v1/products/search/route.js:64"
+      },
+      "404": {
+        "example": {
+          "data": null,
+          "mensagens": [
+            "Produto não encontrado."
+          ]
+        },
+        "source": "app/api/v1/products/search/route.js:146"
+      },
+      "500": {
+        "example": {
+          "data": null,
+          "mensagens": [
+            "Erro interno ao buscar produto."
+          ]
+        },
+        "source": "app/api/v1/products/search/route.js:164"
+      }
+    },
+    "source": "app/api/v1/products/search/route.js"
+  },
+  "get /api/v1/products/simulate-error": {
+    "errors": {
+      "401": {
+        "example": {
+          "data": null,
+          "mensagens": [
+            "Exemplo de erro retornado pela API"
+          ],
+          "expires_at": null
+        },
+        "source": "app/api/v1/products/simulate-error/route.js:34"
+      },
+      "500": {
+        "example": {
+          "data": null,
+          "mensagens": [
+            "Exemplo de erro retornado pela API"
+          ]
+        },
+        "source": "app/api/v1/products/simulate-error/route.js:48"
+      }
+    },
+    "source": "app/api/v1/products/simulate-error/route.js"
+  },
+  "delete /api/v1/products/storage/cleanup": {
+    "errors": {
+      "403": {
+        "example": {
+          "data": null,
+          "mensagens": [
+            "Acesso negado. Você não tem permissão para limpar o storage. Passe a chave correta no header \"x-admin-key\"."
+          ]
+        },
+        "source": "app/api/v1/products/storage/cleanup/route.js:36"
+      },
+      "500": {
+        "example": {
+          "data": null,
+          "mensagens": [
+            "Erro interno ao executar a faxina.",
+            "Exemplo de erro retornado pela API"
+          ]
+        },
+        "source": "app/api/v1/products/storage/cleanup/route.js:84"
+      }
+    },
+    "source": "app/api/v1/products/storage/cleanup/route.js"
+  },
+  "post /api/v1/products/validate": {
+    "errors": {
+      "400": {
+        "example": {
+          "valid": false,
+          "errors": [
+            "JSON inválido"
+          ],
+          "warnings": [],
+          "suggestions": [
+            "Verifique o formato do JSON enviado"
+          ]
+        },
+        "source": "app/api/v1/products/validate/route.js:104"
+      },
+      "401": {
+        "example": {
+          "valid": false,
+          "errors": [
+            "Token inválido"
+          ],
+          "warnings": [],
+          "suggestions": []
+        },
+        "source": "app/api/v1/products/validate/route.js:88"
+      },
+      "500": {
+        "example": {
+          "valid": false,
+          "errors": [
+            "Erro interno na validação"
+          ],
+          "warnings": [],
+          "suggestions": [
+            "Tente novamente em instantes"
+          ]
+        },
+        "source": "app/api/v1/products/validate/route.js:321"
+      }
+    },
+    "source": "app/api/v1/products/validate/route.js"
+  },
+  "post /api/v1/products/{id}/image": {
+    "errors": {
+      "400": {
+        "example": {
+          "data": null,
+          "mensagens": [
+            "Arquivo muito grande. Tamanho máximo permitido: 2MB. Tamanho atual: 1MB"
+          ]
+        },
+        "source": "app/api/v1/products/[id]/image/route.js:107"
+      },
+      "401": {
+        "example": {
+          "data": null,
+          "mensagens": [
+            "Exemplo de erro retornado pela API"
+          ]
+        },
+        "source": "app/api/v1/products/[id]/image/route.js:67"
+      },
+      "404": {
+        "example": {
+          "data": null,
+          "mensagens": [
+            "Produto com ID 1 não encontrado."
+          ]
+        },
+        "source": "app/api/v1/products/[id]/image/route.js:78"
+      },
+      "500": {
+        "example": {
+          "data": null,
+          "mensagens": [
+            "Erro interno ao processar upload.",
+            "Exemplo de erro retornado pela API"
+          ]
+        },
+        "source": "app/api/v1/products/[id]/image/route.js:157"
+      }
+    },
+    "source": "app/api/v1/products/[id]/image/route.js"
+  },
+  "get /api/v1/products/{id}/image": {
+    "errors": {
+      "500": {
+        "example": {
+          "data": null,
+          "mensagens": [
+            "Erro ao buscar imagens.",
+            "Exemplo de erro retornado pela API"
+          ]
+        },
+        "source": "app/api/v1/products/[id]/image/route.js:218"
+      }
+    },
+    "source": "app/api/v1/products/[id]/image/route.js"
+  },
+  "get /api/v1/products/{id}/image/{fileId}": {
+    "errors": {
+      "404": {
+        "example": {
+          "data": null,
+          "mensagens": [
+            "Imagem não encontrada para este ID."
+          ]
+        },
+        "source": "app/api/v1/products/[id]/image/[fileId]/route.js:80"
+      },
+      "500": {
+        "example": {
+          "data": null,
+          "mensagens": [
+            "Erro interno ao buscar a imagem.",
+            "Exemplo de erro retornado pela API"
+          ]
+        },
+        "source": "app/api/v1/products/[id]/image/[fileId]/route.js:96"
+      }
+    },
+    "source": "app/api/v1/products/[id]/image/[fileId]/route.js"
+  },
+  "post /api/v1/products/{id}/pdf": {
+    "errors": {
+      "400": {
+        "example": {
+          "data": null,
+          "mensagens": [
+            "Arquivo muito grande. Tamanho máximo permitido: 2MB. Tamanho atual: 1MB"
+          ]
+        },
+        "source": "app/api/v1/products/[id]/pdf/route.js:97"
+      },
+      "401": {
+        "example": {
+          "data": null,
+          "mensagens": [
+            "Exemplo de erro retornado pela API"
+          ]
+        },
+        "source": "app/api/v1/products/[id]/pdf/route.js:67"
+      },
+      "404": {
+        "example": {
+          "data": null,
+          "mensagens": [
+            "Produto com ID 1 não encontrado."
+          ]
+        },
+        "source": "app/api/v1/products/[id]/pdf/route.js:78"
+      },
+      "500": {
+        "example": {
+          "data": null,
+          "mensagens": [
+            "Erro interno ao processar upload.",
+            "Exemplo de erro retornado pela API"
+          ]
+        },
+        "source": "app/api/v1/products/[id]/pdf/route.js:147"
+      }
+    },
+    "source": "app/api/v1/products/[id]/pdf/route.js"
+  },
+  "get /api/v1/products/{id}/pdf": {
+    "errors": {
+      "500": {
+        "example": {
+          "data": null,
+          "mensagens": [
+            "Erro ao buscar PDFs.",
+            "Exemplo de erro retornado pela API"
+          ]
+        },
+        "source": "app/api/v1/products/[id]/pdf/route.js:208"
+      }
+    },
+    "source": "app/api/v1/products/[id]/pdf/route.js"
+  },
+  "get /api/v1/products/{id}/pdf/{fileId}": {
+    "errors": {
+      "404": {
+        "example": {
+          "data": null,
+          "mensagens": [
+            "PDF não encontrado para este ID."
+          ]
+        },
+        "source": "app/api/v1/products/[id]/pdf/[fileId]/route.js:80"
+      },
+      "500": {
+        "example": {
+          "data": null,
+          "mensagens": [
+            "Erro interno ao buscar o PDF.",
+            "Exemplo de erro retornado pela API"
+          ]
+        },
+        "source": "app/api/v1/products/[id]/pdf/[fileId]/route.js:96"
+      }
+    },
+    "source": "app/api/v1/products/[id]/pdf/[fileId]/route.js"
+  },
+  "get /api/v1/products/{id}/reviews": {
+    "errors": {
+      "400": {
+        "example": {
+          "data": null,
+          "mensagens": [
+            "ID do produto inválido."
+          ]
+        },
+        "source": "app/api/v1/products/[id]/reviews/route.js:47"
+      },
+      "401": {
+        "example": {
+          "data": null,
+          "mensagens": [
+            "Exemplo de erro retornado pela API"
+          ]
+        },
+        "source": "app/api/v1/products/[id]/reviews/route.js:38"
+      },
+      "404": {
+        "example": {
+          "data": null,
+          "mensagens": [
+            "Produto não encontrado."
+          ]
+        },
+        "source": "app/api/v1/products/[id]/reviews/route.js:62"
+      },
+      "500": {
+        "example": {
+          "data": null,
+          "mensagens": [
+            "Erro interno ao buscar avaliações do produto."
+          ]
+        },
+        "source": "app/api/v1/products/[id]/reviews/route.js:116"
+      }
+    },
+    "source": "app/api/v1/products/[id]/reviews/route.js"
+  },
+  "get /api/v1/products/{id}": {
+    "errors": {
+      "400": {
+        "example": {
+          "data": null,
+          "mensagens": [
+            "ID do produto inválido. Deve ser um número positivo."
+          ]
+        },
+        "source": "app/api/v1/products/[id]/route.js:125"
+      },
+      "401": {
+        "example": {
+          "data": null,
+          "mensagens": [
+            "Exemplo de erro retornado pela API"
+          ],
+          "expires_at": null
+        },
+        "source": "app/api/v1/products/[id]/route.js:110"
+      },
+      "404": {
+        "example": {
+          "data": null,
+          "mensagens": [
+            "Produto com ID 1 não encontrado."
+          ]
+        },
+        "source": "app/api/v1/products/[id]/route.js:155"
+      },
+      "500": {
+        "example": {
+          "data": null,
+          "mensagens": [
+            "Erro interno ao buscar produto."
+          ]
+        },
+        "source": "app/api/v1/products/[id]/route.js:169"
+      }
+    },
+    "source": "app/api/v1/products/[id]/route.js"
+  },
+  "put /api/v1/products/{id}": {
+    "errors": {
+      "400": {
+        "example": {
+          "data": null,
+          "mensagens": [
+            "SKU é obrigatório."
+          ]
+        },
+        "source": "app/api/v1/products/[id]/route.js:329"
+      },
+      "401": {
+        "example": {
+          "data": null,
+          "mensagens": [
+            "Exemplo de erro retornado pela API"
+          ],
+          "expires_at": null
+        },
+        "source": "app/api/v1/products/[id]/route.js:295"
+      },
+      "404": {
+        "example": {
+          "data": null,
+          "mensagens": [
+            "Produto com ID 1 não encontrado."
+          ]
+        },
+        "source": "app/api/v1/products/[id]/route.js:367"
+      },
+      "409": {
+        "example": {
+          "data": null,
+          "mensagens": [
+            "Já existe outro produto com esse nome/slug."
+          ]
+        },
+        "source": "app/api/v1/products/[id]/route.js:393"
+      },
+      "500": {
+        "example": {
+          "data": null,
+          "mensagens": [
+            "Exemplo de erro retornado pela API"
+          ]
+        },
+        "source": "app/api/v1/products/[id]/route.js:488"
+      }
+    },
+    "source": "app/api/v1/products/[id]/route.js"
+  },
+  "patch /api/v1/products/{id}": {
+    "errors": {
+      "400": {
+        "example": {
+          "data": null,
+          "mensagens": [
+            "ID do fornecedor deve ser um número positivo ou nulo."
+          ]
+        },
+        "source": "app/api/v1/products/[id]/route.js:757"
+      },
+      "401": {
+        "example": {
+          "data": null,
+          "mensagens": [
+            "Exemplo de erro retornado pela API"
+          ],
+          "expires_at": null
+        },
+        "source": "app/api/v1/products/[id]/route.js:579"
+      },
+      "404": {
+        "example": {
+          "data": null,
+          "mensagens": [
+            "Produto com ID 1 não encontrado."
+          ]
+        },
+        "source": "app/api/v1/products/[id]/route.js:629"
+      },
+      "409": {
+        "example": {
+          "data": null,
+          "mensagens": [
+            "Já existe outro produto com esse SKU."
+          ]
+        },
+        "source": "app/api/v1/products/[id]/route.js:730"
+      },
+      "500": {
+        "example": {
+          "data": null,
+          "mensagens": [
+            "Exemplo de erro retornado pela API"
+          ]
+        },
+        "source": "app/api/v1/products/[id]/route.js:837"
+      }
+    },
+    "source": "app/api/v1/products/[id]/route.js"
+  },
+  "delete /api/v1/products/{id}": {
+    "errors": {
+      "400": {
+        "example": {
+          "data": null,
+          "mensagens": [
+            "ID do produto inválido. Deve ser um número positivo."
+          ]
+        },
+        "source": "app/api/v1/products/[id]/route.js:880"
+      },
+      "401": {
+        "example": {
+          "data": null,
+          "mensagens": [
+            "Exemplo de erro retornado pela API"
+          ],
+          "expires_at": null
+        },
+        "source": "app/api/v1/products/[id]/route.js:865"
+      },
+      "404": {
+        "example": {
+          "data": null,
+          "mensagens": [
+            "Produto com ID 1 não encontrado."
+          ]
+        },
+        "source": "app/api/v1/products/[id]/route.js:899"
+      },
+      "500": {
+        "example": {
+          "data": null,
+          "mensagens": [
+            "Exemplo de erro retornado pela API"
+          ]
+        },
+        "source": "app/api/v1/products/[id]/route.js:943"
+      }
+    },
+    "source": "app/api/v1/products/[id]/route.js"
+  },
+  "post /api/v1/register": {
+    "errors": {
+      "400": {
+        "example": {
+          "error": "Email already exists"
+        },
+        "source": "app/api/v1/register/route.js:43"
+      },
+      "500": {
+        "example": {
+          "error": "Internal server error"
+        },
+        "source": "app/api/v1/register/route.js:94"
+      }
+    },
+    "source": "app/api/v1/register/route.js"
+  },
+  "get /api/v1/reports/top-products": {
+    "errors": {
+      "400": {
+        "example": {
+          "data": null,
+          "mensagens": [
+            "Valor de top inválido. Use 10, 20, 50 ou 100."
+          ]
+        },
+        "source": "app/api/v1/reports/top-products/route.js:66"
+      },
+      "401": {
+        "example": {
+          "error": "No token provided"
+        },
+        "source": "lib/auth.js:requireAuth"
+      },
+      "500": {
+        "example": {
+          "data": null,
+          "mensagens": [
+            "Erro interno ao gerar relatório."
+          ]
+        },
+        "source": "app/api/v1/reports/top-products/route.js:188"
+      }
+    },
+    "source": "app/api/v1/reports/top-products/route.js"
+  },
+  "get /api/v1/reviews": {
+    "errors": {
+      "401": {
+        "example": {
+          "data": null,
+          "mensagens": [
+            "Exemplo de erro retornado pela API"
+          ]
+        },
+        "source": "app/api/v1/reviews/route.js:40"
+      },
+      "500": {
+        "example": {
+          "data": null,
+          "mensagens": [
+            "Erro interno ao carregar avaliações."
+          ]
+        },
+        "source": "app/api/v1/reviews/route.js:103"
+      }
+    },
+    "source": "app/api/v1/reviews/route.js"
+  },
+  "post /api/v1/reviews": {
+    "errors": {
+      "400": {
+        "example": {
+          "data": null,
+          "mensagens": [
+            "O campo rating deve ser um inteiro entre 1 e 5."
+          ]
+        },
+        "source": "app/api/v1/reviews/route.js:175"
+      },
+      "401": {
+        "example": {
+          "data": null,
+          "mensagens": [
+            "Exemplo de erro retornado pela API"
+          ],
+          "expires_at": null
+        },
+        "source": "app/api/v1/reviews/route.js:139"
+      },
+      "404": {
+        "example": {
+          "data": null,
+          "mensagens": [
+            "Produto não encontrado."
+          ]
+        },
+        "source": "app/api/v1/reviews/route.js:189"
+      },
+      "500": {
+        "example": {
+          "data": null,
+          "mensagens": [
+            "Erro interno ao criar avaliação."
+          ]
+        },
+        "source": "app/api/v1/reviews/route.js:247"
+      }
+    },
+    "source": "app/api/v1/reviews/route.js"
+  },
+  "get /api/v1/reviews/without-reviews": {
+    "errors": {
+      "401": {
+        "example": {
+          "data": null,
+          "mensagens": [
+            "Exemplo de erro retornado pela API"
+          ]
+        },
+        "source": "app/api/v1/reviews/without-reviews/route.js:43"
+      },
+      "500": {
+        "example": {
+          "data": null,
+          "mensagens": [
+            "Erro interno ao buscar produtos sem avaliação."
+          ]
+        },
+        "source": "app/api/v1/reviews/without-reviews/route.js:107"
+      }
+    },
+    "source": "app/api/v1/reviews/without-reviews/route.js"
+  },
+  "get /api/v1/shippers": {
+    "errors": {
+      "401": {
+        "example": {
+          "error": "No token provided"
+        },
+        "source": "lib/auth.js:requireAuth"
+      },
+      "500": {
+        "example": {
+          "data": null,
+          "mensagens": [
+            "Erro ao buscar transportadoras."
+          ]
+        },
+        "source": "app/api/v1/shippers/route.js:37"
+      }
+    },
+    "source": "app/api/v1/shippers/route.js"
+  },
+  "get /api/v1/suppliers": {
+    "errors": {
+      "401": {
+        "example": {
+          "data": null,
+          "mensagens": [
+            "Exemplo de erro retornado pela API"
+          ],
+          "expires_at": null
+        },
+        "source": "app/api/v1/suppliers/route.js:42"
+      },
+      "500": {
+        "example": {
+          "data": null,
+          "mensagens": [
+            "Erro ao carregar fornecedores."
+          ]
+        },
+        "source": "app/api/v1/suppliers/route.js:96"
+      }
+    },
+    "source": "app/api/v1/suppliers/route.js"
+  },
+  "post /api/v1/suppliers": {
+    "errors": {
+      "400": {
+        "example": {
+          "data": null,
+          "mensagens": [
+            "Exemplo de erro retornado pela API"
+          ]
+        },
+        "source": "app/api/v1/suppliers/route.js:457"
+      },
+      "401": {
+        "example": {
+          "data": null,
+          "mensagens": [
+            "Exemplo de erro retornado pela API"
+          ],
+          "expires_at": null
+        },
+        "source": "app/api/v1/suppliers/route.js:179"
+      },
+      "409": {
+        "example": {
+          "data": null,
+          "mensagens": [
+            "Já existe um fornecedor com este CNPJ."
+          ]
+        },
+        "source": "app/api/v1/suppliers/route.js:393"
+      }
+    },
+    "source": "app/api/v1/suppliers/route.js"
+  },
+  "get /api/v1/suppliers/{id}/products": {
+    "errors": {
+      "400": {
+        "example": {
+          "data": null,
+          "mensagens": [
+            "ID do fornecedor inválido. Deve ser um número positivo."
+          ]
+        },
+        "source": "app/api/v1/suppliers/[id]/products/route.js:74"
+      },
+      "401": {
+        "example": {
+          "data": null,
+          "mensagens": [
+            "Exemplo de erro retornado pela API"
+          ],
+          "expires_at": null
+        },
+        "source": "app/api/v1/suppliers/[id]/products/route.js:59"
+      },
+      "404": {
+        "example": {
+          "data": null,
+          "mensagens": [
+            "Fornecedor com ID 1 não encontrado."
+          ]
+        },
+        "source": "app/api/v1/suppliers/[id]/products/route.js:97"
+      },
+      "500": {
+        "example": {
+          "data": null,
+          "mensagens": [
+            "Erro interno ao buscar produtos do fornecedor."
+          ]
+        },
+        "source": "app/api/v1/suppliers/[id]/products/route.js:143"
+      }
+    },
+    "source": "app/api/v1/suppliers/[id]/products/route.js"
+  },
+  "get /api/v1/suppliers/{id}": {
+    "errors": {
+      "400": {
+        "example": {
+          "data": null,
+          "mensagens": [
+            "ID do fornecedor inválido. Deve ser um número positivo."
+          ]
+        },
+        "source": "app/api/v1/suppliers/[id]/route.js:62"
+      },
+      "401": {
+        "example": {
+          "data": null,
+          "mensagens": [
+            "Exemplo de erro retornado pela API"
+          ],
+          "expires_at": null
+        },
+        "source": "app/api/v1/suppliers/[id]/route.js:47"
+      },
+      "404": {
+        "example": {
+          "data": null,
+          "mensagens": [
+            "Fornecedor com ID 1 não encontrado."
+          ]
+        },
+        "source": "app/api/v1/suppliers/[id]/route.js:79"
+      },
+      "500": {
+        "example": {
+          "data": null,
+          "mensagens": [
+            "Erro interno ao buscar detalhes do fornecedor."
+          ]
+        },
+        "source": "app/api/v1/suppliers/[id]/route.js:100"
+      }
+    },
+    "source": "app/api/v1/suppliers/[id]/route.js"
+  },
+  "put /api/v1/suppliers/{id}": {
+    "errors": {
+      "400": {
+        "example": {
+          "data": null,
+          "mensagens": [
+            "UF inválida. Informe a sigla de 2 letras do estado (ex: SP, RJ, MG)."
+          ]
+        },
+        "source": "app/api/v1/suppliers/[id]/route.js:379"
+      },
+      "401": {
+        "example": {
+          "data": null,
+          "mensagens": [
+            "Exemplo de erro retornado pela API"
+          ],
+          "expires_at": null
+        },
+        "source": "app/api/v1/suppliers/[id]/route.js:191"
+      },
+      "404": {
+        "example": {
+          "data": null,
+          "mensagens": [
+            "Fornecedor com ID 1 não encontrado."
+          ]
+        },
+        "source": "app/api/v1/suppliers/[id]/route.js:398"
+      },
+      "409": {
+        "example": {
+          "data": null,
+          "mensagens": [
+            "Já existe um fornecedor com este CNPJ."
+          ]
+        },
+        "source": "app/api/v1/suppliers/[id]/route.js:434"
+      },
+      "500": {
+        "example": {
+          "data": null,
+          "mensagens": [
+            "Exemplo de erro retornado pela API"
+          ]
+        },
+        "source": "app/api/v1/suppliers/[id]/route.js:500"
+      }
+    },
+    "source": "app/api/v1/suppliers/[id]/route.js"
+  },
+  "delete /api/v1/suppliers/{id}": {
+    "errors": {
+      "400": {
+        "example": {
+          "data": null,
+          "mensagens": [
+            "Não é possível excluir. Este fornecedor está sendo usado por produtos."
+          ]
+        },
+        "source": "app/api/v1/suppliers/[id]/route.js:602"
+      },
+      "401": {
+        "example": {
+          "data": null,
+          "mensagens": [
+            "Exemplo de erro retornado pela API"
+          ],
+          "expires_at": null
+        },
+        "source": "app/api/v1/suppliers/[id]/route.js:549"
+      },
+      "404": {
+        "example": {
+          "data": null,
+          "mensagens": [
+            "Fornecedor com ID 1 não encontrado."
+          ]
+        },
+        "source": "app/api/v1/suppliers/[id]/route.js:583"
+      },
+      "500": {
+        "example": {
+          "data": null,
+          "mensagens": [
+            "Exemplo de erro retornado pela API"
+          ]
+        },
+        "source": "app/api/v1/suppliers/[id]/route.js:646"
+      }
+    },
+    "source": "app/api/v1/suppliers/[id]/route.js"
+  },
+  "post /api/v1/suppliers/{id}/unlink": {
+    "errors": {
+      "400": {
+        "example": {
+          "data": null,
+          "mensagens": [
+            "Nenhum ID de produto válido fornecido."
+          ]
+        },
+        "source": "app/api/v1/suppliers/[id]/unlink/route.js:143"
+      },
+      "401": {
+        "example": {
+          "data": null,
+          "mensagens": [
+            "Exemplo de erro retornado pela API"
+          ],
+          "expires_at": null
+        },
+        "source": "app/api/v1/suppliers/[id]/unlink/route.js:73"
+      },
+      "404": {
+        "example": {
+          "data": null,
+          "mensagens": [
+            "Nenhum produto encontrado vinculado a este fornecedor."
+          ]
+        },
+        "source": "app/api/v1/suppliers/[id]/unlink/route.js:171"
+      },
+      "500": {
+        "example": {
+          "data": null,
+          "mensagens": [
+            "Exemplo de erro retornado pela API"
+          ]
+        },
+        "source": "app/api/v1/suppliers/[id]/unlink/route.js:214"
+      }
+    },
+    "source": "app/api/v1/suppliers/[id]/unlink/route.js"
+  }
+}

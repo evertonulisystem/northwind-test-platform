@@ -1,5 +1,6 @@
 "use client";
 
+import ToastMessage from "@/components/ToastMessage";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
@@ -92,13 +93,13 @@ export default function SuppliersPage() {
       console.log("🔍 DEBUG - suppliers API result:", result);
 
       if (!res.ok) {
-        toast.error(result.mensagens?.[0] || "Erro ao carregar fornecedores");
+        toast.error(<ToastMessage testId="suppliers-fetch-suppliers-error-toast">{result.mensagens?.[0] || "Erro ao carregar fornecedores"}</ToastMessage>);
         return;
       }
 
       setSuppliers(result.data || []);
     } catch (error) {
-      toast.error("Erro de conexão");
+      toast.error(<ToastMessage testId="suppliers-fetch-suppliers-error-toast-2">{"Erro de conexão"}</ToastMessage>);
     } finally {
       setLoading(false);
     }
@@ -182,7 +183,7 @@ export default function SuppliersPage() {
     console.log("🔍 DEBUG - handleSubmit chamado");
 
     if (!validateForm()) {
-      toast.error("Corrija os erros antes de salvar");
+      toast.error(<ToastMessage testId="suppliers-handle-submit-error-toast">{"Corrija os erros antes de salvar"}</ToastMessage>);
       return;
     }
 
@@ -198,7 +199,7 @@ export default function SuppliersPage() {
       const token = localStorage.getItem("token");
 
       if (!token) {
-        toast.error("Você precisa estar logado");
+        toast.error(<ToastMessage testId="suppliers-handle-submit-error-toast-2">{"Você precisa estar logado"}</ToastMessage>);
         setLoading(false);
         return;
       }
@@ -215,17 +216,17 @@ export default function SuppliersPage() {
       const result = await res.json();
 
       if (!res.ok) {
-        toast.error(result.mensagens?.[0] || "Erro ao cadastrar");
+        toast.error(<ToastMessage testId="suppliers-handle-submit-error-toast-3">{result.mensagens?.[0] || "Erro ao cadastrar"}</ToastMessage>);
         setLoading(false);
         return;
       }
 
-      toast.success("Fornecedor cadastrado com sucesso!");
+      toast.success(<ToastMessage testId="suppliers-handle-submit-success-toast">{"Fornecedor cadastrado com sucesso!"}</ToastMessage>);
       fetchSuppliers();
       setShowAddModal(false);
       resetForm();
     } catch (error) {
-      toast.error("Erro de rede");
+      toast.error(<ToastMessage testId="suppliers-handle-submit-error-toast-4">{"Erro de rede"}</ToastMessage>);
     } finally {
       setLoading(false);
     }
@@ -243,7 +244,7 @@ export default function SuppliersPage() {
     };
 
     if (!validateForm()) {
-      toast.error("Corrija os erros antes de salvar");
+      toast.error(<ToastMessage testId="suppliers-handle-update-error-toast">{"Corrija os erros antes de salvar"}</ToastMessage>);
       return;
     }
 
@@ -262,7 +263,7 @@ export default function SuppliersPage() {
       const token = localStorage.getItem("token");
 
       if (!token) {
-        toast.error("Você precisa estar logado");
+        toast.error(<ToastMessage testId="suppliers-handle-update-error-toast-2">{"Você precisa estar logado"}</ToastMessage>);
         setLoading(false);
         return;
       }
@@ -281,19 +282,19 @@ export default function SuppliersPage() {
       console.log("🔍 DEBUG - Resposta da API:", result);
 
       if (!res.ok) {
-        toast.error(result.mensagens?.[0] || "Erro ao atualizar");
+        toast.error(<ToastMessage testId="suppliers-handle-update-error-toast-3">{result.mensagens?.[0] || "Erro ao atualizar"}</ToastMessage>);
         setLoading(false);
         return;
       }
 
-      toast.success("Fornecedor atualizado com sucesso!");
+      toast.success(<ToastMessage testId="suppliers-handle-update-success-toast">{"Fornecedor atualizado com sucesso!"}</ToastMessage>);
       fetchSuppliers();
       setShowEditModal(false);
       setEditingSupplier(null);
       resetForm();
     } catch (error) {
       console.error("🔍 DEBUG - Erro na requisição:", error);
-      toast.error("Erro de rede");
+      toast.error(<ToastMessage testId="suppliers-handle-update-error-toast-4">{"Erro de rede"}</ToastMessage>);
     } finally {
       setLoading(false);
     }
@@ -306,7 +307,7 @@ export default function SuppliersPage() {
       const token = localStorage.getItem("token");
 
       if (!token) {
-        toast.error("Você precisa estar logado");
+        toast.error(<ToastMessage testId="suppliers-handle-delete-error-toast">{"Você precisa estar logado"}</ToastMessage>);
         return;
       }
 
@@ -332,19 +333,19 @@ export default function SuppliersPage() {
             return;
           }
         } else {
-          toast.error(result.mensagens?.[0] || "Erro ao excluir fornecedor");
+          toast.error(<ToastMessage testId="suppliers-handle-delete-error-toast-2">{result.mensagens?.[0] || "Erro ao excluir fornecedor"}</ToastMessage>);
         }
         setShowConfirm(false);
         setDeleteId(null);
         return;
       }
 
-      toast.success("Fornecedor excluído com sucesso!");
+      toast.success(<ToastMessage testId="suppliers-handle-delete-success-toast">{"Fornecedor excluído com sucesso!"}</ToastMessage>);
       fetchSuppliers();
       setShowConfirm(false);
       setDeleteId(null);
     } catch (error) {
-      toast.error("Erro de conexão ao excluir fornecedor");
+      toast.error(<ToastMessage testId="suppliers-handle-delete-error-toast-3">{"Erro de conexão ao excluir fornecedor"}</ToastMessage>);
       setShowConfirm(false);
       setDeleteId(null);
     }
@@ -354,7 +355,7 @@ export default function SuppliersPage() {
     fetchSuppliers();
     setShowUnlinkModal(false);
     setUnlinkingSupplier(null);
-    toast.success("Agora você pode excluir o fornecedor!");
+    toast.success(<ToastMessage testId="suppliers-handle-unlink-success-success-toast">{"Agora você pode excluir o fornecedor!"}</ToastMessage>);
   };
 
   const formatCNPJ = (value) => {
@@ -415,7 +416,7 @@ export default function SuppliersPage() {
             </p>
 
             <div className="flex justify-center gap-4">
-              <button
+              <button data-testid="new-supplier-btn"
                 onClick={() => setShowAddModal(true)}
                 className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-xl font-semibold shadow-lg transition transform hover:scale-105 flex items-center gap-2"
               >
@@ -423,7 +424,7 @@ export default function SuppliersPage() {
                 Novo Fornecedor
               </button>
 
-              <button
+              <button data-testid="suppliers-back-to-products-btn"
                 onClick={() => window.open("/products", "_blank")}
                 className="bg-slate-700 hover:bg-slate-600 text-white px-8 py-3 rounded-xl font-semibold shadow-lg transition flex items-center gap-2"
               >
@@ -467,7 +468,7 @@ export default function SuppliersPage() {
                   : "Nenhum fornecedor cadastrado"}
               </p>
               {!searchTerm && (
-                <button
+                <button data-testid="create-first-supplier-btn"
                   onClick={() => setShowAddModal(true)}
                   className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg transition"
                 >
@@ -536,7 +537,7 @@ export default function SuppliersPage() {
                       </div>
 
                       <div className="flex flex-wrap gap-2 pt-4 border-t border-slate-700 mt-auto">
-                        <button
+                        <button data-testid={`supplier-view-products-${supplier.id}`}
                           onClick={() =>
                             router.push(`/suppliers/${supplier.id}/products`)
                           }
@@ -545,7 +546,7 @@ export default function SuppliersPage() {
                           <Eye className="w-4 h-4" />
                           Ver Produtos
                         </button>
-                        <button
+                        <button data-testid={`edit-supplier-${supplier.id}`}
                           onClick={() => {
                             setEditingSupplier(supplier);
                             setFormData({
@@ -563,7 +564,7 @@ export default function SuppliersPage() {
                           <Edit className="w-4 h-4" />
                           Editar
                         </button>
-                        <button
+                        <button data-testid={`unlink-supplier-${supplier.id}`}
                           onClick={() => {
                             setUnlinkingSupplier(supplier);
                             setShowUnlinkModal(true);
@@ -574,7 +575,7 @@ export default function SuppliersPage() {
                           <Unlink className="w-4 h-4" />
                           Desvincular
                         </button>
-                        <button
+                        <button data-testid={`delete-supplier-${supplier.id}`}
                           onClick={() => {
                             setDeleteId(supplier.id);
                             setShowConfirm(true);
@@ -593,7 +594,7 @@ export default function SuppliersPage() {
               {/* Pagination Controls */}
               {totalPages > 1 && (
                 <div className="flex justify-center items-center gap-4 mt-8">
-                  <button
+                  <button data-testid="suppliers-previous-page-btn"
                     onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
                     disabled={currentPage === 1}
                     className="px-4 py-2 rounded-lg bg-slate-800 border border-slate-600 text-white hover:bg-slate-700 disabled:opacity-50 disabled:cursor-not-allowed transition"
@@ -606,7 +607,7 @@ export default function SuppliersPage() {
                     de{" "}
                     <span className="font-bold text-white">{totalPages}</span>
                   </span>
-                  <button
+                  <button data-testid="suppliers-next-page-btn"
                     onClick={() =>
                       setCurrentPage((p) => Math.min(totalPages, p + 1))
                     }
@@ -649,7 +650,7 @@ export default function SuppliersPage() {
                   placeholder="Tech Solutions Ltda"
                 />
                 {errors.company_name && (
-                  <p className="text-red-400 text-xs mt-1">
+                  <p data-testid="suppliers-suppliers-page-errors-company-name" className="text-red-400 text-xs mt-1">
                     {errors.company_name}
                   </p>
                 )}
@@ -670,7 +671,7 @@ export default function SuppliersPage() {
                   placeholder="João Silva"
                 />
                 {errors.contact_name && (
-                  <p className="text-red-400 text-xs mt-1">
+                  <p data-testid="suppliers-suppliers-page-errors-contact-name" className="text-red-400 text-xs mt-1">
                     {errors.contact_name}
                   </p>
                 )}
@@ -691,7 +692,7 @@ export default function SuppliersPage() {
                   placeholder="joao@techsolutions.com"
                 />
                 {errors.email && (
-                  <p className="text-red-400 text-xs mt-1">{errors.email}</p>
+                  <p data-testid="suppliers-suppliers-page-errors-email" className="text-red-400 text-xs mt-1">{errors.email}</p>
                 )}
               </div>
 
@@ -713,7 +714,7 @@ export default function SuppliersPage() {
                   placeholder="(11) 98765-4321"
                 />
                 {errors.phone && (
-                  <p className="text-red-400 text-xs mt-1">{errors.phone}</p>
+                  <p data-testid="suppliers-suppliers-page-errors-phone" className="text-red-400 text-xs mt-1">{errors.phone}</p>
                 )}
               </div>
 
@@ -735,7 +736,7 @@ export default function SuppliersPage() {
                   placeholder="12.345.678/0001-90"
                 />
                 {errors.cnpj && (
-                  <p className="text-red-400 text-xs mt-1">{errors.cnpj}</p>
+                  <p data-testid="suppliers-suppliers-page-errors-cnpj" className="text-red-400 text-xs mt-1">{errors.cnpj}</p>
                 )}
               </div>
 
@@ -758,13 +759,13 @@ export default function SuppliersPage() {
                   maxLength={2}
                 />
                 {errors.uf && (
-                  <p className="text-red-400 text-xs mt-1">{errors.uf}</p>
+                  <p data-testid="suppliers-suppliers-page-errors-uf" className="text-red-400 text-xs mt-1">{errors.uf}</p>
                 )}
               </div>
             </div>
 
             <div className="p-6 border-t border-slate-700 flex gap-3">
-              <button
+              <button data-testid="save-supplier-btn"
                 type="button"
                 onClick={(e) => {
                   e.preventDefault();
@@ -776,7 +777,7 @@ export default function SuppliersPage() {
               >
                 {loading ? "Salvando..." : "Salvar"}
               </button>
-              <button
+              <button data-testid="cancel-add-supplier-btn"
                 type="button"
                 onClick={() => {
                   setShowAddModal(false);
@@ -818,7 +819,7 @@ export default function SuppliersPage() {
                   placeholder="Tech Solutions Ltda"
                 />
                 {errors.company_name && (
-                  <p className="text-red-400 text-xs mt-1">
+                  <p data-testid="suppliers-suppliers-page-errors-company-name-2" className="text-red-400 text-xs mt-1">
                     {errors.company_name}
                   </p>
                 )}
@@ -839,7 +840,7 @@ export default function SuppliersPage() {
                   placeholder="João Silva"
                 />
                 {errors.contact_name && (
-                  <p className="text-red-400 text-xs mt-1">
+                  <p data-testid="suppliers-suppliers-page-errors-contact-name-2" className="text-red-400 text-xs mt-1">
                     {errors.contact_name}
                   </p>
                 )}
@@ -860,7 +861,7 @@ export default function SuppliersPage() {
                   placeholder="joao@techsolutions.com"
                 />
                 {errors.email && (
-                  <p className="text-red-400 text-xs mt-1">{errors.email}</p>
+                  <p data-testid="suppliers-suppliers-page-errors-email-2" className="text-red-400 text-xs mt-1">{errors.email}</p>
                 )}
               </div>
 
@@ -882,7 +883,7 @@ export default function SuppliersPage() {
                   placeholder="(11) 98765-4321"
                 />
                 {errors.phone && (
-                  <p className="text-red-400 text-xs mt-1">{errors.phone}</p>
+                  <p data-testid="suppliers-suppliers-page-errors-phone-2" className="text-red-400 text-xs mt-1">{errors.phone}</p>
                 )}
               </div>
 
@@ -904,7 +905,7 @@ export default function SuppliersPage() {
                   placeholder="12.345.678/0001-90"
                 />
                 {errors.cnpj && (
-                  <p className="text-red-400 text-xs mt-1">{errors.cnpj}</p>
+                  <p data-testid="suppliers-suppliers-page-errors-cnpj-2" className="text-red-400 text-xs mt-1">{errors.cnpj}</p>
                 )}
               </div>
 
@@ -927,13 +928,13 @@ export default function SuppliersPage() {
                   maxLength={2}
                 />
                 {errors.uf && (
-                  <p className="text-red-400 text-xs mt-1">{errors.uf}</p>
+                  <p data-testid="suppliers-suppliers-page-errors-uf-2" className="text-red-400 text-xs mt-1">{errors.uf}</p>
                 )}
               </div>
             </div>
 
             <div className="p-6 border-t border-slate-700 flex gap-3">
-              <button
+              <button data-testid="update-supplier-btn"
                 type="button"
                 onClick={(e) => {
                   e.preventDefault();
@@ -945,7 +946,7 @@ export default function SuppliersPage() {
               >
                 {loading ? "Atualizando..." : "Atualizar"}
               </button>
-              <button
+              <button data-testid="cancel-edit-supplier-btn"
                 type="button"
                 onClick={() => {
                   setShowEditModal(false);
@@ -972,13 +973,13 @@ export default function SuppliersPage() {
               Tem certeza que deseja excluir este fornecedor?
             </p>
             <div className="flex gap-3">
-              <button
+              <button data-testid="confirm-delete-supplier-btn"
                 onClick={handleDelete}
                 className="flex-1 bg-red-600 text-white py-2 rounded-lg hover:bg-red-700 transition font-semibold"
               >
                 Excluir
               </button>
-              <button
+              <button data-testid="cancel-delete-supplier-btn"
                 onClick={() => {
                   setShowConfirm(false);
                   setDeleteId(null);

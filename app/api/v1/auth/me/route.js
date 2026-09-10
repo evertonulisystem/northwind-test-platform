@@ -1,3 +1,4 @@
+import { normalizeApiBody } from '@/lib/api-envelope';
 // app/api/auth/me/route.js
 import { supabase } from '@/lib/supabase';
 import { verifyToken, getTokenFromRequest } from '@/lib/jwt';
@@ -17,10 +18,10 @@ export async function GET(request) {
   
   if (!token) {
     console.log('❌ Token ausente - retornando erro 401');
-    return Response.json({ 
+    return Response.json(normalizeApiBody({
       data: null,
       mensagens: ['Token ausente'] 
-    }, { status: 401 });
+    }), { status: 401 });
   }
 
   const payload = await verifyToken(token);
@@ -32,10 +33,10 @@ export async function GET(request) {
     const message = payload?.message || 'Token inválido';
     console.log('❌ Token inválido/expirado - retornando erro 401:', message);
     console.log('Payload.error:', payload?.error);
-    return Response.json({ 
+    return Response.json(normalizeApiBody({
       data: null,
       mensagens: [message] 
-    }, { status: 401 });
+    }), { status: 401 });
   }
 
   console.log('✅ Token válido, buscando usuário no Supabase...');
@@ -56,15 +57,15 @@ export async function GET(request) {
   if (error || !user) {
     console.log('❌ Usuário não encontrado ou erro na consulta');
     if (error) console.log('Detalhes do erro:', error);
-    return Response.json({ 
+    return Response.json(normalizeApiBody({
       data: null,
       mensagens: ['Usuário não encontrado'] 
-    }, { status: 404 });
+    }), { status: 404 });
   }
 
   console.log('✅ Usuário encontrado, retornando sucesso');
-  return Response.json({ 
+  return Response.json(normalizeApiBody({
     data: { user },
     mensagens: ['Dados do usuário recuperados com sucesso.']
-  });
+  }));
 }

@@ -1,3 +1,4 @@
+import { normalizeApiBody } from '@/lib/api-envelope';
 // app/api/products/simulate-error/route.js
 import { NextResponse } from 'next/server';
 import { verifyToken, getTokenFromRequest } from '@/lib/jwt';
@@ -20,10 +21,10 @@ export async function GET(request) {
     const token = getTokenFromRequest(request);
     if (!token) {
       return NextResponse.json(
-        { 
+        normalizeApiBody({
           data: null,
           mensagens: ['Token ausente'] 
-        }, 
+        }),
         { status: 401 }
       );
     }
@@ -32,11 +33,11 @@ export async function GET(request) {
     if (!payload || payload.error) {
       const message = payload?.message || 'Token inválido';
       return NextResponse.json(
-        { 
+        normalizeApiBody({
           data: null,
           mensagens: [message],
           expires_at: payload?.expires_at || null
-        }, 
+        }),
         { status: 401 }
       );
     }
@@ -46,10 +47,10 @@ export async function GET(request) {
 
   } catch (error) {
     return NextResponse.json(
-      { 
+      normalizeApiBody({
         data: null, 
         mensagens: [error.message || 'Erro interno do servidor.'] 
-      },
+      }),
       { status: 500 }
     );
   }

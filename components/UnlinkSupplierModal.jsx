@@ -1,5 +1,6 @@
 'use client';
 
+import ToastMessage from "@/components/ToastMessage";
 import { useState, useEffect } from 'react';
 import { toast } from 'react-toastify';
 import { Building2, Package, X, AlertTriangle, CheckCircle, Loader2 } from 'lucide-react';
@@ -31,7 +32,7 @@ export default function UnlinkSupplierModal({ supplier, onClose, onSuccess }) {
       const result = await res.json();
       
       if (!res.ok) {
-        toast.error('Erro ao carregar produtos do fornecedor');
+        toast.error(<ToastMessage testId="unlink-supplier-modal-fetch-supplier-products-error-toast">{'Erro ao carregar produtos do fornecedor'}</ToastMessage>);
         return;
       }
       
@@ -39,7 +40,7 @@ export default function UnlinkSupplierModal({ supplier, onClose, onSuccess }) {
       // Por padrão, seleciona todos os produtos
       setSelectedProducts((result.data || []).map(p => p.id));
     } catch (error) {
-      toast.error('Erro de conexão');
+      toast.error(<ToastMessage testId="unlink-supplier-modal-fetch-supplier-products-error-toast-2">{'Erro de conexão'}</ToastMessage>);
     } finally {
       setLoading(false);
     }
@@ -65,7 +66,7 @@ export default function UnlinkSupplierModal({ supplier, onClose, onSuccess }) {
 
   const handleUnlink = async () => {
     if (selectedProducts.length === 0) {
-      toast.error('Selecione pelo menos um produto');
+      toast.error(<ToastMessage testId="unlink-supplier-modal-handle-unlink-error-toast">{'Selecione pelo menos um produto'}</ToastMessage>);
       return;
     }
 
@@ -75,7 +76,7 @@ export default function UnlinkSupplierModal({ supplier, onClose, onSuccess }) {
       const token = localStorage.getItem('token');
       
       if (!token) {
-        toast.error('Você precisa estar logado');
+        toast.error(<ToastMessage testId="unlink-supplier-modal-handle-unlink-error-toast-2">{'Você precisa estar logado'}</ToastMessage>);
         setUnlinking(false);
         return;
       }
@@ -95,16 +96,16 @@ export default function UnlinkSupplierModal({ supplier, onClose, onSuccess }) {
       const result = await res.json();
 
       if (!res.ok) {
-        toast.error(result.mensagens?.[0] || 'Erro ao desvincular produtos');
+        toast.error(<ToastMessage testId="unlink-supplier-modal-handle-unlink-error-toast-3">{result.mensagens?.[0] || 'Erro ao desvincular produtos'}</ToastMessage>);
         return;
       }
 
       const { updated_count } = result.data || {};
-      toast.success(`${updated_count} produto(s) desvinculado(s) com sucesso!`);
+      toast.success(<ToastMessage testId="unlink-supplier-modal-handle-unlink-success-toast">{`${updated_count} produto(s) desvinculado(s) com sucesso!`}</ToastMessage>);
       onSuccess?.();
       onClose();
     } catch (error) {
-      toast.error('Erro ao desvincular produtos');
+      toast.error(<ToastMessage testId="unlink-supplier-modal-handle-unlink-error-toast-4">{'Erro ao desvincular produtos'}</ToastMessage>);
     } finally {
       setUnlinking(false);
     }

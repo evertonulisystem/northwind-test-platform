@@ -1,3 +1,4 @@
+import { normalizeApiBody } from '@/lib/api-envelope';
 // app/api/v1/cart/[id]/route.js
 import { supabase } from '@/lib/supabase';
 import { NextResponse } from 'next/server';
@@ -43,7 +44,7 @@ async function updateCartItem(request, { params, user }) {
 
     if (!quantity || quantity <= 0) {
       return NextResponse.json(
-        { data: null, mensagens: ['quantity (positivo) é obrigatório.'] },
+        normalizeApiBody({ data: null, mensagens: ['quantity (positivo) é obrigatório.'] }),
         { status: 400 }
       );
     }
@@ -57,7 +58,7 @@ async function updateCartItem(request, { params, user }) {
 
     if (fetchError || !item) {
       return NextResponse.json(
-        { data: null, mensagens: ['Item do carrinho não encontrado.'] },
+        normalizeApiBody({ data: null, mensagens: ['Item do carrinho não encontrado.'] }),
         { status: 404 }
       );
     }
@@ -65,14 +66,14 @@ async function updateCartItem(request, { params, user }) {
     // Segurança: Garantir que o item pertence ao usuário
     if (item.user_id !== user.id) {
        return NextResponse.json(
-        { data: null, mensagens: ['Acesso negado.'] },
+        normalizeApiBody({ data: null, mensagens: ['Acesso negado.'] }),
         { status: 403 }
       );
     }
 
     if (item.products.stock_quantity < quantity) {
       return NextResponse.json(
-        { data: null, mensagens: [`Estoque insuficiente. Disponível: ${item.products.stock_quantity}`] },
+        normalizeApiBody({ data: null, mensagens: [`Estoque insuficiente. Disponível: ${item.products.stock_quantity}`] }),
         { status: 400 }
       );
     }
@@ -86,15 +87,15 @@ async function updateCartItem(request, { params, user }) {
 
     if (updateError) throw updateError;
 
-    return NextResponse.json({
+    return NextResponse.json(normalizeApiBody({
       data: updated,
       mensagens: ['Quantidade atualizada com sucesso.']
-    });
+    }));
 
   } catch (error) {
     console.error('Erro ao atualizar item do carrinho:', error);
     return NextResponse.json(
-      { data: null, mensagens: ['Erro ao atualizar item.'] },
+      normalizeApiBody({ data: null, mensagens: ['Erro ao atualizar item.'] }),
       { status: 500 }
     );
   }
@@ -130,14 +131,14 @@ async function deleteCartItem(request, { params, user }) {
 
     if (fetchError || !item) {
       return NextResponse.json(
-        { data: null, mensagens: ['Item não encontrado no carrinho.'] },
+        normalizeApiBody({ data: null, mensagens: ['Item não encontrado no carrinho.'] }),
         { status: 404 }
       );
     }
 
     if (item.user_id !== user.id) {
       return NextResponse.json(
-        { data: null, mensagens: ['Acesso negado.'] },
+        normalizeApiBody({ data: null, mensagens: ['Acesso negado.'] }),
         { status: 403 }
       );
     }
@@ -149,15 +150,15 @@ async function deleteCartItem(request, { params, user }) {
 
     if (error) throw error;
 
-    return NextResponse.json({
+    return NextResponse.json(normalizeApiBody({
       data: null,
       mensagens: ['Item removido do carrinho.']
-    });
+    }));
 
   } catch (error) {
     console.error('Erro ao remover item do carrinho:', error);
     return NextResponse.json(
-      { data: null, mensagens: ['Erro ao remover item.'] },
+      normalizeApiBody({ data: null, mensagens: ['Erro ao remover item.'] }),
       { status: 500 }
     );
   }

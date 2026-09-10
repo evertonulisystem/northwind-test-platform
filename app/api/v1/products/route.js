@@ -1,3 +1,4 @@
+import { normalizeApiBody } from '@/lib/api-envelope';
 // app/api/v1/products/route.js
 import { supabase } from '@/lib/supabase';
 import { NextResponse } from 'next/server';
@@ -139,10 +140,10 @@ export async function GET(request) {
     const token = getTokenFromRequest(request);
     if (!token) {
       return NextResponse.json(
-        { 
+        normalizeApiBody({
           data: null,
           mensagens: ['Token ausente'] 
-        }, 
+        }),
         { status: 401 }
       );
     }
@@ -151,11 +152,11 @@ export async function GET(request) {
     if (!payload || payload.error) {
       const message = payload?.message || 'Token inválido';
       return NextResponse.json(
-        { 
+        normalizeApiBody({
           data: null,
           mensagens: [message],
           expires_at: payload?.expires_at || null
-        }, 
+        }),
         { status: 401 }
       );
     }
@@ -234,20 +235,20 @@ export async function GET(request) {
     
     if (!allowedSortFields.includes(sortBy)) {
       return NextResponse.json(
-        { 
+        normalizeApiBody({
           data: null, 
           mensagens: [`Campo de ordenação '${sortBy}' não é permitido. Use: ${allowedSortFields.join(', ')}.`] 
-        },
+        }),
         { status: 400 }
       );
     }
     
     if (!allowedOrders.includes(order.toLowerCase())) {
       return NextResponse.json(
-        { 
+        normalizeApiBody({
           data: null, 
           mensagens: [`Ordem '${order}' não é permitida. Use: asc ou desc.`] 
-        },
+        }),
         { status: 400 }
       );
     }
@@ -268,10 +269,10 @@ export async function GET(request) {
     // Se houver filtros (search, category_id ou supplier_id) e não encontrar nada, retorna 404
     if ((search || category_id || supplier_id) && (!data || data.length === 0)) {
       return NextResponse.json(
-        { 
+        normalizeApiBody({
           data: null,
           mensagens: ['Nenhum produto encontrado para os filtros aplicados.'] 
-        },
+        }),
         { status: 404 }
       );
     }
@@ -288,7 +289,7 @@ export async function GET(request) {
     console.log('  - order:', order);
     console.log('  - ascending:', ascending);
 
-    return NextResponse.json({
+    return NextResponse.json(normalizeApiBody({
       data: data || [],
       pagination: {
         page,
@@ -297,15 +298,15 @@ export async function GET(request) {
         totalPages: Math.ceil((count || 0) / limit),
       },
       mensagens: ['Produtos carregados com sucesso.'],
-    });
+    }));
 
   } catch (error) {
     console.error('Erro fatal:', error);
-    return NextResponse.json({
+    return NextResponse.json(normalizeApiBody({
       data: [],
       pagination: { page: 1, limit: 10, total: 0, totalPages: 0 },
       mensagens: ['Erro interno ao carregar produtos.']
-    }, { status: 500 });
+    }), { status: 500 });
   }
 }
 /**
@@ -418,10 +419,10 @@ export async function POST(request) {
     const token = getTokenFromRequest(request);
     if (!token) {
       return NextResponse.json(
-        { 
+        normalizeApiBody({
           data: null,
           mensagens: ['Token ausente'] 
-        }, 
+        }),
         { status: 401 }
       );
     }
@@ -430,11 +431,11 @@ export async function POST(request) {
     if (!payload || payload.error) {
       const message = payload?.message || 'Token inválido';
       return NextResponse.json(
-        { 
+        normalizeApiBody({
           data: null,
           mensagens: [message],
           expires_at: payload?.expires_at || null
-        }, 
+        }),
         { status: 401 }
       );
     }
@@ -444,20 +445,20 @@ export async function POST(request) {
       body = await request.json();
     } catch (jsonError) {
       return NextResponse.json(
-        { 
+        normalizeApiBody({
           data: null, 
           mensagens: ['Dados inválidos. Verifique se todos os campos foram preenchidos corretamente.'] 
-        },
+        }),
         { status: 400 }
       );
     }
 
     if (!body || Object.keys(body).length === 0) {
       return NextResponse.json(
-        { 
+        normalizeApiBody({
           data: null, 
           mensagens: ['Nenhum dado informado. Preencha os campos do produto.'] 
-        },
+        }),
         { status: 400 }
       );
     }
@@ -468,10 +469,10 @@ export async function POST(request) {
     
     if (missingFields.length > 0) {
       return NextResponse.json(
-        { 
+        normalizeApiBody({
           data: null, 
           mensagens: [`Campos obrigatórios não preenchidos: ${missingFields.join(', ')}.`] 
-        },
+        }),
         { status: 400 }
       );
     }
@@ -480,10 +481,10 @@ export async function POST(request) {
     const price = parseFloat(body.price);
     if (isNaN(price) || price <= 0) {
       return NextResponse.json(
-        { 
+        normalizeApiBody({
           data: null, 
           mensagens: ['O preço deve ser um valor positivo maior que zero.'] 
-        },
+        }),
         { status: 400 }
       );
     }
@@ -492,10 +493,10 @@ export async function POST(request) {
     const stockQuantity = parseInt(body.stock_quantity);
     if (isNaN(stockQuantity) || stockQuantity < 0) {
       return NextResponse.json(
-        { 
+        normalizeApiBody({
           data: null, 
           mensagens: ['A quantidade em estoque deve ser um número inteiro maior ou igual a zero.'] 
-        },
+        }),
         { status: 400 }
       );
     }
@@ -511,10 +512,10 @@ export async function POST(request) {
 
     if (existing) {
       return NextResponse.json(
-        { 
+        normalizeApiBody({
           data: null, 
           mensagens: ['Já existe um produto com esse nome/slug.'] 
-        },
+        }),
         { status: 409 }
       );
     }
@@ -528,10 +529,10 @@ export async function POST(request) {
 
     if (skuExists) {
       return NextResponse.json(
-        { 
+        normalizeApiBody({
           data: null, 
           mensagens: ['Já existe um produto com esse SKU.'] 
-        },
+        }),
         { status: 409 }
       );
     }
@@ -557,13 +558,13 @@ export async function POST(request) {
     const projectHost = supabaseUrl ? new URL(supabaseUrl).host : 'desconhecido';
 
     return NextResponse.json(
-      { 
+      normalizeApiBody({
         data: newProduct, 
         mensagens: [
           'Produto criado com sucesso!',
           `Verificado: Salvo no banco Supabase (${projectHost})`
         ] 
-      },
+      }),
       { status: 201 }
     );
   } catch (error) {
@@ -597,10 +598,10 @@ export async function POST(request) {
     }
     
     return NextResponse.json(
-      { 
+      normalizeApiBody({
         data: null, 
         mensagens: [errorMessage] 
-      },
+      }),
       { status: 400 }
     );
   }

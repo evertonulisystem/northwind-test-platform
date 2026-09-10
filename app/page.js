@@ -1,6 +1,7 @@
 // app/page.js
 "use client";
 
+import ToastMessage from "@/components/ToastMessage";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
@@ -55,7 +56,7 @@ export default function LoginPage() {
         localStorage.setItem("user", JSON.stringify(data.data.user));
 
         console.log("✅ Login bem-sucedido, redirecionando...");
-        toast.success("Login realizado com sucesso!");
+        toast.success(<ToastMessage testId="page-handle-submit-success-toast">{"Login realizado com sucesso!"}</ToastMessage>);
 
         // Redirecionar para products
         router.push("/products");
@@ -74,11 +75,11 @@ export default function LoginPage() {
           setErrors({ email: errorMessage });
         }
 
-        toast.error(errorMessage || "Erro ao fazer login");
+        toast.error(<ToastMessage testId="page-handle-submit-error-toast">{errorMessage || "Erro ao fazer login"}</ToastMessage>);
       }
     } catch (error) {
       console.error("❌ Erro na requisição:", error);
-      toast.error("Erro de conexão");
+      toast.error(<ToastMessage testId="page-handle-submit-error-toast-2">{"Erro de conexão"}</ToastMessage>);
     } finally {
       setLoading(false);
     }

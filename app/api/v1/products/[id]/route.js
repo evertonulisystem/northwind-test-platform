@@ -1,3 +1,4 @@
+import { normalizeApiBody } from '@/lib/api-envelope';
 // app/api/products/[id]/route.js
 import { supabase } from '@/lib/supabase';
 import { NextResponse } from 'next/server';
@@ -96,10 +97,10 @@ export async function GET(request, { params }) {
     const token = getTokenFromRequest(request);
     if (!token) {
       return NextResponse.json(
-        { 
+        normalizeApiBody({
           data: null,
           mensagens: ['Token ausente'] 
-        }, 
+        }),
         { status: 401 }
       );
     }
@@ -108,11 +109,11 @@ export async function GET(request, { params }) {
     if (!payload || payload.error) {
       const message = payload?.message || 'Token inválido';
       return NextResponse.json(
-        { 
+        normalizeApiBody({
           data: null,
           mensagens: [message],
           expires_at: payload?.expires_at || null
-        }, 
+        }),
         { status: 401 }
       );
     }
@@ -123,10 +124,10 @@ export async function GET(request, { params }) {
 
     if (isNaN(idNum) || idNum <= 0) {
       return NextResponse.json(
-        { 
+        normalizeApiBody({
           data: null, 
           mensagens: ['ID do produto inválido. Deve ser um número positivo.'] 
-        },
+        }),
         { status: 400 }
       );
     }
@@ -143,34 +144,34 @@ export async function GET(request, { params }) {
     if (error) {
       console.error('Erro ao buscar produto:', error);
       return NextResponse.json(
-        { 
+        normalizeApiBody({
           data: null, 
           mensagens: ['Erro interno ao buscar produto.'] 
-        },
+        }),
         { status: 500 }
       );
     }
 
     if (!product) {
       return NextResponse.json(
-        { 
+        normalizeApiBody({
           data: null, 
           mensagens: [`Produto com ID ${idNum} não encontrado.`] 
-        },
+        }),
         { status: 404 }
       );
     }
 
-    return NextResponse.json({ 
+    return NextResponse.json(normalizeApiBody({
       data: product,
       mensagens: ['Produto carregado com sucesso.']
-    });
+    }));
   } catch (error) {
     return NextResponse.json(
-      { 
+      normalizeApiBody({
         data: null, 
         mensagens: ['Erro interno ao buscar produto.'] 
-      },
+      }),
       { status: 500 }
     );
   }
@@ -281,10 +282,10 @@ export async function PUT(request, { params }) {
     const token = getTokenFromRequest(request);
     if (!token) {
       return NextResponse.json(
-        { 
+        normalizeApiBody({
           data: null,
           mensagens: ['Token ausente'] 
-        }, 
+        }),
         { status: 401 }
       );
     }
@@ -293,11 +294,11 @@ export async function PUT(request, { params }) {
     if (!payload || payload.error) {
       const message = payload?.message || 'Token inválido';
       return NextResponse.json(
-        { 
+        normalizeApiBody({
           data: null,
           mensagens: [message],
           expires_at: payload?.expires_at || null
-        }, 
+        }),
         { status: 401 }
       );
     }
@@ -315,10 +316,10 @@ export async function PUT(request, { params }) {
     
     if (isNaN(idNum) || idNum <= 0) {
       return NextResponse.json(
-        { 
+        normalizeApiBody({
           data: null, 
           mensagens: ['ID do produto inválido. Deve ser um número positivo.'] 
-        },
+        }),
         { status: 400 }
       );
     }
@@ -327,10 +328,10 @@ export async function PUT(request, { params }) {
     const sku = body.sku?.trim();
     if (!sku) {
       return NextResponse.json(
-        { 
+        normalizeApiBody({
           data: null, 
           mensagens: ['SKU é obrigatório.'] 
-        },
+        }),
         { status: 400 }
       );
     }
@@ -345,10 +346,10 @@ export async function PUT(request, { params }) {
 
     if (skuExists) {
       return NextResponse.json(
-        { 
+        normalizeApiBody({
           data: null, 
           mensagens: ['Já existe outro produto com esse SKU.'] 
-        },
+        }),
         { status: 409 }
       );
     }
@@ -365,10 +366,10 @@ export async function PUT(request, { params }) {
     }
     if (!current || current.length === 0) {
       return NextResponse.json(
-        { 
+        normalizeApiBody({
           data: null, 
           mensagens: [`Produto com ID ${idNum} não encontrado.`] 
-        },
+        }),
         { status: 404 }
       );
     }
@@ -391,10 +392,10 @@ export async function PUT(request, { params }) {
 
       if (slugExists) {
         return NextResponse.json(
-          { 
+          normalizeApiBody({
             data: null, 
             mensagens: ['Já existe outro produto com esse nome/slug.'] 
-          },
+          }),
           { status: 409 }
         );
       }
@@ -449,10 +450,10 @@ export async function PUT(request, { params }) {
     console.log('Produto após update:', updated);
 
     return NextResponse.json(
-      { 
+      normalizeApiBody({
         data: updated, 
         mensagens: ['Produto atualizado com sucesso!'] 
-      },
+      }),
       { status: 200 }
     );
   } catch (error) {
@@ -486,10 +487,10 @@ export async function PUT(request, { params }) {
     }
     
     return NextResponse.json(
-      { 
+      normalizeApiBody({
         data: null, 
         mensagens: [errorMessage] 
-      },
+      }),
       { status: 500 }
     );
   }
@@ -565,10 +566,10 @@ export async function PATCH(request, { params }) {
     const token = getTokenFromRequest(request);
     if (!token) {
       return NextResponse.json(
-        { 
+        normalizeApiBody({
           data: null,
           mensagens: ['Token ausente'] 
-        }, 
+        }),
         { status: 401 }
       );
     }
@@ -577,11 +578,11 @@ export async function PATCH(request, { params }) {
     if (!payload || payload.error) {
       const message = payload?.message || 'Token inválido';
       return NextResponse.json(
-        { 
+        normalizeApiBody({
           data: null,
           mensagens: [message],
           expires_at: payload?.expires_at || null
-        }, 
+        }),
         { status: 401 }
       );
     }
@@ -597,10 +598,10 @@ export async function PATCH(request, { params }) {
     
     if (isNaN(idNum) || idNum <= 0) {
       return NextResponse.json(
-        { 
+        normalizeApiBody({
           data: null, 
           mensagens: ['ID do produto inválido. Deve ser um número positivo.'] 
-        },
+        }),
         { status: 400 }
       );
     }
@@ -610,10 +611,10 @@ export async function PATCH(request, { params }) {
     
     if (!name && price === undefined && stock_quantity === undefined && !sku && category_id === undefined && supplier_id === undefined) {
       return NextResponse.json(
-        { 
+        normalizeApiBody({
           data: null, 
           mensagens: ['Pelo menos um campo deve ser fornecido para atualização.'] 
-        },
+        }),
         { status: 400 }
       );
     }
@@ -627,10 +628,10 @@ export async function PATCH(request, { params }) {
 
     if (fetchError || !current) {
       return NextResponse.json(
-        { 
+        normalizeApiBody({
           data: null, 
           mensagens: [`Produto com ID ${idNum} não encontrado.`] 
-        },
+        }),
         { status: 404 }
       );
     }
@@ -645,10 +646,10 @@ export async function PATCH(request, { params }) {
     if (name !== undefined) {
       if (!name || name.trim() === '') {
         return NextResponse.json(
-          { 
+          normalizeApiBody({
             data: null, 
             mensagens: ['Nome não pode estar vazio.'] 
-          },
+          }),
           { status: 400 }
         );
       }
@@ -669,10 +670,10 @@ export async function PATCH(request, { params }) {
 
         if (slugExists) {
           return NextResponse.json(
-            { 
+            normalizeApiBody({
               data: null, 
               mensagens: ['Já existe outro produto com esse nome/slug.'] 
-            },
+            }),
             { status: 409 }
           );
         }
@@ -682,10 +683,10 @@ export async function PATCH(request, { params }) {
     if (price !== undefined) {
       if (typeof price !== 'number' || price < 0) {
         return NextResponse.json(
-          { 
+          normalizeApiBody({
             data: null, 
             mensagens: ['Preço deve ser um número positivo.'] 
-          },
+          }),
           { status: 400 }
         );
       }
@@ -695,10 +696,10 @@ export async function PATCH(request, { params }) {
     if (stock_quantity !== undefined) {
       if (typeof stock_quantity !== 'number' || stock_quantity < 0) {
         return NextResponse.json(
-          { 
+          normalizeApiBody({
             data: null, 
             mensagens: ['Quantidade em estoque deve ser um número inteiro positivo.'] 
-          },
+          }),
           { status: 400 }
         );
       }
@@ -709,10 +710,10 @@ export async function PATCH(request, { params }) {
       const skuTrimmed = sku?.trim();
       if (!skuTrimmed) {
         return NextResponse.json(
-          { 
+          normalizeApiBody({
             data: null, 
             mensagens: ['SKU não pode estar vazio.'] 
-          },
+          }),
           { status: 400 }
         );
       }
@@ -728,10 +729,10 @@ export async function PATCH(request, { params }) {
 
         if (skuExists) {
           return NextResponse.json(
-            { 
+            normalizeApiBody({
               data: null, 
               mensagens: ['Já existe outro produto com esse SKU.'] 
-            },
+            }),
             { status: 409 }
           );
         }
@@ -742,10 +743,10 @@ export async function PATCH(request, { params }) {
     if (category_id !== undefined) {
       if (category_id !== null && (typeof category_id !== 'number' || category_id <= 0)) {
         return NextResponse.json(
-          { 
+          normalizeApiBody({
             data: null, 
             mensagens: ['ID da categoria deve ser um número positivo ou nulo.'] 
-          },
+          }),
           { status: 400 }
         );
       }
@@ -755,10 +756,10 @@ export async function PATCH(request, { params }) {
     if (supplier_id !== undefined) {
       if (supplier_id !== null && (typeof supplier_id !== 'number' || supplier_id <= 0)) {
         return NextResponse.json(
-          { 
+          normalizeApiBody({
             data: null, 
             mensagens: ['ID do fornecedor deve ser um número positivo ou nulo.'] 
-          },
+          }),
           { status: 400 }
         );
       }
@@ -798,10 +799,10 @@ export async function PATCH(request, { params }) {
     console.log('Produto após patch:', updated);
 
     return NextResponse.json(
-      { 
+      normalizeApiBody({
         data: updated, 
         mensagens: ['Produto atualizado com sucesso!'] 
-      },
+      }),
       { status: 200 }
     );
   } catch (error) {
@@ -835,10 +836,10 @@ export async function PATCH(request, { params }) {
     }
     
     return NextResponse.json(
-      { 
+      normalizeApiBody({
         data: null, 
         mensagens: [errorMessage] 
-      },
+      }),
       { status: 500 }
     );
   }
@@ -851,10 +852,10 @@ export async function DELETE(request, { params }) {
     const token = getTokenFromRequest(request);
     if (!token) {
       return NextResponse.json(
-        { 
+        normalizeApiBody({
           data: null,
           mensagens: ['Token ausente'] 
-        }, 
+        }),
         { status: 401 }
       );
     }
@@ -863,11 +864,11 @@ export async function DELETE(request, { params }) {
     if (!payload || payload.error) {
       const message = payload?.message || 'Token inválido';
       return NextResponse.json(
-        { 
+        normalizeApiBody({
           data: null,
           mensagens: [message],
           expires_at: payload?.expires_at || null
-        }, 
+        }),
         { status: 401 }
       );
     }
@@ -878,10 +879,10 @@ export async function DELETE(request, { params }) {
 
     if (isNaN(idNum) || idNum <= 0) {
       return NextResponse.json(
-        { 
+        normalizeApiBody({
           data: null, 
           mensagens: ['ID do produto inválido. Deve ser um número positivo.'] 
-        },
+        }),
         { status: 400 }
       );
     }
@@ -897,10 +898,10 @@ export async function DELETE(request, { params }) {
 
     if (!existing) {
       return NextResponse.json(
-        { 
+        normalizeApiBody({
           data: null, 
           mensagens: [`Produto com ID ${idNum} não encontrado.`] 
-        },
+        }),
         { status: 404 }
       );
     }
@@ -914,10 +915,10 @@ export async function DELETE(request, { params }) {
     if (deleteError) throw deleteError;
 
     return NextResponse.json(
-      { 
+      normalizeApiBody({
         data: null, 
         mensagens: ['Produto excluído com sucesso!'] 
-      },
+      }),
       { status: 200 }
     );
   } catch (error) {
@@ -941,10 +942,10 @@ export async function DELETE(request, { params }) {
     }
     
     return NextResponse.json(
-      { 
+      normalizeApiBody({
         data: null, 
         mensagens: [errorMessage] 
-      },
+      }),
       { status: 500 }
     );
   }

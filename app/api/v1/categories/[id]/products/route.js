@@ -1,3 +1,4 @@
+import { normalizeApiBody } from '@/lib/api-envelope';
 // app/api/v1/categories/[id]/products/route.js
 import { supabase } from '@/lib/supabase';
 import { NextResponse } from 'next/server';
@@ -12,7 +13,7 @@ export const dynamic = "force-dynamic";
  * @swagger
  * /api/v1/categories/{id}/products:
  *   get:
- *     summary: Lista produtos de uma categoria
+ *     summary: Lista produtos paginados de uma categoria
  *     tags: [Categories]
  *     security:
  *       - bearerAuth: []
@@ -22,23 +23,95 @@ export const dynamic = "force-dynamic";
  *         required: true
  *         schema:
  *           type: integer
+ *         example: 1
+ *         description: ID da categoria
  *       - in: query
  *         name: page
  *         schema:
  *           type: integer
+ *           minimum: 1
  *           default: 1
- *         description: Número da página
+ *         description: Número da página (padrão: 1)
  *       - in: query
  *         name: limit
  *         schema:
  *           type: integer
+ *           minimum: 1
  *           default: 10
- *         description: Quantidade de itens por página
+ *         description: Quantidade de itens por página (padrão: 10)
  *     responses:
  *       200:
- *         description: Lista de produtos da categoria
+ *         description: Lista paginada de produtos da categoria
+ *         content:
+ *           application/json:
+ *             example:
+ *               data:
+ *                 - id: 1
+ *                   name: Mouse Gamer RGB Pro
+ *                   price: 299.9
+ *                   stock_quantity: 150
+ *                   sku: MOU-RGB-001
+ *                   slug: mouse-gamer-rgb-pro
+ *                   categories:
+ *                     name: Periféricos
+ *                   suppliers:
+ *                     company_name: Tech Solutions Ltda
+ *                   image_url: "/api/v1/products/1/image/abc123xyz"
+ *                 - id: 2
+ *                   name: Teclado Mecânico Redragon
+ *                   price: 459
+ *                   stock_quantity: 80
+ *                   sku: TEC-MEC-002
+ *                   slug: teclado-mecanico-redragon
+ *                   categories:
+ *                     name: Periféricos
+ *                   suppliers:
+ *                     company_name: Tech Solutions Ltda
+ *                   image_url: null
+ *               pagination:
+ *                 page: 1
+ *                 limit: 10
+ *                 total: 18
+ *                 totalPages: 2
+ *               mensagens:
+ *                 - "18 produtos encontrados para a categoria Periféricos."
+ *       400:
+ *         description: ID inválido
+ *         content:
+ *           application/json:
+ *             example:
+ *               data: null
+ *               mensagens: ["ID da categoria inválido. Deve ser um número positivo."]
+ *       401:
+ *         description: Token ausente ou inválido
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *             examples:
+ *               TokenAusente:
+ *                 value:
+ *                   data: null
+ *                   mensagens: ["Token ausente"]
+ *               TokenInvalido:
+ *                 value:
+ *                   data: null
+ *                   mensagens: ["Token inválido"]
+ *                   expires_at: "2026-09-05T10:00:00.000Z"
  *       404:
  *         description: Categoria não encontrada
+ *         content:
+ *           application/json:
+ *             example:
+ *               data: null
+ *               mensagens: ["Categoria com ID 9999 não encontrada."]
+ *       500:
+ *         description: Erro interno ao buscar produtos
+ *         content:
+ *           application/json:
+ *             example:
+ *               data: null
+ *               mensagens: ["Erro interno ao buscar produtos da categoria."]
  */
 export async function GET(request, { params }) {
   try {
@@ -46,10 +119,10 @@ export async function GET(request, { params }) {
     const token = getTokenFromRequest(request);
     if (!token) {
       return NextResponse.json(
-        { 
+        normalizeApiBody({
           data: null,
           mensagens: ['Token ausente'] 
-        }, 
+        }),
         { status: 401 }
       );
     }
@@ -58,11 +131,11 @@ export async function GET(request, { params }) {
     if (!payload || payload.error) {
       const message = payload?.message || 'Token inválido';
       return NextResponse.json(
-        { 
+        normalizeApiBody({
           data: null, 
           mensagens: [message],
           expires_at: payload?.expires_at || null
-        }, 
+        }),
         { status: 401 }
       );
     }
@@ -73,10 +146,10 @@ export async function GET(request, { params }) {
 
     if (isNaN(idNum) || idNum <= 0) {
       return NextResponse.json(
-        { 
+        normalizeApiBody({
           data: null, 
           mensagens: ['ID da categoria inválido. Deve ser um número positivo.'] 
-        },
+        }),
         { status: 400 }
       );
     }
@@ -96,10 +169,10 @@ export async function GET(request, { params }) {
 
     if (catError || !category) {
       return NextResponse.json(
-        { 
+        normalizeApiBody({
           data: null, 
           mensagens: [`Categoria com ID ${idNum} não encontrada.`] 
-        },
+        }),
         { status: 404 }
       );
     }
@@ -117,10 +190,10 @@ export async function GET(request, { params }) {
 
     if (error) {
       return NextResponse.json(
-        { 
+        normalizeApiBody({
           data: null, 
           mensagens: [error.message] 
-        }, 
+        }),
         { status: 500 }
       );
     }
@@ -162,7 +235,7 @@ export async function GET(request, { params }) {
     const total = count || 0;
     const totalPages = Math.ceil(total / limit);
 
-    return NextResponse.json({ 
+    return NextResponse.json(normalizeApiBody({
       data: productsWithImages || [],
       pagination: {
         page,
@@ -173,13 +246,13 @@ export async function GET(request, { params }) {
       mensagens: total > 0 
         ? [`${total} produtos encontrados para a categoria ${category.name}.`]
         : [`Nenhum produto cadastrado para a categoria ${category.name}.`]
-    });
+    }));
   } catch (error) {
     return NextResponse.json(
-      { 
+      normalizeApiBody({
         data: null, 
         mensagens: ['Erro interno ao buscar produtos da categoria.'] 
-      },
+      }),
       { status: 500 }
     );
   }

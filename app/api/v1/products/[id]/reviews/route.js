@@ -1,3 +1,4 @@
+import { normalizeApiBody } from '@/lib/api-envelope';
 // ============================================================
 // 🆕 NOVA FUNCIONALIDADE — Avaliações de Produtos
 // Módulo: Reviews | Cenário: Avaliações por produto específico
@@ -28,7 +29,7 @@ export async function GET(request, { params }) {
   const token = getTokenFromRequest(request);
   if (!token) {
     return NextResponse.json(
-      { data: null, mensagens: ['Token ausente'] },
+      normalizeApiBody({ data: null, mensagens: ['Token ausente'] }),
       { status: 401 }
     );
   }
@@ -36,7 +37,7 @@ export async function GET(request, { params }) {
   const payload = await verifyToken(token);
   if (!payload || payload.error) {
     return NextResponse.json(
-      { data: null, mensagens: [payload?.message || 'Token inválido'] },
+      normalizeApiBody({ data: null, mensagens: [payload?.message || 'Token inválido'] }),
       { status: 401 }
     );
   }
@@ -45,7 +46,7 @@ export async function GET(request, { params }) {
   const productId = parseInt(params.id, 10);
   if (isNaN(productId) || productId <= 0) {
     return NextResponse.json(
-      { data: null, mensagens: ['ID do produto inválido.'] },
+      normalizeApiBody({ data: null, mensagens: ['ID do produto inválido.'] }),
       { status: 400 }
     );
   }
@@ -60,7 +61,7 @@ export async function GET(request, { params }) {
 
     if (productError || !product) {
       return NextResponse.json(
-        { data: null, mensagens: ['Produto não encontrado.'] },
+        normalizeApiBody({ data: null, mensagens: ['Produto não encontrado.'] }),
         { status: 404 }
       );
     }
@@ -99,7 +100,7 @@ export async function GET(request, { params }) {
           ) / 10
         : null;
 
-    return NextResponse.json({
+    return NextResponse.json(normalizeApiBody({
       data: reviews || [],
       product: { id: product.id, name: product.name },
       averageRating,
@@ -109,12 +110,12 @@ export async function GET(request, { params }) {
           ? `${totalReviews} avaliação(ões) encontrada(s).`
           : 'Este produto ainda não possui avaliações.',
       ],
-    });
+    }));
 
   } catch (error) {
     console.error(`Erro fatal GET /api/v1/products/${productId}/reviews:`, error);
     return NextResponse.json(
-      { data: null, mensagens: ['Erro interno ao buscar avaliações do produto.'] },
+      normalizeApiBody({ data: null, mensagens: ['Erro interno ao buscar avaliações do produto.'] }),
       { status: 500 }
     );
   }

@@ -5,6 +5,7 @@
 // Adicionado em: julho/2026
 // ============================================================
 
+import ToastMessage from "@/components/ToastMessage";
 import { useState } from 'react';
 import { Star, XCircle, Loader2 } from 'lucide-react';
 import { toast } from 'react-toastify';
@@ -24,7 +25,7 @@ function StarRating({ value, onChange, error }) {
         aria-label="Selecione uma nota de 1 a 5 estrelas"
       >
         {[1,2,3,4,5].map((star) => (
-          <button
+          <button data-testid={`review-modal-star-${star}`}
             key={star}
             type="button"
             onClick={() => onChange(star)}
@@ -52,7 +53,7 @@ function StarRating({ value, onChange, error }) {
         )}
       </div>
       {error && (
-        <p className="text-red-400 text-xs mt-1 flex items-center gap-1" role="alert">
+        <p data-testid="review-modal-star-rating-error" className="text-red-400 text-xs mt-1 flex items-center gap-1" role="alert">
           <XCircle className="w-3.5 h-3.5" />
           {error}
         </p>
@@ -89,7 +90,7 @@ export default function ReviewModal({ product, onClose, onSuccess }) {
     try {
       const token = localStorage.getItem('token');
       if (!token) {
-        toast.error('Você precisa estar logado para avaliar.');
+        toast.error(<ToastMessage testId="review-modal-handle-submit-error-toast">{'Você precisa estar logado para avaliar.'}</ToastMessage>);
         router.push('/');
         return;
       }
@@ -108,14 +109,14 @@ export default function ReviewModal({ product, onClose, onSuccess }) {
       }
       const data = await res.json();
       if (!res.ok) {
-        toast.error(data.mensagens?.[0] || 'Erro ao enviar avaliação');
+        toast.error(<ToastMessage testId="review-modal-handle-submit-error-toast-2">{data.mensagens?.[0] || 'Erro ao enviar avaliação'}</ToastMessage>);
         return;
       }
-      toast.success('Avaliação enviada com sucesso!');
+      toast.success(<ToastMessage testId="review-modal-handle-submit-success-toast">{'Avaliação enviada com sucesso!'}</ToastMessage>);
       onSuccess?.();
       onClose();
     } catch (err) {
-      toast.error('Erro de conexão ao enviar avaliação');
+      toast.error(<ToastMessage testId="review-modal-handle-submit-error-toast-3">{'Erro de conexão ao enviar avaliação'}</ToastMessage>);
     } finally {
       setLoading(false);
     }
@@ -136,7 +137,7 @@ export default function ReviewModal({ product, onClose, onSuccess }) {
             <p className="text-slate-400 text-xs uppercase tracking-widest mb-1">Avaliar produto</p>
             <h2 className="text-xl font-bold text-white">{product.name}</h2>
           </div>
-          <button
+          <button data-testid="review-modal-close-btn"
             onClick={onClose}
             className="text-slate-400 hover:text-white transition rounded-lg p-1.5 hover:bg-slate-700">
             <XCircle className="w-6 h-6" />
@@ -171,7 +172,8 @@ export default function ReviewModal({ product, onClose, onSuccess }) {
                 setComment(e.target.value);
                 if (errors.comment && e.target.value.trim().length >= 10) {
                   setErrors(prev => ({ ...prev, comment: null }));
-                }}
+                }
+              }}
               placeholder="Conte sua experiência com este produto..."
               rows={4}
               maxLength={1000}
@@ -183,16 +185,16 @@ export default function ReviewModal({ product, onClose, onSuccess }) {
             />
             <div className="flex justify-between mt-1">
               {errors.comment ? (
-                <p className="text-red-400 text-xs" role="alert">{errors.comment}</p>
+                <p data-testid="review-modal-review-modal-errors-comment" className="text-red-400 text-xs" role="alert">{errors.comment}</p>
               ) : null}
               <span className={`text-xs ml-auto ${comment.length < 10 ? 'text-slate-500' : 'text-slate-400'}`}>{comment.length}/1000</span>
             </div>
           </div>
           <div className="flex gap-3 pt-2">
-            <button type="button" onClick={onClose} className="flex-1 px-4 py-2.5 bg-slate-700 hover:bg-slate-600 text-slate-300 rounded-lg font-medium text-sm">
+            <button data-testid="review-modal-cancel-btn" type="button" onClick={onClose} className="flex-1 px-4 py-2.5 bg-slate-700 hover:bg-slate-600 text-slate-300 rounded-lg font-medium text-sm">
               Cancelar
             </button>
-            <button type="submit" disabled={loading}
+            <button data-testid="review-modal-submit-btn" type="submit" disabled={loading}
               className="flex-1 px-4 py-2.5 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-lg font-semibold text-sm transition flex items-center justify-center gap-2"
             >
               {loading ? (

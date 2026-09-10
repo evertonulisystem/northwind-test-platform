@@ -42,7 +42,7 @@ export default function RulesModal({ isOpen, onClose }) {
         </p>
 
         <div className="flex justify-center">
-          <button
+          <button data-testid="rules-modal-confirm-btn"
             onClick={onClose}
             className="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-8 rounded-xl text-xl transition transform hover:scale-105 shadow-lg flex items-center gap-2"
           >

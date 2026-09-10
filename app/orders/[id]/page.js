@@ -13,6 +13,7 @@
 // Adicionado em: agosto/2026
 // ============================================================
 
+import ToastMessage from "@/components/ToastMessage";
 import { useState, useEffect, useCallback } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { toast } from "react-toastify";
@@ -522,14 +523,14 @@ export default function OrderDetailPage() {
         return;
       }
       if (res.status === 404) {
-        toast.error("Pedido não encontrado.");
+        toast.error(<ToastMessage testId="orders-detail-order-detail-page-error-toast">{"Pedido não encontrado."}</ToastMessage>);
         router.push("/orders");
         return;
       }
       const result = await res.json();
       setOrder(result.data);
     } catch {
-      toast.error("Erro ao carregar pedido.");
+      toast.error(<ToastMessage testId="orders-detail-order-detail-page-error-toast-2">{"Erro ao carregar pedido."}</ToastMessage>);
     } finally {
       setLoadingOrder(false);
     }
@@ -548,7 +549,7 @@ export default function OrderDetailPage() {
       const result = await res.json();
       setPayments(result.data || []);
     } catch {
-      toast.error("Erro ao carregar pagamentos.");
+      toast.error(<ToastMessage testId="orders-detail-order-detail-page-error-toast-3">{"Erro ao carregar pagamentos."}</ToastMessage>);
     } finally {
       setLoadingPayments(false);
     }
@@ -567,7 +568,7 @@ export default function OrderDetailPage() {
       const result = await res.json();
       setTimeline(result.data?.timeline || []);
     } catch {
-      toast.error("Erro ao carregar histórico.");
+      toast.error(<ToastMessage testId="orders-detail-order-detail-page-error-toast-4">{"Erro ao carregar histórico."}</ToastMessage>);
     } finally {
       setLoadingHistory(false);
     }

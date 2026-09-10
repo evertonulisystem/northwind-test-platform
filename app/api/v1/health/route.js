@@ -1,3 +1,4 @@
+import { normalizeApiBody } from '@/lib/api-envelope';
 // app/api/v1/health/route.js - Health Check completo para QA
 import { supabase } from '@/lib/supabase';
 import { NextResponse } from 'next/server';
@@ -131,7 +132,7 @@ export async function GET() {
       }
     };
 
-    return NextResponse.json(healthData, {
+    return NextResponse.json(normalizeApiBody(healthData), {
       status: 200,
       headers: {
         'Cache-Control': 'no-cache, no-store, must-revalidate',
@@ -143,7 +144,7 @@ export async function GET() {
   } catch (error) {
     console.error('Health check failed:', error);
     
-    return NextResponse.json({
+    return NextResponse.json(normalizeApiBody({
       status: 'error',
       message: 'Supabase inativo',
       timestamp: new Date().toISOString(),
@@ -157,7 +158,7 @@ export async function GET() {
           status: 'unknown'
         }
       }
-    }, { 
+    }), {
       status: 503,
       headers: {
         'Cache-Control': 'no-cache, no-store, must-revalidate'

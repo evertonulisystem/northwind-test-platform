@@ -13,6 +13,7 @@
 // Adicionado em: agosto/2026
 // ============================================================
 
+import ToastMessage from "@/components/ToastMessage";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
@@ -116,7 +117,7 @@ export default function ReportsPage() {
           totalPages: 0,
         });
         setMessage(errorMessage);
-        toast.error(errorMessage);
+        toast.error(<ToastMessage testId="reports-fetch-report-error-toast">{errorMessage}</ToastMessage>);
         return;
       }
 
@@ -141,7 +142,7 @@ export default function ReportsPage() {
         totalPages: 0,
       });
       setMessage("Erro ao carregar relatório.");
-      toast.error("Erro ao carregar relatório.");
+      toast.error(<ToastMessage testId="reports-fetch-report-error-toast-2">{"Erro ao carregar relatório."}</ToastMessage>);
     } finally {
       setLoading(false);
     }

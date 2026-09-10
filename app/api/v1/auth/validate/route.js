@@ -1,3 +1,4 @@
+import { normalizeApiBody } from '@/lib/api-envelope';
 // app/api/auth/validate/route.js
 import { NextResponse } from 'next/server';
 
@@ -63,7 +64,7 @@ export async function POST(request) {
     } catch (jsonError) {
       console.log('❌ Erro ao parsear JSON:', jsonError);
       return NextResponse.json(
-        { valid: false, message: 'Erro ao processar requisição. Verifique o formato do JSON.' },
+        normalizeApiBody({ valid: false, message: 'Erro ao processar requisição. Verifique o formato do JSON.' }),
         { status: 400 }
       );
     }
@@ -76,7 +77,7 @@ export async function POST(request) {
     if (!field || !value) {
       console.log('❌ Campo ou valor ausente');
       return NextResponse.json(
-        { valid: false, message: 'Campo e valor são obrigatórios' },
+        normalizeApiBody({ valid: false, message: 'Campo e valor são obrigatórios' }),
         { status: 400 }
       );
     }
@@ -94,19 +95,19 @@ export async function POST(request) {
       default:
         console.log('❌ Campo não suportado:', field);
         return NextResponse.json(
-          { valid: false, message: 'Campo não suportado para validação' },
+          normalizeApiBody({ valid: false, message: 'Campo não suportado para validação' }),
           { status: 400 }
         );
     }
 
     console.log('🐛 DEBUG VALIDATION API - Resultado:', validationResult);
     
-    return NextResponse.json(validationResult);
+    return NextResponse.json(normalizeApiBody(validationResult));
 
   } catch (error) {
     console.error('❌ Erro geral na validação:', error);
     return NextResponse.json(
-      { valid: false, message: 'Erro interno de validação' },
+      normalizeApiBody({ valid: false, message: 'Erro interno de validação' }),
       { status: 500 }
     );
   }

@@ -1,3 +1,4 @@
+import { normalizeApiBody } from '@/lib/api-envelope';
 // app/api/v1/suppliers/route.js
 import { supabase } from '@/lib/supabase';
 import { NextResponse } from 'next/server';
@@ -28,10 +29,10 @@ export async function GET(request) {
     const token = getTokenFromRequest(request);
     if (!token) {
       return NextResponse.json(
-        { 
+        normalizeApiBody({
           data: null,
           mensagens: ['Token ausente'] 
-        }, 
+        }),
         { status: 401 }
       );
     }
@@ -40,11 +41,11 @@ export async function GET(request) {
     if (!payload || payload.error) {
       const message = payload?.message || 'Token inválido';
       return NextResponse.json(
-        { 
+        normalizeApiBody({
           data: null,
           mensagens: [message],
           expires_at: payload?.expires_at || null
-        }, 
+        }),
         { status: 401 }
       );
     }
@@ -86,18 +87,18 @@ export async function GET(request) {
     });
 
     return NextResponse.json(
-      { 
+      normalizeApiBody({
         data: formattedData, 
         mensagens: ['Fornecedores carregados com sucesso!'] 
-      },
+      }),
       { status: 200 }
     );
   } catch (error) {
     return NextResponse.json(
-      { 
+      normalizeApiBody({
         data: null, 
         mensagens: ['Erro ao carregar fornecedores.'] 
-      },
+      }),
       { status: 500 }
     );
   }
@@ -165,10 +166,10 @@ export async function POST(request) {
     const token = getTokenFromRequest(request);
     if (!token) {
       return NextResponse.json(
-        { 
+        normalizeApiBody({
           data: null,
           mensagens: ['Token ausente'] 
-        }, 
+        }),
         { status: 401 }
       );
     }
@@ -177,11 +178,11 @@ export async function POST(request) {
     if (!payload || payload.error) {
       const message = payload?.message || 'Token inválido';
       return NextResponse.json(
-        { 
+        normalizeApiBody({
           data: null,
           mensagens: [message],
           expires_at: payload?.expires_at || null
-        }, 
+        }),
         { status: 401 }
       );
     }
@@ -191,20 +192,20 @@ export async function POST(request) {
       body = await request.json();
     } catch (jsonError) {
       return NextResponse.json(
-        { 
+        normalizeApiBody({
           data: null, 
           mensagens: ['Dados inválidos. Verifique se todos os campos foram preenchidos corretamente.'] 
-        },
+        }),
         { status: 400 }
       );
     }
 
     if (!body || Object.keys(body).length === 0) {
       return NextResponse.json(
-        { 
+        normalizeApiBody({
           data: null, 
           mensagens: ['Nenhum dado informado. Preencha os campos do fornecedor.'] 
-        },
+        }),
         { status: 400 }
       );
     }
@@ -217,60 +218,60 @@ export async function POST(request) {
     
     if (!company_name || !company_name.trim()) {
       return NextResponse.json(
-        { 
+        normalizeApiBody({
           data: null, 
           mensagens: ['Razão social da empresa é obrigatória.'] 
-        },
+        }),
         { status: 400 }
       );
     }
 
     if (!contact_name || !contact_name.trim()) {
       return NextResponse.json(
-        { 
+        normalizeApiBody({
           data: null, 
           mensagens: ['Nome do contato é obrigatório.'] 
-        },
+        }),
         { status: 400 }
       );
     }
 
     if (!email || !email.trim()) {
       return NextResponse.json(
-        { 
+        normalizeApiBody({
           data: null, 
           mensagens: ['E-mail do fornecedor é obrigatório.'] 
-        },
+        }),
         { status: 400 }
       );
     }
 
     if (!phone || !phone.trim()) {
       return NextResponse.json(
-        { 
+        normalizeApiBody({
           data: null, 
           mensagens: ['Telefone do fornecedor é obrigatório.'] 
-        },
+        }),
         { status: 400 }
       );
     }
 
     if (!cnpj || !cnpj.trim()) {
       return NextResponse.json(
-        { 
+        normalizeApiBody({
           data: null, 
           mensagens: ['CNPJ do fornecedor é obrigatório.'] 
-        },
+        }),
         { status: 400 }
       );
     }
 
     if (!uf || !uf.trim()) {
       return NextResponse.json(
-        { 
+        normalizeApiBody({
           data: null, 
           mensagens: ['UF do fornecedor é obrigatória.'] 
-        },
+        }),
         { status: 400 }
       );
     }
@@ -278,40 +279,40 @@ export async function POST(request) {
     // Validação de tamanho
     if (company_name.trim().length < 3) {
       return NextResponse.json(
-        { 
+        normalizeApiBody({
           data: null, 
           mensagens: ['Razão social deve ter no mínimo 3 caracteres.'] 
-        },
+        }),
         { status: 400 }
       );
     }
 
     if (company_name.trim().length > 100) {
       return NextResponse.json(
-        { 
+        normalizeApiBody({
           data: null, 
           mensagens: ['Razão social deve ter no máximo 100 caracteres.'] 
-        },
+        }),
         { status: 400 }
       );
     }
 
     if (contact_name.trim().length < 5) {
       return NextResponse.json(
-        { 
+        normalizeApiBody({
           data: null, 
           mensagens: ['Nome do contato deve ter no mínimo 5 caracteres.'] 
-        },
+        }),
         { status: 400 }
       );
     }
 
     if (contact_name.trim().length > 80) {
       return NextResponse.json(
-        { 
+        normalizeApiBody({
           data: null, 
           mensagens: ['Nome do contato deve ter no máximo 80 caracteres.'] 
-        },
+        }),
         { status: 400 }
       );
     }
@@ -320,10 +321,10 @@ export async function POST(request) {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email.trim())) {
       return NextResponse.json(
-        { 
+        normalizeApiBody({
           data: null, 
           mensagens: ['E-mail inválido. Informe um e-mail válido.'] 
-        },
+        }),
         { status: 400 }
       );
     }
@@ -334,10 +335,10 @@ export async function POST(request) {
     
     if (!phoneRegex.test(cleanPhone)) {
       return NextResponse.json(
-        { 
+        normalizeApiBody({
           data: null, 
           mensagens: ['Telefone inválido. Informe apenas os números (10 ou 11 dígitos).'] 
-        },
+        }),
         { status: 400 }
       );
     }
@@ -346,10 +347,10 @@ export async function POST(request) {
     const cleanCnpj = cnpj.replace(/[^\d]/g, '');
     if (!cnpjRegex.test(cleanCnpj)) {
       return NextResponse.json(
-        { 
+        normalizeApiBody({
           data: null, 
           mensagens: ['CNPJ inválido. Informe apenas os 14 números do CNPJ.'] 
-        },
+        }),
         { status: 400 }
       );
     }
@@ -357,10 +358,10 @@ export async function POST(request) {
     const ufRegex = /^[A-Z]{2}$/;
     if (!ufRegex.test(uf.trim().toUpperCase())) {
       return NextResponse.json(
-        { 
+        normalizeApiBody({
           data: null, 
           mensagens: ['UF inválida. Informe a sigla de 2 letras do estado (ex: SP, RJ, MG).'] 
-        },
+        }),
         { status: 400 }
       );
     }
@@ -374,10 +375,10 @@ export async function POST(request) {
 
     if (emailExisting) {
       return NextResponse.json(
-        { 
+        normalizeApiBody({
           data: null, 
           mensagens: ['Já existe um fornecedor com este e-mail.'] 
-        },
+        }),
         { status: 409 }
       );
     }
@@ -391,10 +392,10 @@ export async function POST(request) {
 
     if (cnpjExisting) {
       return NextResponse.json(
-        { 
+        normalizeApiBody({
           data: null, 
           mensagens: ['Já existe um fornecedor com este CNPJ.'] 
-        },
+        }),
         { status: 409 }
       );
     }
@@ -418,10 +419,10 @@ export async function POST(request) {
     }
 
     return NextResponse.json(
-      { 
+      normalizeApiBody({
         data, 
         mensagens: ['Fornecedor criado com sucesso!'] 
-      },
+      }),
       { status: 201 }
     );
   } catch (error) {
@@ -455,10 +456,10 @@ export async function POST(request) {
     }
     
     return NextResponse.json(
-      { 
+      normalizeApiBody({
         data: null, 
         mensagens: [errorMessage] 
-      },
+      }),
       { status: 400 }
     );
   }

@@ -1,3 +1,4 @@
+import { normalizeApiBody } from '@/lib/api-envelope';
 // app/api/products/validate/route.js
 import { supabase } from '@/lib/supabase';
 import { NextResponse } from 'next/server';
@@ -73,12 +74,12 @@ export async function POST(request) {
     const token = getTokenFromRequest(request);
     if (!token) {
       return NextResponse.json(
-        { 
+        normalizeApiBody({
           valid: false,
           errors: ['Token ausente'],
           warnings: [],
           suggestions: []
-        }, 
+        }),
         { status: 401 }
       );
     }
@@ -86,12 +87,12 @@ export async function POST(request) {
     const payload = await verifyToken(token);
     if (!payload) {
       return NextResponse.json(
-        { 
+        normalizeApiBody({
           valid: false,
           errors: ['Token inválido'],
           warnings: [],
           suggestions: []
-        }, 
+        }),
         { status: 401 }
       );
     }
@@ -102,12 +103,12 @@ export async function POST(request) {
       body = await request.json();
     } catch (jsonError) {
       return NextResponse.json(
-        { 
+        normalizeApiBody({
           valid: false,
           errors: ['JSON inválido'],
           warnings: [],
           suggestions: ['Verifique o formato do JSON enviado']
-        }, 
+        }),
         { status: 400 }
       );
     }
@@ -308,23 +309,23 @@ export async function POST(request) {
     console.log(`Validação concluída: ${isValid ? 'VÁLIDO' : 'INVÁLIDO'}`);
     console.log(`Erros: ${errors.length}, Avisos: ${warnings.length}, Sugestões: ${suggestions.length}`);
 
-    return NextResponse.json({
+    return NextResponse.json(normalizeApiBody({
       valid: isValid,
       errors,
       warnings,
       suggestions,
       message: isValid ? 'Produto válido para cadastro' : 'Corrija os erros antes de prosseguir'
-    });
+    }));
 
   } catch (error) {
     console.error('Erro na validação:', error);
     return NextResponse.json(
-      { 
+      normalizeApiBody({
         valid: false,
         errors: ['Erro interno na validação'],
         warnings: [],
         suggestions: ['Tente novamente em instantes']
-      }, 
+      }),
       { status: 500 }
     );
   }

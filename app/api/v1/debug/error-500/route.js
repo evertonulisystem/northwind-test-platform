@@ -1,3 +1,4 @@
+import { normalizeApiBody } from '@/lib/api-envelope';
 // app/api/debug/error-500/route.js
 import { NextResponse } from 'next/server';
 import { verifyToken, getTokenFromRequest } from '@/lib/jwt';
@@ -22,12 +23,12 @@ export async function GET(request) {
     // 1. Verificar autenticação (O erro só deve ocorrer para usuários logados)
     const token = getTokenFromRequest(request);
     if (!token) {
-      return NextResponse.json({ data: null, mensagens: ['Token ausente'] }, { status: 401 });
+      return NextResponse.json(normalizeApiBody({ data: null, mensagens: ['Token ausente'] }), { status: 401 });
     }
 
     const payload = await verifyToken(token);
     if (!payload || payload.error) {
-      return NextResponse.json({ data: null, mensagens: [payload?.message || 'Token inválido'] }, { status: 401 });
+      return NextResponse.json(normalizeApiBody({ data: null, mensagens: [payload?.message || 'Token inválido'] }), { status: 401 });
     }
 
     // 2. Lista de erros "clássicos" de backend para simular aleatoriedade
@@ -48,10 +49,10 @@ export async function GET(request) {
   } catch (error) {
     // 4. Retornar no padrão corporativo da API
     return NextResponse.json(
-      { 
+      normalizeApiBody({
         data: null, 
         mensagens: [error.message || 'Erro interno do servidor.'] 
-      },
+      }),
       { status: 500 }
     );
   }

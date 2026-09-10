@@ -1,3 +1,4 @@
+import { normalizeApiBody } from '@/lib/api-envelope';
 // ============================================================
 // 🆕 NOVA FUNCIONALIDADE — Timeline de Histórico do Pedido
 // Módulo: Order History | Rota: GET /api/v1/orders/[id]/history
@@ -49,7 +50,7 @@ async function getOrderHistory(request, { params, user }) {
 
     if (orderError || !order) {
       return NextResponse.json(
-        { data: null, mensagens: ["Pedido não encontrado ou sem permissão."] },
+        normalizeApiBody({ data: null, mensagens: ["Pedido não encontrado ou sem permissão."] }),
         { status: 404 },
       );
     }
@@ -73,7 +74,7 @@ async function getOrderHistory(request, { params, user }) {
 
     if (historyError) throw historyError;
 
-    return NextResponse.json({
+    return NextResponse.json(normalizeApiBody({
       data: {
         order_id: parseInt(id),
         order_number: order.order_number,
@@ -82,11 +83,11 @@ async function getOrderHistory(request, { params, user }) {
         timeline: history || [],
       },
       mensagens: ["Histórico do pedido carregado com sucesso."],
-    });
+    }));
   } catch (error) {
     console.error("Erro ao buscar histórico do pedido:", error);
     return NextResponse.json(
-      { data: null, mensagens: ["Erro interno ao buscar histórico."] },
+      normalizeApiBody({ data: null, mensagens: ["Erro interno ao buscar histórico."] }),
       { status: 500 },
     );
   }

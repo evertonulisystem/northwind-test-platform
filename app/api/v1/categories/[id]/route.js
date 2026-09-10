@@ -1,3 +1,4 @@
+import { normalizeApiBody } from '@/lib/api-envelope';
 // app/api/v1/categories/[id]/route.js
 import { supabase } from '@/lib/supabase';
 import { NextResponse } from 'next/server';
@@ -31,11 +32,59 @@ function generateSlug(name) {
  *         required: true
  *         schema:
  *           type: integer
+ *         example: 1
  *     responses:
  *       200:
  *         description: Categoria encontrada
+ *         content:
+ *           application/json:
+ *             example:
+ *               data:
+ *                 id: 1
+ *                 name: Periféricos
+ *                 description: Teclados, mouses e acessórios para PC
+ *                 slug: perifericos
+ *                 created_at: "2026-08-15T10:30:00.000Z"
+ *                 updated_at: "2026-09-01T14:20:00.000Z"
+ *               mensagens:
+ *                 - "Categoria encontrada com sucesso."
+ *       400:
+ *         description: ID inválido
+ *         content:
+ *           application/json:
+ *             example:
+ *               data: null
+ *               mensagens: ["ID da categoria inválido. Deve ser um número positivo."]
+ *       401:
+ *         description: Token ausente ou inválido
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *             examples:
+ *               TokenAusente:
+ *                 value:
+ *                   data: null
+ *                   mensagens: ["Token ausente"]
+ *               TokenInvalido:
+ *                 value:
+ *                   data: null
+ *                   mensagens: ["Token inválido"]
+ *                   expires_at: "2026-09-05T10:00:00.000Z"
  *       404:
  *         description: Categoria não encontrada
+ *         content:
+ *           application/json:
+ *             example:
+ *               data: null
+ *               mensagens: ["Categoria com ID 9999 não encontrada."]
+ *       500:
+ *         description: Erro interno ao buscar categoria
+ *         content:
+ *           application/json:
+ *             example:
+ *               data: null
+ *               mensagens: ["Erro interno ao buscar categoria."]
  */
 export async function GET(request, { params }) {
   try {
@@ -43,10 +92,10 @@ export async function GET(request, { params }) {
     const token = getTokenFromRequest(request);
     if (!token) {
       return NextResponse.json(
-        { 
+        normalizeApiBody({
           data: null,
           mensagens: ['Token ausente'] 
-        }, 
+        }),
         { status: 401 }
       );
     }
@@ -55,11 +104,11 @@ export async function GET(request, { params }) {
     if (!payload || payload.error) {
       const message = payload?.message || 'Token inválido';
       return NextResponse.json(
-        { 
+        normalizeApiBody({
           data: null,
           mensagens: [message],
           expires_at: payload?.expires_at || null
-        }, 
+        }),
         { status: 401 }
       );
     }
@@ -70,10 +119,10 @@ export async function GET(request, { params }) {
 
     if (isNaN(idNum) || idNum <= 0) {
       return NextResponse.json(
-        { 
+        normalizeApiBody({
           data: null, 
           mensagens: ['ID da categoria inválido. Deve ser um número positivo.'] 
-        },
+        }),
         { status: 400 }
       );
     }
@@ -88,95 +137,52 @@ export async function GET(request, { params }) {
     if (error) {
       console.error('Erro ao buscar categoria:', error);
       return NextResponse.json(
-        { 
+        normalizeApiBody({
           data: null, 
           mensagens: ['Erro interno ao buscar categoria.'] 
-        }, 
+        }),
         { status: 500 }
       );
     }
 
     if (!category) {
       return NextResponse.json(
-        { 
+        normalizeApiBody({
           data: null, 
           mensagens: [`Categoria com ID ${idNum} não encontrada.`] 
-        },
+        }),
         { status: 404 }
       );
     }
 
-    return NextResponse.json({ 
+    return NextResponse.json(normalizeApiBody({
       data: category,
       mensagens: ['Categoria encontrada com sucesso.']
-    });
+    }));
   } catch (error) {
     return NextResponse.json(
-      { 
+      normalizeApiBody({
         data: null, 
         mensagens: ['Erro interno ao buscar categoria.'] 
-      },
+      }),
       { status: 500 }
     );
   }
 }
 
-/**
- * @swagger
- * /api/v1/categories/{id}/products:
- *   get:
- *     summary: Lista produtos de uma categoria (ID e Nome apenas)
- *     tags: [Categories]
- *     security:
- *       - bearerAuth: []
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         schema:
- *           type: integer
- *         description: ID da categoria
- *     responses:
- *       200:
- *         description: Lista de produtos da categoria com ID e nome
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 data:
- *                   type: array
- *                   items:
- *                     type: object
- *                     properties:
- *                       id:
- *                         type: integer
- *                         example: 1
- *                       name:
- *                         type: string
- *                         example: "Notebook Dell"
- *                 mensagens:
- *                   type: array
- *                   items:
- *                     type: string
- *                   example: ["3 produtos encontrados para a categoria Livros."]
- *       404:
- *         description: Categoria não encontrada
- *       401:
- *         description: Não autorizado
- *       500:
- *         description: Erro interno
- */
+// === GET /categories/{id}/products ===
+// (Documentação JSDoc movida para: app/api/v1/categories/[id]/products/route.js)
+// Evita duplicação. Apenas a função GET_products é declarada aqui para referência interna.
 export async function GET_products(request, { params }) {
   try {
     // Verificar autenticação
     const token = getTokenFromRequest(request);
     if (!token) {
       return NextResponse.json(
-        { 
+        normalizeApiBody({
           data: null,
           mensagens: ['Token ausente'] 
-        }, 
+        }),
         { status: 401 }
       );
     }
@@ -185,11 +191,11 @@ export async function GET_products(request, { params }) {
     if (!payload || payload.error) {
       const message = payload?.message || 'Token inválido';
       return NextResponse.json(
-        { 
+        normalizeApiBody({
           data: null,
           mensagens: [message],
           expires_at: payload?.expires_at || null
-        }, 
+        }),
         { status: 401 }
       );
     }
@@ -200,10 +206,10 @@ export async function GET_products(request, { params }) {
 
     if (isNaN(idNum) || idNum <= 0) {
       return NextResponse.json(
-        { 
+        normalizeApiBody({
           data: null, 
           mensagens: ['ID da categoria inválido. Deve ser um número positivo.'] 
-        },
+        }),
         { status: 400 }
       );
     }
@@ -217,10 +223,10 @@ export async function GET_products(request, { params }) {
 
     if (catError || !category) {
       return NextResponse.json(
-        { 
+        normalizeApiBody({
           data: null, 
           mensagens: [`Categoria com ID ${idNum} não encontrada.`] 
-        },
+        }),
         { status: 404 }
       );
     }
@@ -233,26 +239,26 @@ export async function GET_products(request, { params }) {
 
     if (error) {
       return NextResponse.json(
-        { 
+        normalizeApiBody({
           data: null, 
           mensagens: [error.message] 
-        }, 
+        }),
         { status: 500 }
       );
     }
 
-    return NextResponse.json({ 
+    return NextResponse.json(normalizeApiBody({
       data: products || [],
       mensagens: products?.length > 0 
         ? [`${products.length} produtos encontrados para a categoria ${category.name}.`]
         : [`Nenhum produto cadastrado para a categoria ${category.name}.`]
-    });
+    }));
   } catch (error) {
     return NextResponse.json(
-      { 
+      normalizeApiBody({
         data: null, 
         mensagens: ['Erro interno ao buscar produtos da categoria.'] 
-      },
+      }),
       { status: 500 }
     );
   }
@@ -262,7 +268,7 @@ export async function GET_products(request, { params }) {
  * @swagger
  * /api/v1/categories/{id}:
  *   put:
- *     summary: Atualiza uma categoria existente
+ *     summary: Atualiza uma categoria existente (PUT completo)
  *     tags: [Categories]
  *     security:
  *       - bearerAuth: []
@@ -272,34 +278,123 @@ export async function GET_products(request, { params }) {
  *         required: true
  *         schema:
  *           type: integer
+ *         example: 2
  *     requestBody:
  *       required: true
  *       content:
  *         application/json:
  *           schema:
  *             type: object
- *             required:
- *               - name
- *               - description
+ *             required: [name, description]
  *             properties:
  *               name:
  *                 type: string
  *                 maxLength: 25
- *                 example: "Eletrônicos"
+ *                 example: "Eletrônicos Premium"
  *               description:
  *                 type: string
  *                 minLength: 6
  *                 maxLength: 40
- *                 example: "Produtos eletrônicos variados"
+ *                 example: "Produtos de tecnologia de alta qualidade"
  *     responses:
  *       200:
- *         description: Categoria atualizada
+ *         description: Categoria atualizada com sucesso
+ *         content:
+ *           application/json:
+ *             example:
+ *               data:
+ *                 id: 2
+ *                 name: Eletrônicos Premium
+ *                 description: Produtos de tecnologia de alta qualidade
+ *                 slug: eletronicos-premium
+ *                 created_at: "2026-08-10T09:00:00.000Z"
+ *                 updated_at: "2026-09-06T12:20:00.000Z"
+ *               mensagens:
+ *                 - "Categoria atualizada com sucesso!"
  *       400:
- *         description: Dados inválidos
+ *         description: "Dados inválidos (ID, JSON, campos obrigatórios ou tamanhos)"
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *             examples:
+ *               IdInvalido:
+ *                 summary: ID não é um número inteiro positivo
+ *                 value:
+ *                   data: null
+ *                   mensagens: ["ID da categoria inválido. Deve ser um número positivo."]
+ *               JsonInvalido:
+ *                 summary: Corpo da requisição não é um JSON válido
+ *                 value:
+ *                   data: null
+ *                   mensagens: ["Dados inválidos. Verifique se todos os campos foram preenchidos corretamente."]
+ *               SemDados:
+ *                 summary: Corpo da requisição vazio
+ *                 value:
+ *                   data: null
+ *                   mensagens: ["Nenhum dado informado. Preencha os campos da categoria."]
+ *               NomeObrigatorio:
+ *                 summary: Campo name não informado ou vazio
+ *                 value:
+ *                   data: null
+ *                   mensagens: ["Nome da categoria é obrigatório."]
+ *               DescricaoObrigatoria:
+ *                 summary: Campo description não informado ou vazio
+ *                 value:
+ *                   data: null
+ *                   mensagens: ["Descrição da categoria é obrigatória."]
+ *               NomeMuitoLongo:
+ *                 summary: Nome com mais de 25 caracteres
+ *                 value:
+ *                   data: null
+ *                   mensagens: ["Nome da categoria deve ter no máximo 25 caracteres."]
+ *               DescricaoMuitoCurta:
+ *                 summary: Descrição com menos de 6 caracteres
+ *                 value:
+ *                   data: null
+ *                   mensagens: ["Descrição deve ter no mínimo 6 caracteres."]
+ *               DescricaoMuitoLonga:
+ *                 summary: Descrição com mais de 40 caracteres
+ *                 value:
+ *                   data: null
+ *                   mensagens: ["Descrição deve ter no máximo 40 caracteres."]
+ *       401:
+ *         description: Token ausente ou inválido
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *             examples:
+ *               TokenAusente:
+ *                 value:
+ *                   data: null
+ *                   mensagens: ["Token ausente"]
+ *               TokenInvalido:
+ *                 value:
+ *                   data: null
+ *                   mensagens: ["Token inválido"]
+ *                   expires_at: "2026-09-05T10:00:00.000Z"
  *       404:
  *         description: Categoria não encontrada
+ *         content:
+ *           application/json:
+ *             example:
+ *               data: null
+ *               mensagens: ["Categoria com ID 9999 não encontrada."]
  *       409:
- *         description: Categoria duplicada
+ *         description: Categoria duplicada - nome já existe
+ *         content:
+ *           application/json:
+ *             example:
+ *               data: null
+ *               mensagens: ["Já existe uma categoria com este nome."]
+ *       500:
+ *         description: Erro interno ao atualizar
+ *         content:
+ *           application/json:
+ *             example:
+ *               data: null
+ *               mensagens: ["timeout exceeded"]
  */
 export async function PUT(request, { params }) {
   try {
@@ -307,10 +402,10 @@ export async function PUT(request, { params }) {
     const token = getTokenFromRequest(request);
     if (!token) {
       return NextResponse.json(
-        { 
+        normalizeApiBody({
           data: null,
           mensagens: ['Token ausente'] 
-        }, 
+        }),
         { status: 401 }
       );
     }
@@ -319,11 +414,11 @@ export async function PUT(request, { params }) {
     if (!payload || payload.error) {
       const message = payload?.message || 'Token inválido';
       return NextResponse.json(
-        { 
+        normalizeApiBody({
           data: null,
           mensagens: [message],
           expires_at: payload?.expires_at || null
-        }, 
+        }),
         { status: 401 }
       );
     }
@@ -334,10 +429,10 @@ export async function PUT(request, { params }) {
 
     if (isNaN(idNum) || idNum <= 0) {
       return NextResponse.json(
-        { 
+        normalizeApiBody({
           data: null, 
           mensagens: ['ID da categoria inválido. Deve ser um número positivo.'] 
-        },
+        }),
         { status: 400 }
       );
     }
@@ -347,20 +442,20 @@ export async function PUT(request, { params }) {
       body = await request.json();
     } catch (jsonError) {
       return NextResponse.json(
-        { 
+        normalizeApiBody({
           data: null, 
           mensagens: ['Dados inválidos. Verifique se todos os campos foram preenchidos corretamente.'] 
-        },
+        }),
         { status: 400 }
       );
     }
 
     if (!body || Object.keys(body).length === 0) {
       return NextResponse.json(
-        { 
+        normalizeApiBody({
           data: null, 
           mensagens: ['Nenhum dado informado. Preencha os campos da categoria.'] 
-        },
+        }),
         { status: 400 }
       );
     }
@@ -370,20 +465,20 @@ export async function PUT(request, { params }) {
     
     if (!name || !name.trim()) {
       return NextResponse.json(
-        { 
+        normalizeApiBody({
           data: null, 
           mensagens: ['Nome da categoria é obrigatório.'] 
-        },
+        }),
         { status: 400 }
       );
     }
 
     if (!description || !description.trim()) {
       return NextResponse.json(
-        { 
+        normalizeApiBody({
           data: null, 
           mensagens: ['Descrição da categoria é obrigatória.'] 
-        },
+        }),
         { status: 400 }
       );
     }
@@ -391,30 +486,30 @@ export async function PUT(request, { params }) {
     // Validação de tamanho
     if (name.trim().length > 25) {
       return NextResponse.json(
-        { 
+        normalizeApiBody({
           data: null, 
           mensagens: ['Nome da categoria deve ter no máximo 25 caracteres.'] 
-        },
+        }),
         { status: 400 }
       );
     }
 
     if (description.trim().length < 6) {
       return NextResponse.json(
-        { 
+        normalizeApiBody({
           data: null, 
           mensagens: ['Descrição deve ter no mínimo 6 caracteres.'] 
-        },
+        }),
         { status: 400 }
       );
     }
 
     if (description.trim().length > 40) {
       return NextResponse.json(
-        { 
+        normalizeApiBody({
           data: null, 
           mensagens: ['Descrição deve ter no máximo 40 caracteres.'] 
-        },
+        }),
         { status: 400 }
       );
     }
@@ -430,10 +525,10 @@ export async function PUT(request, { params }) {
 
     if (!existing) {
       return NextResponse.json(
-        { 
+        normalizeApiBody({
           data: null, 
           mensagens: [`Categoria com ID ${idNum} não encontrada.`] 
-        },
+        }),
         { status: 404 }
       );
     }
@@ -448,10 +543,10 @@ export async function PUT(request, { params }) {
 
     if (duplicate) {
       return NextResponse.json(
-        { 
+        normalizeApiBody({
           data: null, 
           mensagens: ['Já existe uma categoria com este nome.'] 
-        },
+        }),
         { status: 409 }
       );
     }
@@ -470,29 +565,33 @@ export async function PUT(request, { params }) {
     if (error) {
       if (error.message.includes('null value in column')) {
         return NextResponse.json(
-          { 
+          normalizeApiBody({
             data: null, 
             mensagens: ['Campos obrigatórios não foram preenchidos.'] 
-          },
+          }),
           { status: 400 }
         );
       }
       throw error;
     }
 
+    if (!data) {
+      throw new Error('Não foi possível confirmar a atualização da categoria.');
+    }
+
     return NextResponse.json(
-      { 
+      normalizeApiBody({
         data, 
         mensagens: ['Categoria atualizada com sucesso!'] 
-      },
+      }),
       { status: 200 }
     );
   } catch (error) {
     return NextResponse.json(
-      { 
+      normalizeApiBody({
         data: null, 
         mensagens: [error.message || 'Erro ao atualizar categoria.'] 
-      },
+      }),
       { status: 500 }
     );
   }
@@ -512,19 +611,68 @@ export async function PUT(request, { params }) {
  *         required: true
  *         schema:
  *           type: integer
+ *         example: 5
  *     responses:
  *       200:
- *         description: Categoria excluída
+ *         description: Categoria excluída com sucesso
+ *         content:
+ *           application/json:
+ *             example:
+ *               data: null
+ *               mensagens: ["Categoria excluída com sucesso!"]
+ *       400:
+ *         description: "ID inválido ou categoria em uso por produtos"
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *             examples:
+ *               IdInvalido:
+ *                 summary: ID não é um número inteiro positivo
+ *                 value:
+ *                   data: null
+ *                   mensagens: ["ID da categoria inválido. Deve ser um número positivo."]
+ *               EmUso:
+ *                 summary: Categoria vinculada a produtos (não pode excluir)
+ *                 value:
+ *                   data: null
+ *                   mensagens: ["Não é possível excluir. Esta categoria está sendo usada por produtos."]
+ *       401:
+ *         description: Token ausente ou inválido
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *             examples:
+ *               TokenAusente:
+ *                 value:
+ *                   data: null
+ *                   mensagens: ["Token ausente"]
+ *               TokenInvalido:
+ *                 value:
+ *                   data: null
+ *                   mensagens: ["Token inválido"]
+ *                   expires_at: "2026-09-05T10:00:00.000Z"
  *       404:
  *         description: Categoria não encontrada
- *       400:
- *         description: Categoria em uso
+ *         content:
+ *           application/json:
+ *             example:
+ *               data: null
+ *               mensagens: ["Categoria com ID 9999 não encontrada."]
+ *       500:
+ *         description: "Erro interno (incluindo violação de FK)"
+ *         content:
+ *           application/json:
+ *             example:
+ *               data: null
+ *               mensagens: ["Não é possível excluir esta categoria pois existem produtos vinculados a ela."]
  */
 /**
  * @swagger
  * /api/v1/categories/{id}:
  *   patch:
- *     summary: Atualiza parcialmente uma categoria
+ *     summary: Atualiza parcialmente uma categoria (PATCH - arquivo [id]/route.js)
  *     tags: [Categories]
  *     security:
  *       - bearerAuth: []
@@ -534,31 +682,123 @@ export async function PUT(request, { params }) {
  *         required: true
  *         schema:
  *           type: integer
+ *         example: 4
  *     requestBody:
  *       required: true
  *       content:
  *         application/json:
  *           schema:
  *             type: object
+ *             minProperties: 1
  *             properties:
  *               name:
  *                 type: string
  *                 maxLength: 25
- *                 example: "Eletrônicos"
+ *                 example: "Móveis e Decoração"
  *               description:
  *                 type: string
  *                 minLength: 6
- *                 maxLength: 40
- *                 example: "Produtos eletrônicos variados"
+ *                 maxLength: 200
+ *                 example: "Móveis para casa, escritório e decoração em geral"
  *     responses:
  *       200:
- *         description: Categoria atualizada parcialmente
+ *         description: Categoria atualizada parcialmente com sucesso
+ *         content:
+ *           application/json:
+ *             example:
+ *               data:
+ *                 id: 4
+ *                 name: Móveis e Decoração
+ *                 description: Móveis para casa, escritório e decoração em geral
+ *                 slug: moveis-e-decoracao
+ *                 created_at: "2026-08-20T08:00:00.000Z"
+ *                 updated_at: "2026-09-06T12:30:00.000Z"
+ *               mensagens:
+ *                 - "Categoria atualizada parcialmente com sucesso!"
  *       400:
- *         description: Dados inválidos
+ *         description: "Dados inválidos (ID, JSON, campos vazios ou tamanhos)"
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *             examples:
+ *               IdInvalido:
+ *                 summary: ID não é um número inteiro positivo
+ *                 value:
+ *                   data: null
+ *                   mensagens: ["ID da categoria inválido. Deve ser um número positivo."]
+ *               JsonInvalido:
+ *                 summary: Corpo da requisição não é um JSON válido
+ *                 value:
+ *                   data: null
+ *                   mensagens: ["Dados inválidos. Verifique se todos os campos foram preenchidos corretamente."]
+ *               SemDados:
+ *                 summary: Corpo da requisição vazio
+ *                 value:
+ *                   data: null
+ *                   mensagens: ["Nenhum dado informado. Envie pelo menos um campo para atualizar."]
+ *               NomeVazio:
+ *                 summary: Nome enviado mas vazio
+ *                 value:
+ *                   data: null
+ *                   mensagens: ["Nome da categoria não pode ser vazio."]
+ *               NomeMuitoLongo:
+ *                 summary: Nome com mais de 25 caracteres
+ *                 value:
+ *                   data: null
+ *                   mensagens: ["Nome da categoria deve ter no máximo 25 caracteres."]
+ *               DescricaoVazia:
+ *                 summary: Descrição enviada mas vazia
+ *                 value:
+ *                   data: null
+ *                   mensagens: ["Descrição da categoria não pode ser vazia."]
+ *               DescricaoMuitoCurta:
+ *                 summary: Descrição com menos de 6 caracteres
+ *                 value:
+ *                   data: null
+ *                   mensagens: ["Descrição deve ter no mínimo 6 caracteres."]
+ *               DescricaoMuitoLonga:
+ *                 summary: Descrição com mais de 200 caracteres
+ *                 value:
+ *                   data: null
+ *                   mensagens: ["Descrição deve ter no máximo 200 caracteres."]
+ *       401:
+ *         description: Token ausente ou inválido
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *             examples:
+ *               TokenAusente:
+ *                 value:
+ *                   data: null
+ *                   mensagens: ["Token ausente"]
+ *               TokenInvalido:
+ *                 value:
+ *                   data: null
+ *                   mensagens: ["Token inválido"]
+ *                   expires_at: "2026-09-05T10:00:00.000Z"
  *       404:
  *         description: Categoria não encontrada
+ *         content:
+ *           application/json:
+ *             example:
+ *               data: null
+ *               mensagens: ["Categoria com ID 9999 não encontrada."]
  *       409:
- *         description: Categoria duplicada
+ *         description: Categoria duplicada - nome já existe
+ *         content:
+ *           application/json:
+ *             example:
+ *               data: null
+ *               mensagens: ["Já existe uma categoria com este nome."]
+ *       500:
+ *         description: Erro interno ao atualizar
+ *         content:
+ *           application/json:
+ *             example:
+ *               data: null
+ *               mensagens: ["connection refused"]
  */
 export async function PATCH(request, { params }) {
   try {
@@ -566,10 +806,10 @@ export async function PATCH(request, { params }) {
     const token = getTokenFromRequest(request);
     if (!token) {
       return NextResponse.json(
-        { 
+        normalizeApiBody({
           data: null,
           mensagens: ['Token ausente'] 
-        }, 
+        }),
         { status: 401 }
       );
     }
@@ -578,11 +818,11 @@ export async function PATCH(request, { params }) {
     if (!payload || payload.error) {
       const message = payload?.message || 'Token inválido';
       return NextResponse.json(
-        { 
+        normalizeApiBody({
           data: null,
           mensagens: [message],
           expires_at: payload?.expires_at || null
-        }, 
+        }),
         { status: 401 }
       );
     }
@@ -593,10 +833,10 @@ export async function PATCH(request, { params }) {
 
     if (isNaN(idNum) || idNum <= 0) {
       return NextResponse.json(
-        { 
+        normalizeApiBody({
           data: null, 
           mensagens: ['ID da categoria inválido. Deve ser um número positivo.'] 
-        },
+        }),
         { status: 400 }
       );
     }
@@ -606,20 +846,20 @@ export async function PATCH(request, { params }) {
       body = await request.json();
     } catch (jsonError) {
       return NextResponse.json(
-        { 
+        normalizeApiBody({
           data: null, 
           mensagens: ['Dados inválidos. Verifique se todos os campos foram preenchidos corretamente.'] 
-        },
+        }),
         { status: 400 }
       );
     }
 
     if (!body || Object.keys(body).length === 0) {
       return NextResponse.json(
-        { 
+        normalizeApiBody({
           data: null, 
           mensagens: ['Nenhum dado informado. Envie pelo menos um campo para atualizar.'] 
-        },
+        }),
         { status: 400 }
       );
     }
@@ -635,10 +875,10 @@ export async function PATCH(request, { params }) {
 
     if (!existing) {
       return NextResponse.json(
-        { 
+        normalizeApiBody({
           data: null, 
           mensagens: [`Categoria com ID ${idNum} não encontrada.`] 
-        },
+        }),
         { status: 404 }
       );
     }
@@ -655,20 +895,20 @@ export async function PATCH(request, { params }) {
     if (name !== undefined) {
       if (!name || !name.trim()) {
         return NextResponse.json(
-          { 
+          normalizeApiBody({
             data: null, 
             mensagens: ['Nome da categoria não pode ser vazio.'] 
-          },
+          }),
           { status: 400 }
         );
       }
 
       if (name.trim().length > 25) {
         return NextResponse.json(
-          { 
+          normalizeApiBody({
             data: null, 
             mensagens: ['Nome da categoria deve ter no máximo 25 caracteres.'] 
-          },
+          }),
           { status: 400 }
         );
       }
@@ -684,10 +924,10 @@ export async function PATCH(request, { params }) {
 
         if (duplicate) {
           return NextResponse.json(
-            { 
+            normalizeApiBody({
               data: null, 
               mensagens: ['Já existe uma categoria com este nome.'] 
-            },
+            }),
             { status: 409 }
           );
         }
@@ -701,30 +941,30 @@ export async function PATCH(request, { params }) {
     if (description !== undefined) {
       if (!description || !description.trim()) {
         return NextResponse.json(
-          { 
+          normalizeApiBody({
             data: null, 
             mensagens: ['Descrição da categoria não pode ser vazia.'] 
-          },
+          }),
           { status: 400 }
         );
       }
 
       if (description.trim().length < 6) {
         return NextResponse.json(
-          { 
+          normalizeApiBody({
             data: null, 
             mensagens: ['Descrição deve ter no mínimo 6 caracteres.'] 
-          },
+          }),
           { status: 400 }
         );
       }
 
       if (description.trim().length > 200) {
         return NextResponse.json(
-          { 
+          normalizeApiBody({
             data: null, 
             mensagens: ['Descrição deve ter no máximo 200 caracteres.'] 
-          },
+          }),
           { status: 400 }
         );
       }
@@ -745,21 +985,25 @@ export async function PATCH(request, { params }) {
       throw error;
     }
 
+    if (!data) {
+      throw new Error('Não foi possível confirmar a atualização da categoria.');
+    }
+
     console.log('✅ Categoria atualizada com PATCH:', data);
 
     return NextResponse.json(
-      { 
+      normalizeApiBody({
         data, 
         mensagens: ['Categoria atualizada parcialmente com sucesso!'] 
-      },
+      }),
       { status: 200 }
     );
   } catch (error) {
     return NextResponse.json(
-      { 
+      normalizeApiBody({
         data: null, 
         mensagens: [error.message || 'Erro ao atualizar categoria.'] 
-      },
+      }),
       { status: 500 }
     );
   }
@@ -771,10 +1015,10 @@ export async function DELETE(request, { params }) {
     const token = getTokenFromRequest(request);
     if (!token) {
       return NextResponse.json(
-        { 
+        normalizeApiBody({
           data: null,
           mensagens: ['Token ausente'] 
-        }, 
+        }),
         { status: 401 }
       );
     }
@@ -783,11 +1027,11 @@ export async function DELETE(request, { params }) {
     if (!payload || payload.error) {
       const message = payload?.message || 'Token inválido';
       return NextResponse.json(
-        { 
+        normalizeApiBody({
           data: null,
           mensagens: [message],
           expires_at: payload?.expires_at || null
-        }, 
+        }),
         { status: 401 }
       );
     }
@@ -798,10 +1042,10 @@ export async function DELETE(request, { params }) {
 
     if (isNaN(idNum) || idNum <= 0) {
       return NextResponse.json(
-        { 
+        normalizeApiBody({
           data: null, 
           mensagens: ['ID da categoria inválido. Deve ser um número positivo.'] 
-        },
+        }),
         { status: 400 }
       );
     }
@@ -817,10 +1061,10 @@ export async function DELETE(request, { params }) {
 
     if (!existing) {
       return NextResponse.json(
-        { 
+        normalizeApiBody({
           data: null, 
           mensagens: [`Categoria com ID ${idNum} não encontrada.`] 
-        },
+        }),
         { status: 404 }
       );
     }
@@ -836,10 +1080,10 @@ export async function DELETE(request, { params }) {
 
     if (productsUsing && productsUsing.length > 0) {
       return NextResponse.json(
-        { 
+        normalizeApiBody({
           data: null, 
           mensagens: ['Não é possível excluir. Esta categoria está sendo usada por produtos.'] 
-        },
+        }),
         { status: 400 }
       );
     }
@@ -853,10 +1097,10 @@ export async function DELETE(request, { params }) {
     if (deleteError) throw deleteError;
 
     return NextResponse.json(
-      { 
+      normalizeApiBody({
         data: null, 
         mensagens: ['Categoria excluída com sucesso!'] 
-      },
+      }),
       { status: 200 }
     );
   } catch (error) {
@@ -880,10 +1124,10 @@ export async function DELETE(request, { params }) {
     }
     
     return NextResponse.json(
-      { 
+      normalizeApiBody({
         data: null, 
         mensagens: [errorMessage] 
-      },
+      }),
       { status: 500 }
     );
   }

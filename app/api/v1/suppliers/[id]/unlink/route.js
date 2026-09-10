@@ -1,3 +1,4 @@
+import { normalizeApiBody } from '@/lib/api-envelope';
 // app/api/v1/suppliers/[id]/unlink/route.js
 import { supabase } from '@/lib/supabase';
 import { NextResponse } from 'next/server';
@@ -59,10 +60,10 @@ export async function POST(request, { params }) {
     const token = getTokenFromRequest(request);
     if (!token) {
       return NextResponse.json(
-        { 
+        normalizeApiBody({
           data: null,
           mensagens: ['Token ausente'] 
-        }, 
+        }),
         { status: 401 }
       );
     }
@@ -71,11 +72,11 @@ export async function POST(request, { params }) {
     if (!payload || payload.error) {
       const message = payload?.message || 'Token inválido';
       return NextResponse.json(
-        { 
+        normalizeApiBody({
           data: null,
           mensagens: [message],
           expires_at: payload?.expires_at || null
-        }, 
+        }),
         { status: 401 }
       );
     }
@@ -86,10 +87,10 @@ export async function POST(request, { params }) {
 
     if (isNaN(idNum) || idNum <= 0) {
       return NextResponse.json(
-        { 
+        normalizeApiBody({
           data: null, 
           mensagens: ['ID do fornecedor inválido. Deve ser um número positivo.'] 
-        },
+        }),
         { status: 400 }
       );
     }
@@ -99,20 +100,20 @@ export async function POST(request, { params }) {
       body = await request.json();
     } catch (jsonError) {
       return NextResponse.json(
-        { 
+        normalizeApiBody({
           data: null, 
           mensagens: ['Dados inválidos. Verifique se todos os campos foram preenchidos corretamente.'] 
-        },
+        }),
         { status: 400 }
       );
     }
 
     if (!body || !body.product_ids || !Array.isArray(body.product_ids) || body.product_ids.length === 0) {
       return NextResponse.json(
-        { 
+        normalizeApiBody({
           data: null, 
           mensagens: ['IDs dos produtos são obrigatórios e devem ser um array não vazio.'] 
-        },
+        }),
         { status: 400 }
       );
     }
@@ -126,10 +127,10 @@ export async function POST(request, { params }) {
 
     if (supplierError || !supplier) {
       return NextResponse.json(
-        { 
+        normalizeApiBody({
           data: null, 
           mensagens: [`Fornecedor com ID ${idNum} não encontrado.`] 
-        },
+        }),
         { status: 404 }
       );
     }
@@ -141,10 +142,10 @@ export async function POST(request, { params }) {
 
     if (validIds.length === 0) {
       return NextResponse.json(
-        { 
+        normalizeApiBody({
           data: null, 
           mensagens: ['Nenhum ID de produto válido fornecido.'] 
-        },
+        }),
         { status: 400 }
       );
     }
@@ -159,20 +160,20 @@ export async function POST(request, { params }) {
     if (productsError) {
       console.error('❌ Erro ao buscar produtos:', productsError);
       return NextResponse.json(
-        { 
+        normalizeApiBody({
           data: null, 
           mensagens: ['Erro ao verificar produtos.'] 
-        },
+        }),
         { status: 500 }
       );
     }
 
     if (!products || products.length === 0) {
       return NextResponse.json(
-        { 
+        normalizeApiBody({
           data: null, 
           mensagens: ['Nenhum produto encontrado vinculado a este fornecedor.'] 
-        },
+        }),
         { status: 404 }
       );
     }
@@ -189,33 +190,33 @@ export async function POST(request, { params }) {
     if (updateError) {
       console.error('❌ Erro ao desvincular produtos:', updateError);
       return NextResponse.json(
-        { 
+        normalizeApiBody({
           data: null, 
           mensagens: ['Erro ao desvincular produtos do fornecedor.'] 
-        },
+        }),
         { status: 500 }
       );
     }
 
     return NextResponse.json(
-      { 
+      normalizeApiBody({
         data: {
           updated_count: updatedProducts?.length || 0,
           updated_products: updatedProducts || [],
           supplier_id: idNum
         }, 
         mensagens: [`${updatedProducts?.length || 0} produto(s) desvinculado(s) do fornecedor com sucesso!`] 
-      },
+      }),
       { status: 200 }
     );
 
   } catch (error) {
     console.error('❌ Erro interno:', error);
     return NextResponse.json(
-      { 
+      normalizeApiBody({
         data: null, 
         mensagens: [error.message || 'Erro interno ao processar desvinculamento.'] 
-      },
+      }),
       { status: 500 }
     );
   }

@@ -1,7 +1,8 @@
+import { normalizeApiBody } from '@/lib/api-envelope';
 // app/api/v1/shippers/route.js
 import { supabase } from '@/lib/supabase';
 import { NextResponse } from 'next/server';
-import { requireAuth } from '@/lib/auth';
+import { verifyToken, getTokenFromRequest } from '@/lib/jwt';
 
 export const dynamic = "force-dynamic";
 
@@ -16,11 +17,33 @@ export const dynamic = "force-dynamic";
  *     responses:
  *       200:
  *         description: Lista de transportadoras carregada com sucesso
+ *       401:
+ *         description: Token ausente ou inválido
  *       500:
  *         description: Erro interno do servidor
  */
 async function getShippers(request) {
   try {
+    const token = getTokenFromRequest(request);
+    if (!token) {
+      return NextResponse.json(
+        normalizeApiBody({ data: null, mensagens: ['Token ausente'] }),
+        { status: 401 }
+      );
+    }
+
+    const payload = await verifyToken(token);
+    if (!payload || payload.error) {
+      return NextResponse.json(
+        normalizeApiBody({
+          data: null,
+          mensagens: [payload?.message || 'Token inválido'],
+          expires_at: payload?.expires_at || null
+        }),
+        { status: 401 }
+      );
+    }
+
     const { data, error } = await supabase
       .from('shippers')
       .select('*')
@@ -28,17 +51,17 @@ async function getShippers(request) {
 
     if (error) throw error;
 
-    return NextResponse.json({
+    return NextResponse.json(normalizeApiBody({
       data: data || [],
       mensagens: ['Transportadoras carregadas com sucesso.']
-    });
+    }));
   } catch (error) {
     console.error('Erro ao buscar transportadoras:', error);
     return NextResponse.json(
-      { data: null, mensagens: ['Erro ao buscar transportadoras.'] },
+      normalizeApiBody({ data: null, mensagens: ['Erro ao buscar transportadoras.'] }),
       { status: 500 }
     );
   }
 }
 
-export const GET = requireAuth(getShippers);
+export const GET = getShippers;

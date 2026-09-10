@@ -1,3 +1,4 @@
+import { normalizeApiBody } from '@/lib/api-envelope';
 import bcrypt from 'bcryptjs';
 
 export async function POST(request) {
@@ -5,18 +6,18 @@ export async function POST(request) {
     const { password } = await request.json();
     
     if (!password) {
-      return Response.json({ error: 'Password required' }, { status: 400 });
+      return Response.json(normalizeApiBody({ error: 'Password required' }), { status: 400 });
     }
 
     const hash = await bcrypt.hash(password, 10);
     
-    return Response.json({ 
+    return Response.json(normalizeApiBody({
       password, 
       hash,
       message: 'Use este hash no UPDATE do banco'
-    });
+    }));
 
   } catch (error) {
-    return Response.json({ error: error.message }, { status: 500 });
+    return Response.json(normalizeApiBody({ error: error.message }), { status: 500 });
   }
 }

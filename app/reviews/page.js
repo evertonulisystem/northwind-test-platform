@@ -7,6 +7,7 @@
 // app/reviews/page.js
 "use client";
 
+import ToastMessage from "@/components/ToastMessage";
 import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
@@ -123,7 +124,7 @@ function StarRating({ value, onChange, error }) {
 
       {/* Erro inline quando nenhuma estrela foi selecionada */}
       {error && (
-        <p
+        <p data-testid="reviews-star-rating-error"
           className="text-red-400 text-xs mt-1 flex items-center gap-1"
           role="alert"
         >
@@ -184,7 +185,7 @@ function ReviewModal({ product, onClose, onSuccess }) {
 
       // Tratar 401: redirecionar para login se não autenticado
       if (!token) {
-        toast.error("Você precisa estar logado para avaliar.");
+        toast.error(<ToastMessage testId="reviews-handle-submit-error-toast">{"Você precisa estar logado para avaliar."}</ToastMessage>);
         window.location.href = "/";
         return;
       }
@@ -209,22 +210,22 @@ function ReviewModal({ product, onClose, onSuccess }) {
         // Token expirado ou inválido → redirecionar para login
         localStorage.removeItem("token");
         localStorage.removeItem("user");
-        toast.error("Sessão expirada. Faça login novamente.");
+        toast.error(<ToastMessage testId="reviews-handle-submit-error-toast-2">{"Sessão expirada. Faça login novamente."}</ToastMessage>);
         window.location.href = "/";
         return;
       }
 
       if (!res.ok) {
-        toast.error(data.mensagens?.[0] || "Erro ao enviar avaliação.");
+        toast.error(<ToastMessage testId="reviews-handle-submit-error-toast-3">{data.mensagens?.[0] || "Erro ao enviar avaliação."}</ToastMessage>);
         return;
       }
 
       // Sucesso!
-      toast.success("✅ Avaliação enviada com sucesso!");
+      toast.success(<ToastMessage testId="reviews-handle-submit-success-toast">{"✅ Avaliação enviada com sucesso!"}</ToastMessage>);
       onSuccess();
     } catch (err) {
       console.error("Erro ao enviar avaliação:", err);
-      toast.error("Erro de conexão ao enviar avaliação.");
+      toast.error(<ToastMessage testId="reviews-handle-submit-error-toast-4">{"Erro de conexão ao enviar avaliação."}</ToastMessage>);
     } finally {
       setLoading(false);
     }
@@ -409,6 +410,14 @@ export default function ReviewsPage() {
   // ── Estado: produtos sem avaliação ──────────────────────────
   const [productsWithoutReviews, setProductsWithoutReviews] = useState([]);
   const [loadingWithout, setLoadingWithout] = useState(true);
+  const [productsPage, setProductsPage] = useState(1);
+  const productsPerPage = 8;
+  const productsTotalPages = Math.ceil(productsWithoutReviews.length / productsPerPage);
+  const safeProductsPage = Math.min(productsPage, Math.max(1, productsTotalPages));
+  const visibleProducts = productsWithoutReviews.slice(
+    (safeProductsPage - 1) * productsPerPage,
+    safeProductsPage * productsPerPage,
+  );
 
   // ── Estado: avaliações aprovadas ─────────────────────────────
   const [reviews, setReviews] = useState([]);
@@ -416,7 +425,7 @@ export default function ReviewsPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const [pagination, setPagination] = useState({
     page: 1,
-    limit: 10,
+    limit: 6,
     total: 0,
     totalPages: 0,
   });
@@ -428,7 +437,7 @@ export default function ReviewsPage() {
   function getAuthHeaders() {
     const token = localStorage.getItem("token");
     if (!token) {
-      toast.error("Você precisa estar logado.");
+      toast.error(<ToastMessage testId="reviews-get-auth-headers-error-toast">{"Você precisa estar logado."}</ToastMessage>);
       router.push("/");
       return null;
     }
@@ -457,10 +466,13 @@ export default function ReviewsPage() {
       }
 
       const data = await res.json();
-      setProductsWithoutReviews(data.data || []);
+      if (!res.ok) throw new Error(data.mensagens?.[0] || "Erro ao carregar produtos");
+      const products = data.data || [];
+      setProductsWithoutReviews(products);
+      setProductsPage((page) => Math.min(page, Math.max(1, Math.ceil(products.length / productsPerPage))));
     } catch (err) {
       console.error("Erro ao buscar produtos sem avaliação:", err);
-      toast.error("Erro ao carregar produtos sem avaliação.");
+      toast.error(<ToastMessage testId="reviews-reviews-page-error-toast">{"Erro ao carregar produtos sem avaliação."}</ToastMessage>);
     } finally {
       setLoadingWithout(false);
     }
@@ -474,7 +486,7 @@ export default function ReviewsPage() {
       const token = localStorage.getItem("token");
       if (!token) return;
 
-      const res = await fetch(`/api/v1/reviews?page=${page}&limit=10`, {
+      const res = await fetch(`/api/v1/reviews?page=${page}&limit=6`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -488,13 +500,14 @@ export default function ReviewsPage() {
       }
 
       const data = await res.json();
+      if (!res.ok) throw new Error(data.mensagens?.[0] || "Erro ao carregar avaliações");
       setReviews(data.data || []);
       if (data.pagination) {
         setPagination(data.pagination);
       }
     } catch (err) {
       console.error("Erro ao buscar avaliações:", err);
-      toast.error("Erro ao carregar avaliações.");
+      toast.error(<ToastMessage testId="reviews-reviews-page-error-toast-2">{"Erro ao carregar avaliações."}</ToastMessage>);
     } finally {
       setLoadingReviews(false);
     }
@@ -504,8 +517,11 @@ export default function ReviewsPage() {
   // Carrega ambas as listas ao montar a página
   useEffect(() => {
     fetchProductsWithoutReviews();
+  }, [fetchProductsWithoutReviews]);
+
+  useEffect(() => {
     fetchReviews(currentPage);
-  }, [fetchProductsWithoutReviews, fetchReviews, currentPage]);
+  }, [fetchReviews, currentPage]);
 
   // ── Handler: após envio da avaliação com sucesso ─────────────
   // Fecha o modal e recarrega ambas as listas para refletir o estado atual
@@ -638,7 +654,7 @@ export default function ReviewsPage() {
                       </tr>
                     </thead>
                     <tbody>
-                      {productsWithoutReviews.map((product) => (
+                      {visibleProducts.map((product) => (
                         <tr
                           key={product.id}
                           data-testid={`without-review-row-${product.id}`}
@@ -701,6 +717,19 @@ export default function ReviewsPage() {
                 </div>
               )}
             </div>
+            {!loadingWithout && productsTotalPages > 1 && (
+              <nav aria-label="Paginação de produtos sem avaliação" data-testid="without-reviews-pagination" className="flex flex-wrap justify-center items-center gap-4 mt-8">
+                <button data-testid="without-reviews-previous-page-btn" type="button" onClick={() => setProductsPage(safeProductsPage - 1)} disabled={safeProductsPage === 1}
+                  className="px-4 py-2 rounded-lg bg-slate-800 border border-slate-600 text-white hover:bg-slate-700 disabled:opacity-50 disabled:cursor-not-allowed transition">
+                  Anterior
+                </button>
+                <span className="text-slate-300" aria-live="polite">Página <span className="font-bold text-white">{safeProductsPage}</span> de <span className="font-bold text-white">{productsTotalPages}</span></span>
+                <button data-testid="without-reviews-next-page-btn" type="button" onClick={() => setProductsPage(safeProductsPage + 1)} disabled={safeProductsPage === productsTotalPages}
+                  className="px-4 py-2 rounded-lg bg-slate-800 border border-slate-600 text-white hover:bg-slate-700 disabled:opacity-50 disabled:cursor-not-allowed transition">
+                  Próxima
+                </button>
+              </nav>
+            )}
           </section>
 
           {/* ════════════════════════════════════════════════════
@@ -832,8 +861,8 @@ export default function ReviewsPage() {
                 </div>
 
                 {pagination.totalPages > 1 && (
-                  <div className="flex justify-center items-center gap-4 mt-8">
-                    <button
+                  <nav aria-label="Paginação de avaliações" data-testid="reviews-pagination" className="flex flex-wrap justify-center items-center gap-4 mt-8">
+                    <button data-testid="reviews-previous-page-btn"
                       onClick={() =>
                         setCurrentPage((prev) => Math.max(1, prev - 1))
                       }
@@ -852,7 +881,7 @@ export default function ReviewsPage() {
                         {pagination.totalPages}
                       </span>
                     </span>
-                    <button
+                    <button data-testid="reviews-next-page-btn"
                       onClick={() =>
                         setCurrentPage((prev) =>
                           Math.min(pagination.totalPages, prev + 1),
@@ -863,7 +892,7 @@ export default function ReviewsPage() {
                     >
                       Próxima
                     </button>
-                  </div>
+                  </nav>
                 )}
               </>
             )}

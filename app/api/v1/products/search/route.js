@@ -1,3 +1,4 @@
+import { normalizeApiBody } from '@/lib/api-envelope';
 // app/api/products/search/route.js
 import { supabase } from '@/lib/supabase';
 import { NextResponse } from 'next/server';
@@ -22,6 +23,11 @@ import { verifyToken, getTokenFromRequest } from '@/lib/jwt';
  *         name: slug
  *         schema: { type: string }
  *         description: Slug do produto para busca
+ *       - in: query
+ *         name: name
+ *         schema: { type: string }
+ *         description: Nome completo e exato do produto (prioridade id, sku, slug, name)
+ *         example: Mouse Gamer RGB Pro Wireless
  *     responses:
  *       200:
  *         description: Produto encontrado
@@ -50,10 +56,10 @@ export async function GET(request) {
     const token = getTokenFromRequest(request);
     if (!token) {
       return NextResponse.json(
-        { 
+        normalizeApiBody({
           data: null,
           mensagens: ['Token ausente'] 
-        }, 
+        }),
         { status: 401 }
       );
     }
@@ -62,11 +68,11 @@ export async function GET(request) {
     if (!payload || payload.error) {
       const message = payload?.message || 'Token inválido';
       return NextResponse.json(
-        { 
+        normalizeApiBody({
           data: null,
           mensagens: [message],
           expires_at: payload?.expires_at || null
-        }, 
+        }),
         { status: 401 }
       );
     }
@@ -75,14 +81,15 @@ export async function GET(request) {
     const id = searchParams.get('id');
     const sku = searchParams.get('sku');
     const slug = searchParams.get('slug');
+    const name = searchParams.get('name')?.trim();
 
     // Validação: pelo menos um parâmetro deve ser fornecido
-    if (!id && !sku && !slug) {
+    if (!id && !sku && !slug && !name) {
       return NextResponse.json(
-        { 
+        normalizeApiBody({
           data: null,
-          mensagens: ['Pelo menos um parâmetro deve ser fornecido: id, sku ou slug.'] 
-        }, 
+          mensagens: ['Pelo menos um parâmetro deve ser fornecido: id, sku, slug ou name.']
+        }),
         { status: 400 }
       );
     }
@@ -109,10 +116,10 @@ export async function GET(request) {
       const productId = parseInt(id);
       if (isNaN(productId) || productId <= 0) {
         return NextResponse.json(
-          { 
+          normalizeApiBody({
             data: null,
             mensagens: ['ID deve ser um número positivo válido.'] 
-          }, 
+          }),
           { status: 400 }
         );
       }
@@ -121,6 +128,8 @@ export async function GET(request) {
       query = query.eq('sku', sku.trim().toUpperCase());
     } else if (slug) {
       query = query.eq('slug', slug.trim().toLowerCase());
+    } else if (name) {
+      query = query.eq('name', name);
     }
 
     const { data, error } = await query.single();
@@ -131,10 +140,10 @@ export async function GET(request) {
       if (error.code === 'PGRST116') {
         // Produto não encontrado
         return NextResponse.json(
-          { 
+          normalizeApiBody({
             data: null,
             mensagens: ['Produto não encontrado.'] 
-          }, 
+          }),
           { status: 404 }
         );
       }
@@ -144,26 +153,26 @@ export async function GET(request) {
 
     if (!data) {
       return NextResponse.json(
-        { 
+        normalizeApiBody({
           data: null,
           mensagens: ['Produto não encontrado.'] 
-        }, 
+        }),
         { status: 404 }
       );
     }
 
     console.log('Produto encontrado:', data.name);
     
-    return NextResponse.json({
+    return NextResponse.json(normalizeApiBody({
       data,
       mensagens: ['Produto encontrado com sucesso.'],
-    });
+    }));
 
   } catch (error) {
     console.error('Erro fatal:', error);
-    return NextResponse.json({
+    return NextResponse.json(normalizeApiBody({
       data: null,
       mensagens: ['Erro interno ao buscar produto.']
-    }, { status: 500 });
+    }), { status: 500 });
   }
 }
