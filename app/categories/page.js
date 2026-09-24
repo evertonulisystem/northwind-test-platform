@@ -513,6 +513,7 @@ export default function CategoriesPage() {
                 </label>
                 <textarea
                   name="description"
+                  data-testid="category-description-input"
                   value={formData.description}
                   onChange={handleChange}
                   rows={4}
