@@ -37,13 +37,20 @@ export async function GET(request) {
   const { data: user, error } = await supabase
     .from('users')
     .select(`
-      id, email, full_name, role, phone, address, birth_date, 
+      id, email, full_name, role, phone, birth_date,
       created_at, last_login, is_active
     `)
     .eq('id', payload.id)
-    .single();
+    .maybeSingle();
 
-  if (error || !user) {
+  if (error) {
+    return Response.json(normalizeApiBody({
+      data: null,
+      mensagens: ['Erro ao consultar usuário']
+    }), { status: 500 });
+  }
+
+  if (!user) {
     return Response.json(normalizeApiBody({
       data: null,
       mensagens: ['Usuário não encontrado'] 
