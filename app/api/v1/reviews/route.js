@@ -198,6 +198,23 @@ export async function POST(request) {
   // O user_id vem do token JWT para garantir que o usuário autenticado
   // seja o autor da avaliação (não aceitar user_id no body = segurança).
   try {
+    const { data: existingReview, error: duplicateError } = await supabase
+      .from('reviews')
+      .select('id')
+      .eq('user_id', payload.id)
+      .eq('product_id', parseInt(product_id, 10))
+      .limit(1)
+      .maybeSingle();
+
+    if (duplicateError) throw duplicateError;
+
+    if (existingReview) {
+      return NextResponse.json(
+        normalizeApiBody({ data: null, mensagens: ['Você já avaliou este produto.'] }),
+        { status: 409 }
+      );
+    }
+
     const { data: newReview, error } = await supabase
       .from('reviews')
       .insert({
