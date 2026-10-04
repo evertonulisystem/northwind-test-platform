@@ -19,6 +19,7 @@ import {
   Star,
   BarChart2,
   ClipboardList,
+  User,
 } from "lucide-react";
 import ProductDetailsModal from "@/components/ProductDetailsModal.jsx";
 import RulesModal from "@/components/RulesModal.jsx";
@@ -26,6 +27,52 @@ import ConfirmModal from "@/components/ConfirmModal.jsx";
 
 export default function ProductsPage() {
   const router = useRouter();
+  const [authenticatedUser, setAuthenticatedUser] = useState(null);
+  const logout = useCallback(() => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+    setAuthenticatedUser(null);
+    router.replace("/");
+  }, [router]);
+
+  useEffect(() => {
+    const controller = new AbortController();
+    const token = localStorage.getItem("token");
+    if (!token) {
+      logout();
+      return;
+    }
+
+    async function loadAuthenticatedUser() {
+      try {
+        const response = await fetch("/api/v1/auth/me", {
+          headers: { Authorization: `Bearer ${token}` },
+          cache: "no-store",
+          signal: controller.signal,
+        });
+        if (response.status === 401 || response.status === 404) {
+          logout();
+          return;
+        }
+        if (!response.ok) return;
+        const result = await response.json();
+        if (!controller.signal.aborted) {
+          setAuthenticatedUser(result.data?.user ?? null);
+        }
+      } catch {
+        // Keep the neutral avatar when the profile cannot be loaded.
+      }
+    }
+
+    loadAuthenticatedUser();
+    return () => controller.abort();
+  }, [logout]);
+
+  const userName = authenticatedUser?.full_name?.trim();
+  const initials = userName
+    ? userName.split(/\s+/).filter(Boolean).map((part) => part[0]).filter((_, index, parts) => index === 0 || index === parts.length - 1).join("").toUpperCase()
+    : null;
+  const userRole = authenticatedUser?.role === "customer" ? "consumer" : authenticatedUser?.role;
   const [products, setProducts] = useState([]);
   const [allProducts, setAllProducts] = useState([]);
   const [pagination, setPagination] = useState({
@@ -259,8 +306,28 @@ export default function ProductsPage() {
       <div className="min-h-screen bg-gradient-to-br from-purple-900 via-pink-800 to-orange-700 px-4 py-6">
         <div className="max-w-7xl mx-auto">
           {/* Header */}
-          <div className="mb-8 text-center">
-            <h1 className="text-5xl font-extrabold text-white mb-3">
+          <div className="mb-8 text-center grid grid-cols-1 xl:grid-cols-[1fr_auto_1fr] gap-4 items-start">
+            <div className="flex justify-end min-w-0 xl:col-start-3 xl:row-start-1" data-testid="authenticated-user">
+              <div className="flex items-center gap-3 max-w-full text-white text-left bg-white/10 rounded-xl p-3">
+                <div className="w-10 h-10 shrink-0 rounded-full bg-purple-500/60 flex items-center justify-center font-bold" aria-label={initials ? `Avatar de ${userName}` : "Usuário"}>
+                  {initials || <User className="w-5 h-5" aria-hidden="true" />}
+                </div>
+                {authenticatedUser && (
+                  <div className="min-w-0 text-sm">
+                    {userName && <p className="font-semibold break-words">{userName}</p>}
+                    <p className="text-pink-100 break-all">{authenticatedUser.email}</p>
+                    <p className="text-pink-100">{userRole}</p>
+                  </div>
+                )}
+                {authenticatedUser && (
+                  <button onClick={logout} data-testid="logout-button" className="shrink-0 text-sm font-semibold px-3 py-2 rounded-lg bg-white/10 hover:bg-white/20 focus-visible:outline focus-visible:outline-2 focus-visible:outline-white">
+                    Sair
+                  </button>
+                )}
+              </div>
+            </div>
+            <div className="min-w-0 xl:col-start-2 xl:row-start-1">
+            <h1 className="text-3xl sm:text-5xl font-extrabold text-white mb-3">
               QA Automation Shop
             </h1>
             <p className="text-xl text-pink-100 mb-4">
@@ -274,9 +341,10 @@ export default function ProductsPage() {
               <AlertTriangle className="w-6 h-6" />
               Regras do Playground
             </button>
+            </div>
           </div>
 
-          <div className="flex justify-end gap-4 mb-6">
+          <div className="flex flex-wrap justify-end gap-4 mb-6">
             <button
               onClick={() => router.push("/cart")}
               data-testid="view-cart-button"
