@@ -1,3 +1,4 @@
+import { requireAdmin } from '@/lib/auth';
 import { normalizeApiBody } from '@/lib/api-envelope';
 import { supabase } from '@/lib/supabase';
 import { NextResponse } from 'next/server';
@@ -24,22 +25,8 @@ import path from 'path';
  *       403:
  *         description: Chave inválida
  */
-export async function DELETE(request) {
+async function DELETEHandler(request) {
   try {
-    // 1. Proteção de Acesso (Só o dono da chave pode rodar isso)
-    const adminKey = request.headers.get('x-admin-key');
-    
-    // Você pode colocar a senha que quiser aqui, ou usar a variável de ambiente.
-    // Ex: no ThunderClient, envie o Header: x-admin-key: senha-secreta-do-everton
-    const expectedKey = process.env.ADMIN_CLEANUP_KEY || 'senha-secreta-do-everton';
-
-    if (!adminKey || adminKey !== expectedKey) {
-      return NextResponse.json(normalizeApiBody({
-        data: null, 
-        mensagens: ['Acesso negado. Você não tem permissão para limpar o storage. Passe a chave correta no header "x-admin-key".'] 
-      }), { status: 403 });
-    }
-
     const isVercel = !!process.env.VERCEL;
 
     if (isVercel) {
@@ -85,3 +72,5 @@ export async function DELETE(request) {
     return NextResponse.json(normalizeApiBody({ data: null, mensagens: ['Erro interno ao executar a faxina.', error.message || String(error)] }), { status: 500 });
   }
 }
+
+export const DELETE = requireAdmin(DELETEHandler);

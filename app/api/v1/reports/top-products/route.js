@@ -16,7 +16,7 @@ import { normalizeApiBody } from '@/lib/api-envelope';
 
 import { supabase } from "@/lib/supabase";
 import { NextResponse } from "next/server";
-import { requireAuth } from "@/lib/auth";
+import { requireAdmin } from "@/lib/auth";
 
 const ALLOWED_TOP_VALUES = [10, 20, 50, 100];
 
@@ -193,4 +193,4 @@ async function getTopProducts(request, { user }) {
   }
 }
 
-export const GET = requireAuth(getTopProducts);
+export const GET = requireAdmin(getTopProducts);

@@ -1,3 +1,4 @@
+import { requireAuth } from '@/lib/auth';
 import { normalizeApiBody } from '@/lib/api-envelope';
 // ============================================================
 // 🆕 NOVA FUNCIONALIDADE — Avaliações de Produtos
@@ -27,7 +28,7 @@ import { verifyToken, getTokenFromRequest } from '@/lib/jwt';
  *
  * Requer autenticação via Bearer token.
  */
-export async function GET(request) {
+async function GETHandler(request) {
   console.log('=== GET /api/v1/reviews/without-reviews ===');
 
   // ── 1. Autenticação ──────────────────────────────────────────
@@ -111,3 +112,5 @@ export async function GET(request) {
     );
   }
 }
+
+export const GET = requireAuth(GETHandler);

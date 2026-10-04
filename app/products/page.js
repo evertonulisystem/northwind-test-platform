@@ -68,6 +68,7 @@ export default function ProductsPage() {
     return () => controller.abort();
   }, [logout]);
 
+  const isAdmin = authenticatedUser?.role === 'admin';
   const userName = authenticatedUser?.full_name?.trim();
   const initials = userName
     ? userName.split(/\s+/).filter(Boolean).map((part) => part[0]).filter((_, index, parts) => index === 0 || index === parts.length - 1).join("").toUpperCase()
@@ -345,30 +346,30 @@ export default function ProductsPage() {
           </div>
 
           <div className="flex flex-wrap justify-start gap-3 mb-6">
-            <button
+            <button disabled={!isAdmin} title={!isAdmin ? "Disponível apenas para administradores" : undefined}
               onClick={() => setShowAddModal(true)}
               data-testid="add-product-button"
-              className="bg-green-600 text-white px-4 py-2 rounded-xl hover:bg-green-700 transition font-semibold shadow-lg flex items-center gap-2"
+              className="bg-green-600 text-white px-4 py-2 rounded-xl hover:bg-green-700 transition font-semibold shadow-lg flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <Plus className="w-5 h-5" />
               Adicionar Produto
             </button>
 
-            <button
+            <button disabled={!isAdmin}
               onClick={() => window.open("/suppliers", "_blank")}
               data-testid="new-supplier-button"
-              className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-xl transition font-semibold shadow-lg flex items-center gap-2"
-              title="Cadastrar novo fornecedor"
+              className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-xl transition font-semibold shadow-lg flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+              title={!isAdmin ? "Disponível apenas para administradores" : undefined}
             >
               <Plus className="w-5 h-5" />
               Novo Fornecedor
             </button>
 
-            <button
+            <button disabled={!isAdmin}
               onClick={() => window.open("/categories", "_blank")}
               data-testid="new-category-button"
-              className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-xl transition font-semibold shadow-lg flex items-center gap-2"
-              title="Cadastrar nova categoria"
+              className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-xl transition font-semibold shadow-lg flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+              title={!isAdmin ? "Disponível apenas para administradores" : undefined}
             >
               <Plus className="w-5 h-5" />
               Nova Categoria
@@ -396,11 +397,11 @@ export default function ProductsPage() {
               Ver Carrinho
             </button>
 
-            <button
+            <button disabled={!isAdmin} title={!isAdmin ? "Disponível apenas para administradores" : undefined}
               onClick={() => router.push("/reports")}
               id="view-reports-button"
               data-testid="view-reports-button"
-              className="relative bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-700 hover:to-purple-700 text-white px-4 py-2 rounded-xl transition font-semibold shadow-lg flex items-center gap-2"
+              className="relative bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-700 hover:to-purple-700 text-white px-4 py-2 rounded-xl transition font-semibold shadow-lg flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <BarChart2 className="w-5 h-5" />
               Relatório
@@ -517,7 +518,9 @@ export default function ProductsPage() {
                 <button
                   onClick={() => setShowAddModal(true)}
                   data-testid="add-first-product-button"
-                  className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-8 py-4 rounded-xl font-semibold shadow-lg transition transform hover:scale-105 flex items-center gap-3 mx-auto"
+                  disabled={!isAdmin}
+                  title={!isAdmin ? "Disponível apenas para administradores" : undefined}
+                  className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-8 py-4 rounded-xl font-semibold shadow-lg transition transform hover:scale-105 flex items-center gap-3 mx-auto disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <Plus className="w-6 h-6" />
                   Adicionar Primeiro Produto
@@ -597,6 +600,7 @@ export default function ProductsPage() {
                           </td>
                           <td className="px-4 py-2 text-center">
                             <div className="flex justify-center gap-2">
+                              {isAdmin && <>
                               <button
                                 onClick={() => {
                                   setEditingProduct(p);
@@ -614,6 +618,7 @@ export default function ProductsPage() {
                               >
                                 <Trash2 className="w-4 h-4" /> Delete
                               </button>
+                              </>}
                               <button
                                 onClick={() => {
                                   setSelectedProduct(p);
@@ -686,7 +691,7 @@ export default function ProductsPage() {
           }}
         />
       )}
-      {showAddModal && (
+      {isAdmin && showAddModal && (
         <AddProductModal
           onClose={() => setShowAddModal(false)}
           onAdd={handleAdd}
@@ -699,7 +704,7 @@ export default function ProductsPage() {
           }
         />
       )}
-      {showEditModal && editingProduct && (
+      {isAdmin && showEditModal && editingProduct && (
         <EditProductModal
           product={editingProduct}
           onClose={() => {

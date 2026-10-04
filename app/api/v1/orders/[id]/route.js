@@ -27,6 +27,14 @@ async function getOrderDetail(request, { params, user }) {
   try {
     const { id } = await params;
 
+    // Authorize using ownership from the database, before loading protected details.
+    const { data: owner, error: ownerError } = await supabase.from("orders")
+      .select("user_id").eq("id", id).maybeSingle();
+    if (ownerError) throw ownerError;
+    if (owner && user.role !== "admin" && String(owner.user_id) !== String(user.id)) {
+      return NextResponse.json(normalizeApiBody({ data: null, mensagens: ["Acesso negado."] }), { status: 403 });
+    }
+
     // 1. Buscar o pedido
     const orderQuery = supabase
       .from("orders")

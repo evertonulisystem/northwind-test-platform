@@ -13,6 +13,7 @@
 // Adicionado em: agosto/2026
 // ============================================================
 
+import usePermissions from "@/components/usePermissions";
 import ToastMessage from "@/components/ToastMessage";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -64,6 +65,7 @@ function getRankIcon(rank) {
 
 export default function ReportsPage() {
   const router = useRouter();
+  const { isAdmin } = usePermissions({ adminOnly: true });
   const [products, setProducts] = useState([]);
   const [meta, setMeta] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -78,8 +80,8 @@ export default function ReportsPage() {
   const [message, setMessage] = useState("");
 
   useEffect(() => {
-    fetchReport();
-  }, [top, page]);
+    if (isAdmin) fetchReport();
+  }, [top, page, isAdmin]);
 
   async function fetchReport() {
     try {
@@ -170,6 +172,8 @@ export default function ReportsPage() {
   const totalDiscount =
     meta?.grand_total_discount ??
     products.reduce((acc, p) => acc + p.total_discount_given, 0);
+
+  if (!isAdmin) return null;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-900 via-pink-800 to-orange-700 px-4 py-6">

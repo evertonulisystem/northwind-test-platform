@@ -1,3 +1,5 @@
+import { requireAuth } from '@/lib/auth';
+import { requireAdmin } from '@/lib/auth';
 import { normalizeApiBody } from '@/lib/api-envelope';
 // app/api/v1/suppliers/route.js
 import { supabase } from '@/lib/supabase';
@@ -23,7 +25,7 @@ import { verifyToken, getTokenFromRequest } from '@/lib/jwt';
  *       401:
  *         description: Token ausente
  */
-export async function GET(request) {
+async function GETHandler(request) {
   try {
     // Verificar autenticação
     const token = getTokenFromRequest(request);
@@ -160,7 +162,7 @@ export async function GET(request) {
  *       409:
  *         description: Email ou CNPJ duplicado
  */
-export async function POST(request) {
+async function POSTHandler(request) {
   try {
     // Verificar autenticação
     const token = getTokenFromRequest(request);
@@ -464,3 +466,6 @@ export async function POST(request) {
     );
   }
 }
+export const POST = requireAdmin(POSTHandler);
+
+export const GET = requireAuth(GETHandler);

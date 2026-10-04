@@ -1,3 +1,4 @@
+import { requireAuth } from '@/lib/auth';
 import { normalizeApiBody } from '@/lib/api-envelope';
 // app/api/v1/products/route.js
 import { supabase } from '@/lib/supabase';
@@ -132,7 +133,7 @@ import { authenticate } from '@/lib/auth';
 // app/api/v1/products/route.js → GET ATUALIZADO (O ÚNICO QUE FUNCIONA DE VERDADE COM JOIN)
 // app/api/v1/products/route.js → GET FINAL (FUNCIONA COM TEXTO EM NOME, CATEGORIA E FORNECEDOR)
 // app/api/v1/products/route.js → VERSÃO FINAL QUE FUNCIONA 100%
-export async function GET(request) {
+async function GETHandler(request) {
   console.log('=== DEBUG GET /api/v1/products ===');
   console.log('URL:', request.url);
   console.log('Headers:', Object.fromEntries(request.headers.entries()));
@@ -624,3 +625,5 @@ function generateSlug(name) {
     .replace(/(^-|-$)/g, '')
     .substring(0, 100);
 }
+
+export const GET = requireAuth(GETHandler);

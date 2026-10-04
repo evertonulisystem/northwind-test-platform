@@ -1,3 +1,5 @@
+import { requireAuth } from '@/lib/auth';
+import { requireAdmin } from '@/lib/auth';
 import { normalizeApiBody } from '@/lib/api-envelope';
 // app/api/products/[id]/route.js
 import { supabase } from '@/lib/supabase';
@@ -91,7 +93,7 @@ function generateSlug(name) {
  *               data: null
  *               mensagens: ["Erro interno ao buscar produto."]
  */
-export async function GET(request, { params }) {
+async function GETHandler(request, { params }) {
   try {
     // Verificar autenticação
     const token = getTokenFromRequest(request);
@@ -276,7 +278,7 @@ export async function GET(request, { params }) {
  *         description: Erro interno do servidor
  */
 // === PUT (EDITAR) ===
-export async function PUT(request, { params }) {
+async function PUTHandler(request, { params }) {
   try {
     // Verificar autenticação
     const token = getTokenFromRequest(request);
@@ -560,7 +562,7 @@ export async function PUT(request, { params }) {
  *       409:
  *         description: SKU ou slug duplicado
  */
-export async function PATCH(request, { params }) {
+async function PATCHHandler(request, { params }) {
   try {
     // Verificar autenticação
     const token = getTokenFromRequest(request);
@@ -846,7 +848,7 @@ export async function PATCH(request, { params }) {
 }
 
 // === DELETE ===
-export async function DELETE(request, { params }) {
+async function DELETEHandler(request, { params }) {
   try {
     // Verificar autenticação
     const token = getTokenFromRequest(request);
@@ -950,3 +952,10 @@ export async function DELETE(request, { params }) {
     );
   }
 }
+export const PUT = requireAdmin(PUTHandler);
+
+export const PATCH = requireAdmin(PATCHHandler);
+
+export const DELETE = requireAdmin(DELETEHandler);
+
+export const GET = requireAuth(GETHandler);

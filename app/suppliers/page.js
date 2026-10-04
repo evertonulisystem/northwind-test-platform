@@ -1,4 +1,5 @@
 "use client";
+import usePermissions from "@/components/usePermissions";
 
 import ToastMessage from "@/components/ToastMessage";
 import { useState, useEffect } from "react";
@@ -23,6 +24,7 @@ import UnlinkSupplierModal from "@/components/UnlinkSupplierModal.jsx";
 
 export default function SuppliersPage() {
   const router = useRouter();
+  const { isAdmin } = usePermissions();
   const [suppliers, setSuppliers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showAddModal, setShowAddModal] = useState(false);
@@ -416,9 +418,9 @@ export default function SuppliersPage() {
             </p>
 
             <div className="flex justify-center gap-4">
-              <button data-testid="new-supplier-btn"
+              <button disabled={!isAdmin} title={!isAdmin ? "Disponível apenas para administradores" : undefined} data-testid="new-supplier-btn"
                 onClick={() => setShowAddModal(true)}
-                className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-xl font-semibold shadow-lg transition transform hover:scale-105 flex items-center gap-2"
+                className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-xl font-semibold shadow-lg transition transform hover:scale-105 flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <Plus className="w-5 h-5" />
                 Novo Fornecedor
@@ -468,9 +470,9 @@ export default function SuppliersPage() {
                   : "Nenhum fornecedor cadastrado"}
               </p>
               {!searchTerm && (
-                <button data-testid="create-first-supplier-btn"
+                <button disabled={!isAdmin} title={!isAdmin ? "Disponível apenas para administradores" : undefined} data-testid="create-first-supplier-btn"
                   onClick={() => setShowAddModal(true)}
-                  className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg transition"
+                  className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   Cadastrar primeiro fornecedor
                 </button>
@@ -624,7 +626,7 @@ export default function SuppliersPage() {
       </div>
 
       {/* Add Modal */}
-      {showAddModal && (
+      {isAdmin && showAddModal && (
         <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
           <div className="w-full max-w-md bg-slate-800 rounded-xl border border-slate-700 shadow-2xl">
             <div className="p-6 border-b border-slate-700">

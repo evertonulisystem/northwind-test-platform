@@ -1,3 +1,4 @@
+import { requireAuth } from '@/lib/auth';
 import { normalizeApiBody } from '@/lib/api-envelope';
 // app/api/products/search/route.js
 import { supabase } from '@/lib/supabase';
@@ -47,7 +48,7 @@ import { verifyToken, getTokenFromRequest } from '@/lib/jwt';
  *       400:
  *         description: Parâmetros inválidos
  */
-export async function GET(request) {
+async function GETHandler(request) {
   console.log('=== DEBUG GET /api/products/search ===');
   console.log('URL:', request.url);
   
@@ -176,3 +177,5 @@ export async function GET(request) {
     }), { status: 500 });
   }
 }
+
+export const GET = requireAuth(GETHandler);

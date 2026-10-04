@@ -23,7 +23,7 @@ export const dynamic = "force-dynamic";
  */
 async function getCart(request, { user }) {
   const requestedUserId = new URL(request.url).searchParams.get('userId');
-  if (requestedUserId !== null && requestedUserId !== String(user.id)) {
+  if (user.role !== 'admin' && requestedUserId !== null && requestedUserId !== String(user.id)) {
     return NextResponse.json(
       normalizeApiBody({ data: null, mensagens: ['Acesso negado.'] }),
       { status: 403 }
@@ -46,7 +46,7 @@ async function getCart(request, { user }) {
           stock_quantity
         )
       `)
-      .eq('user_id', user.id);
+      .eq('user_id', user.role === 'admin' && requestedUserId !== null ? requestedUserId : user.id);
 
     if (error) throw error;
     

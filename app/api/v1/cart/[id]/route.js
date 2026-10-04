@@ -64,7 +64,7 @@ async function updateCartItem(request, { params, user }) {
     }
 
     // Segurança: Garantir que o item pertence ao usuário
-    if (item.user_id !== user.id) {
+    if (user.role !== 'admin' && String(item.user_id) !== String(user.id)) {
        return NextResponse.json(
         normalizeApiBody({ data: null, mensagens: ['Acesso negado.'] }),
         { status: 403 }
@@ -82,7 +82,7 @@ async function updateCartItem(request, { params, user }) {
       .from('cart_items')
       .update({ quantity })
       .eq('id', id)
-      .eq('user_id', user.id)
+      .eq('user_id', item.user_id)
       .select()
       .single();
 
@@ -137,7 +137,7 @@ async function deleteCartItem(request, { params, user }) {
       );
     }
 
-    if (item.user_id !== user.id) {
+    if (user.role !== 'admin' && String(item.user_id) !== String(user.id)) {
       return NextResponse.json(
         normalizeApiBody({ data: null, mensagens: ['Acesso negado.'] }),
         { status: 403 }

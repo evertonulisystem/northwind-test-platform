@@ -1,3 +1,5 @@
+import { requireAuth } from '@/lib/auth';
+import { requireAdmin } from '@/lib/auth';
 import { normalizeApiBody } from '@/lib/api-envelope';
 // app/api/v1/categories/route.js
 import { supabase } from '@/lib/supabase';
@@ -103,7 +105,7 @@ export const dynamic = "force-dynamic";
  *                 - "Erro ao carregar categorias."
  *                 - "connection refused"
  */
-export async function GET(request) {
+async function GETHandler(request) {
   try {
     const token = getTokenFromRequest(request);
     
@@ -281,7 +283,7 @@ export async function GET(request) {
  *                   data: null
  *                   mensagens: ["Token inválido"]
  */
-export async function POST(request) {
+async function POSTHandler(request) {
   try {
     const token = getTokenFromRequest(request);
     if (!token) {
@@ -538,3 +540,7 @@ export async function PATCH(request, { params }) {
     );
   }
 }
+
+export const POST = requireAdmin(POSTHandler);
+
+export const GET = requireAuth(GETHandler);

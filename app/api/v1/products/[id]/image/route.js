@@ -1,3 +1,4 @@
+import { requireAdmin } from '@/lib/auth';
 import { normalizeApiBody } from '@/lib/api-envelope';
 import { supabase } from '@/lib/supabase';
 import { NextResponse } from 'next/server';
@@ -51,7 +52,7 @@ async function ensureDir(dirPath) {
  *       404:
  *         description: Produto não encontrado
  */
-export async function POST(request, { params }) {
+async function POSTHandler(request, { params }) {
   try {
     // 1. Identificar produto
     const { id } = await params;
@@ -219,3 +220,5 @@ export async function GET(request, { params }) {
     return NextResponse.json(normalizeApiBody({ data: null, mensagens: ['Erro ao buscar imagens.', error.message || String(error)] }), { status: 500 });
   }
 }
+
+export const POST = requireAdmin(POSTHandler);

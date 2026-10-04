@@ -1,4 +1,5 @@
 "use client";
+import usePermissions from "@/components/usePermissions";
 
 import ToastMessage from "@/components/ToastMessage";
 import { useState, useEffect } from "react";
@@ -19,6 +20,7 @@ import {
 
 export default function CategoriesPage() {
   const router = useRouter();
+  const { isAdmin } = usePermissions();
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showAddModal, setShowAddModal] = useState(false);
@@ -295,10 +297,10 @@ export default function CategoriesPage() {
             </p>
 
             <div className="flex justify-center gap-4">
-              <button
+              <button disabled={!isAdmin} title={!isAdmin ? "Disponível apenas para administradores" : undefined}
                 onClick={() => setShowAddModal(true)}
                 data-testid="add-category-btn"
-                className="bg-emerald-600 hover:bg-emerald-700 text-white px-8 py-3 rounded-xl font-semibold shadow-lg transition transform hover:scale-105 flex items-center gap-2"
+                className="bg-emerald-600 hover:bg-emerald-700 text-white px-8 py-3 rounded-xl font-semibold shadow-lg transition transform hover:scale-105 flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <Plus className="w-5 h-5" />
                 Nova Categoria
@@ -348,9 +350,9 @@ export default function CategoriesPage() {
                   : "Nenhuma categoria cadastrada"}
               </p>
               {!searchTerm && (
-                <button data-testid="create-first-category-btn"
+                <button disabled={!isAdmin} title={!isAdmin ? "Disponível apenas para administradores" : undefined} data-testid="create-first-category-btn"
                   onClick={() => setShowAddModal(true)}
-                  className="bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-2 rounded-lg transition"
+                  className="bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-2 rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   Cadastrar primeira categoria
                 </button>
@@ -465,7 +467,7 @@ export default function CategoriesPage() {
       </div>
 
       {/* Add Modal */}
-      {showAddModal && (
+      {isAdmin && showAddModal && (
         <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
           <div className="w-full max-w-md bg-slate-800 rounded-xl border border-slate-700 shadow-2xl">
             <div className="p-6 border-b border-slate-700">
