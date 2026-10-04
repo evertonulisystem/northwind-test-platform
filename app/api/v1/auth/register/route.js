@@ -49,6 +49,12 @@ export async function POST(request) {
   try {
     // 1. Extrair dados do corpo da requisição
     const body = await request.json();
+    if (Object.hasOwn(body, 'role') || Object.hasOwn(body, 'is_active')) {
+      return Response.json(normalizeApiBody({
+        data: null,
+        mensagens: ['role e is_active não podem ser definidos no cadastro.']
+      }), { status: 400 });
+    }
     const { full_name, email, password, confirmPassword } = body;
 
  // 2. Validar campos obrigatórios

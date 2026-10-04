@@ -82,6 +82,7 @@ async function updateCartItem(request, { params, user }) {
       .from('cart_items')
       .update({ quantity })
       .eq('id', id)
+      .eq('user_id', user.id)
       .select()
       .single();
 
