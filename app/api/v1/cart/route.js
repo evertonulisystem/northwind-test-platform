@@ -3,6 +3,7 @@ import { normalizeApiBody } from '@/lib/api-envelope';
 import { supabase } from '@/lib/supabase';
 import { NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/auth';
+import { getTokenFromRequest, verifyToken } from '@/lib/jwt';
 
 export const dynamic = "force-dynamic";
 
@@ -21,6 +22,14 @@ export const dynamic = "force-dynamic";
  *         description: Não autorizado
  */
 async function getCart(request, { user }) {
+  const requestedUserId = new URL(request.url).searchParams.get('userId');
+  if (requestedUserId !== null && requestedUserId !== String(user.id)) {
+    return NextResponse.json(
+      normalizeApiBody({ data: null, mensagens: ['Acesso negado.'] }),
+      { status: 403 }
+    );
+  }
+
   try {
     const { data, error } = await supabase
       .from('cart_items')
@@ -218,6 +227,30 @@ async function clearCart(request, { user }) {
   }
 }
 
-export const GET = requireAuth(getCart);
+export async function GET(request) {
+  const token = getTokenFromRequest(request);
+  if (!token) {
+    return NextResponse.json(normalizeApiBody({ error: 'No token provided' }), { status: 401 });
+  }
+
+  const payload = await verifyToken(token);
+  const validId = (typeof payload?.id === 'string' && payload.id.trim().length > 0)
+    || (Number.isSafeInteger(payload?.id) && payload.id > 0);
+  if (!payload || payload.error || !validId) {
+    return NextResponse.json(normalizeApiBody({ error: 'Invalid token' }), { status: 401 });
+  }
+
+  const { data: user, error } = await supabase
+    .from('users')
+    .select('id, email, full_name, role, is_active')
+    .eq('id', payload.id)
+    .single();
+
+  if (error || !user || !user.is_active) {
+    return NextResponse.json(normalizeApiBody({ error: 'User not found or inactive' }), { status: 401 });
+  }
+
+  return getCart(request, { user });
+}
 export const POST = requireAuth(addToCart);
 export const DELETE = requireAuth(clearCart);
