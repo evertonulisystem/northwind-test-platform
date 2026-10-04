@@ -3,6 +3,7 @@ import { normalizeApiBody } from '@/lib/api-envelope';
 import { supabase } from '@/lib/supabase';
 import { NextResponse } from 'next/server';
 import { verifyToken, getTokenFromRequest } from '@/lib/jwt';
+import { authenticate } from '@/lib/auth';
 
 /**
  * @swagger
@@ -427,17 +428,23 @@ export async function POST(request) {
       );
     }
 
-    const payload = await verifyToken(token);
-    if (!payload || payload.error) {
-      const message = payload?.message || 'Token inválido';
+    const auth = await authenticate(request);
+    if (!auth.authenticated) {
       return NextResponse.json(
         normalizeApiBody({
           data: null,
-          mensagens: [message],
-          expires_at: payload?.expires_at || null
+          mensagens: [auth.message || auth.error || 'Token inválido'],
+          expires_at: auth.expires_at || null
         }),
         { status: 401 }
       );
+    }
+
+    if (auth.user.role !== 'admin') {
+      return NextResponse.json(normalizeApiBody({
+        data: null,
+        mensagens: ['Acesso negado. Apenas administradores podem criar produtos.']
+      }), { status: 403 });
     }
 
     let body;
