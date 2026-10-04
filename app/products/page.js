@@ -344,37 +344,41 @@ export default function ProductsPage() {
             </div>
           </div>
 
-          <div className="flex flex-wrap justify-end gap-4 mb-6">
+          <div className="flex flex-wrap justify-start gap-3 mb-6">
             <button
-              onClick={() => router.push("/cart")}
-              data-testid="view-cart-button"
-              className="bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-3 rounded-xl transition font-semibold shadow-lg flex items-center gap-2 border border-emerald-500/20"
+              onClick={() => setShowAddModal(true)}
+              data-testid="add-product-button"
+              className="bg-green-600 text-white px-4 py-2 rounded-xl hover:bg-green-700 transition font-semibold shadow-lg flex items-center gap-2"
             >
-              <ShoppingBag className="w-5 h-5" />
-              Ver Carrinho
+              <Plus className="w-5 h-5" />
+              Adicionar Produto
             </button>
 
-            {/* 🆕 NOVA FUNCIONALIDADE — Botão de Avaliações com badge "Novo" pulsante */}
             <button
-              onClick={() => router.push("/reviews")}
-              id="view-reviews-button"
-              data-testid="view-reviews-button"
-              className="relative bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white px-6 py-3 rounded-xl transition font-semibold shadow-lg flex items-center gap-2"
+              onClick={() => window.open("/suppliers", "_blank")}
+              data-testid="new-supplier-button"
+              className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-xl transition font-semibold shadow-lg flex items-center gap-2"
+              title="Cadastrar novo fornecedor"
             >
-              <Star className="w-5 h-5" />
-              Avaliações
-              {/* Badge "Novo" com animação CSS badge-pulse */}
-              <span className="badge-novo absolute -top-2 -right-2 bg-green-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full border-2 border-purple-900 leading-tight">
-                Novo
-              </span>
+              <Plus className="w-5 h-5" />
+              Novo Fornecedor
             </button>
 
-            {/* 🆕 NOVA FUNCIONALIDADE — Botão Meus Pedidos */}
+            <button
+              onClick={() => window.open("/categories", "_blank")}
+              data-testid="new-category-button"
+              className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-xl transition font-semibold shadow-lg flex items-center gap-2"
+              title="Cadastrar nova categoria"
+            >
+              <Plus className="w-5 h-5" />
+              Nova Categoria
+            </button>
+
             <button
               onClick={() => router.push("/orders")}
               id="view-orders-button"
               data-testid="view-orders-button"
-              className="relative bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white px-6 py-3 rounded-xl transition font-semibold shadow-lg flex items-center gap-2"
+              className="relative bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white px-4 py-2 rounded-xl transition font-semibold shadow-lg flex items-center gap-2"
             >
               <ClipboardList className="w-5 h-5" />
               Meus Pedidos
@@ -383,12 +387,20 @@ export default function ProductsPage() {
               </span>
             </button>
 
-            {/* 🆕 NOVA FUNCIONALIDADE — Botão Relatório de Vendas */}
+            <button
+              onClick={() => router.push("/cart")}
+              data-testid="view-cart-button"
+              className="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-xl transition font-semibold shadow-lg flex items-center gap-2 border border-emerald-500/20"
+            >
+              <ShoppingBag className="w-5 h-5" />
+              Ver Carrinho
+            </button>
+
             <button
               onClick={() => router.push("/reports")}
               id="view-reports-button"
               data-testid="view-reports-button"
-              className="relative bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-700 hover:to-purple-700 text-white px-6 py-3 rounded-xl transition font-semibold shadow-lg flex items-center gap-2"
+              className="relative bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-700 hover:to-purple-700 text-white px-4 py-2 rounded-xl transition font-semibold shadow-lg flex items-center gap-2"
             >
               <BarChart2 className="w-5 h-5" />
               Relatório
@@ -398,32 +410,17 @@ export default function ProductsPage() {
             </button>
 
             <button
-              onClick={() => setShowAddModal(true)}
-              data-testid="add-product-button"
-              className="bg-green-600 text-white px-6 py-3 rounded-xl hover:bg-green-700 transition font-semibold shadow-lg flex items-center gap-2"
+              onClick={() => router.push("/reviews")}
+              id="view-reviews-button"
+              data-testid="view-reviews-button"
+              className="relative bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white px-4 py-2 rounded-xl transition font-semibold shadow-lg flex items-center gap-2"
             >
-              <Plus className="w-5 h-5" />
-              Adicionar Produto
-            </button>
-
-            <button
-              onClick={() => window.open("/categories", "_blank")}
-              data-testid="new-category-button"
-              className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-xl transition font-semibold shadow-lg flex items-center gap-2"
-              title="Cadastrar nova categoria"
-            >
-              <Plus className="w-5 h-5" />
-              Nova Categoria
-            </button>
-
-            <button
-              onClick={() => window.open("/suppliers", "_blank")}
-              data-testid="new-supplier-button"
-              className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-xl transition font-semibold shadow-lg flex items-center gap-2"
-              title="Cadastrar novo fornecedor"
-            >
-              <Plus className="w-5 h-5" />
-              Novo Fornecedor
+              <Star className="w-5 h-5" />
+              Avaliações
+              {/* Badge "Novo" com animação CSS badge-pulse */}
+              <span className="badge-novo absolute -top-2 -right-2 bg-green-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full border-2 border-purple-900 leading-tight">
+                Novo
+              </span>
             </button>
           </div>
 
