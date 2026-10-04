@@ -178,9 +178,23 @@ export default function LoginPage() {
         </p>
 
         <div className="mt-8 p-4 bg-white/10 rounded-xl text-sm text-pink-100">
-          <p className="font-semibold">Credenciais de Teste:</p>
-          <p>Email: admin@qatest.com</p>
-          <p>Senha: Teste@123</p>
+          <h2 className="font-semibold text-white">Contas de demonstração</h2>
+          <ul className="mt-3 space-y-3">
+            {[
+              { profile: "Administrador", email: "admin@qatest.com", password: "Teste@123" },
+              { profile: "Consumidor 01", email: "usuario01@qatest.com", password: "Teste@1234" },
+              { profile: "Consumidor 02", email: "usuario02@qatest.com", password: "Teste@12345" },
+            ].map(({ profile, email, password }) => (
+              <li key={email} className="min-w-0 break-words">
+                <p className="font-semibold text-white">{profile}</p>
+                <p>Email: {email}</p>
+                <p>Senha: {password}</p>
+              </li>
+            ))}
+          </ul>
+          <p className="mt-3 border-t border-white/20 pt-3 text-xs break-words">
+            Contas públicas destinadas ao ambiente de treinamento.
+          </p>
         </div>
       </div>
     </div>
