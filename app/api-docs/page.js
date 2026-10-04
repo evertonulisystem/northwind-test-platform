@@ -8,7 +8,7 @@ export default function ApiDocsPage() {
     <div className="min-h-screen bg-white">
       <SwaggerUI 
         url="/api/v1/swagger.json"
-        persistAuthorization={true}
+        persistAuthorization={false}
         docExpansion="list"
         defaultModelsExpandDepth={1}
         displayRequestDuration={true}
