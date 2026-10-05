@@ -97,7 +97,11 @@ async function GETHandler(request) {
         total,
         totalPages,
       },
-      mensagens: ['Avaliações carregadas com sucesso.'],
+      mensagens: [data?.length > 0
+        ? 'Avaliações carregadas com sucesso.'
+        : total > 0
+          ? 'Nenhuma avaliação aprovada encontrada nesta página.'
+          : 'Nenhuma avaliação aprovada encontrada para os filtros informados.'],
     }));
 
   } catch (error) {

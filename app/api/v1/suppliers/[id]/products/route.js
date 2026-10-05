@@ -138,7 +138,9 @@ export async function GET(request, { params }) {
       },
       mensagens: products?.length > 0 
         ? [`${total} produtos encontrados para o fornecedor ${supplier.company_name}.`]
-        : [`Nenhum produto cadastrado para o fornecedor ${supplier.company_name}.`]
+        : total > 0
+          ? [`Nenhum produto encontrado nesta página para o fornecedor ${supplier.company_name}.`]
+          : [`Nenhum produto cadastrado para o fornecedor ${supplier.company_name}.`]
     }));
   } catch (error) {
     return NextResponse.json(

@@ -91,7 +91,11 @@ async function GETHandler(request) {
     return NextResponse.json(
       normalizeApiBody({
         data: formattedData, 
-        mensagens: ['Fornecedores carregados com sucesso!'] 
+        mensagens: [formattedData.length > 0
+          ? 'Fornecedores carregados com sucesso!'
+          : search
+            ? 'Nenhum fornecedor encontrado para os filtros informados.'
+            : 'Nenhum fornecedor encontrado.']
       }),
       { status: 200 }
     );

@@ -243,9 +243,11 @@ export async function GET(request, { params }) {
         total,
         totalPages
       },
-      mensagens: total > 0 
+      mensagens: productsWithImages.length > 0
         ? [`${total} produtos encontrados para a categoria ${category.name}.`]
-        : [`Nenhum produto cadastrado para a categoria ${category.name}.`]
+        : total > 0
+          ? [`Nenhum produto encontrado nesta página para a categoria ${category.name}.`]
+          : [`Nenhum produto cadastrado para a categoria ${category.name}.`]
     }));
   } catch (error) {
     return NextResponse.json(

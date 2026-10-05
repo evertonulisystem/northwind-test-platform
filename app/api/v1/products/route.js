@@ -299,7 +299,11 @@ async function GETHandler(request) {
         total: count || 0,
         totalPages: Math.ceil((count || 0) / limit),
       },
-      mensagens: ['Produtos carregados com sucesso.'],
+      mensagens: [data?.length > 0
+        ? 'Produtos carregados com sucesso.'
+        : count > 0
+          ? 'Nenhum produto encontrado nesta página.'
+          : 'Nenhum produto encontrado.'],
     }));
 
   } catch (error) {

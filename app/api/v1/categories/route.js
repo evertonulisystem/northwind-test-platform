@@ -201,7 +201,11 @@ async function GETHandler(request) {
           hasNextPage: hasNextPage,
           hasPreviousPage: hasPreviousPage
         },
-        mensagens: [`${data?.length || 0} categorias carregadas com sucesso! (Página ${page} de ${totalPages})`]
+        mensagens: [data?.length > 0
+          ? `${data.length} categorias carregadas com sucesso! (Página ${page} de ${totalPages})`
+          : count > 0
+            ? 'Nenhuma categoria encontrada nesta página.'
+            : 'Nenhuma categoria encontrada.']
       }),
       { status: 200 }
     );
