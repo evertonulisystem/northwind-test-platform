@@ -109,7 +109,7 @@ async function GETHandler(request, { params }) {
       mensagens: [
         totalReviews > 0
           ? `${totalReviews} avaliação(ões) encontrada(s).`
-          : 'Este produto ainda não possui avaliações.',
+          : 'Nenhuma avaliação aprovada encontrada para este produto.',
       ],
     }));
 

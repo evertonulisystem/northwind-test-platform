@@ -52,7 +52,9 @@ async function getCart(request, { user }) {
     
     if (!data || data.length === 0) {
       return NextResponse.json(
-        normalizeApiBody({ data: [], mensagens: ['Seu carrinho está vazio.'] }),
+        normalizeApiBody({ data: [], mensagens: [user.role === 'admin' && requestedUserId !== null && requestedUserId !== String(user.id)
+          ? 'O carrinho do usuário consultado está vazio.'
+          : 'Seu carrinho está vazio.'] }),
         { status: 404 }
       );
     }

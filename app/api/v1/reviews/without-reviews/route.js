@@ -100,7 +100,7 @@ async function GETHandler(request) {
       mensagens: [
         data?.length > 0
           ? `${data.length} produto(s) com vendas aguardando avaliação.`
-          : 'Todos os produtos vendidos já foram avaliados!',
+          : 'Nenhum produto vendido sem avaliações foi encontrado.',
       ],
     }));
 

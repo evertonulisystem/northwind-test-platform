@@ -53,7 +53,9 @@ async function getShippers(request) {
 
     return NextResponse.json(normalizeApiBody({
       data: data || [],
-      mensagens: ['Transportadoras carregadas com sucesso.']
+      mensagens: [data?.length > 0
+        ? 'Transportadoras carregadas com sucesso.'
+        : 'Nenhuma transportadora encontrada.']
     }));
   } catch (error) {
     console.error('Erro ao buscar transportadoras:', error);

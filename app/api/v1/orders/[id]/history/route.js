@@ -90,7 +90,9 @@ async function getOrderHistory(request, { params, user }) {
         // A timeline é o histórico completo de mudanças de status
         timeline: history || [],
       },
-      mensagens: ["Histórico do pedido carregado com sucesso."],
+      mensagens: [history?.length > 0
+        ? "Histórico do pedido carregado com sucesso."
+        : "Nenhum registro de histórico encontrado para este pedido."],
     }));
   } catch (error) {
     console.error("Erro ao buscar histórico do pedido:", error);

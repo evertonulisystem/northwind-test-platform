@@ -201,9 +201,13 @@ async function getOrders(request, { user }) {
 
     if (!data || data.length === 0) {
       const noFilterMessage =
-        hasFrom || hasTo || status
-          ? "Nenhum pedido encontrado para os filtros aplicados."
-          : "Você ainda não possui pedidos.";
+        count > 0
+          ? "Nenhum pedido encontrado nesta página."
+          : hasFrom || hasTo || status || shipper || minTotalRaw || maxTotalRaw
+            ? "Nenhum pedido encontrado para os filtros aplicados."
+            : user.role === "admin"
+              ? "Nenhum pedido encontrado."
+              : "Você ainda não possui pedidos.";
 
       return NextResponse.json(
         normalizeApiBody({
