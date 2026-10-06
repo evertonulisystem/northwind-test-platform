@@ -43,8 +43,7 @@ export async function GET() {
           response_time_ms: dbResponseTime
         },
         auth: {
-          status: jwtConfigured ? 'operational' : 'misconfigured',
-          jwt_secret: jwtConfigured ? 'configured' : 'missing'
+          status: jwtConfigured ? 'operational' : 'misconfigured'
         }
       },
       
@@ -59,7 +58,6 @@ export async function GET() {
         sample_data: {
           test_user: {
             email: 'admin@qatest.com',
-            password: 'Teste@123',
             role: 'admin'
           },
           test_endpoints: [
