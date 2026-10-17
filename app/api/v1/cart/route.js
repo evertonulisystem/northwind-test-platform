@@ -232,7 +232,7 @@ async function clearCart(request, { user }) {
 export async function GET(request) {
   const token = getTokenFromRequest(request);
   if (!token) {
-    return NextResponse.json(normalizeApiBody({ error: 'No token provided' }), { status: 401 });
+    return NextResponse.json(normalizeApiBody({ error: 'Token ausente' }), { status: 401 });
   }
 
   const payload = await verifyToken(token);
