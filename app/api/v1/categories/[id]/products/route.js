@@ -81,8 +81,8 @@ export const dynamic = "force-dynamic";
  *           application/json:
  *             example:
  *               data: null
- *               mensagens: ["ID da categoria inválido. Deve ser um número positivo."]
- *       401:
+ *               mensagens: ["ID da categoria inválido. Deve ser um número maior que 0."]
+ *       401:ID da categoria inválido. Deve ser um número maior que 0.
  *         description: Token ausente ou inválido
  *         content:
  *           application/json:
@@ -148,7 +148,7 @@ export async function GET(request, { params }) {
       return NextResponse.json(
         normalizeApiBody({
           data: null, 
-          mensagens: ['ID da categoria inválido. Deve ser um número positivo.'] 
+          mensagens: ['ID da categoria inválido. Deve ser um número maior que 0.'] 
         }),
         { status: 400 }
       );

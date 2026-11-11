@@ -54,7 +54,7 @@ function generateSlug(name) {
  *           application/json:
  *             example:
  *               data: null
- *               mensagens: ["ID da categoria inválido. Deve ser um número positivo."]
+ *               mensagens: ["ID da categoria inválido. Deve ser um número maior que 0."]
  *       401:
  *         description: Token ausente ou inválido
  *         content:
@@ -121,7 +121,7 @@ export async function GET(request, { params }) {
       return NextResponse.json(
         normalizeApiBody({
           data: null, 
-          mensagens: ['ID da categoria inválido. Deve ser um número positivo.'] 
+          mensagens: ['ID da categoria inválido. Deve ser um número maior que 0.'] 
         }),
         { status: 400 }
       );
@@ -208,7 +208,7 @@ export async function GET_products(request, { params }) {
       return NextResponse.json(
         normalizeApiBody({
           data: null, 
-          mensagens: ['ID da categoria inválido. Deve ser um número positivo.'] 
+          mensagens: ['ID da categoria inválido. Deve ser um número maior que 0.'] 
         }),
         { status: 400 }
       );
@@ -322,7 +322,7 @@ export async function GET_products(request, { params }) {
  *                 summary: ID não é um número inteiro positivo
  *                 value:
  *                   data: null
- *                   mensagens: ["ID da categoria inválido. Deve ser um número positivo."]
+ *                   mensagens: ["ID da categoria inválido. Deve ser um número maior que 0."]
  *               JsonInvalido:
  *                 summary: Corpo da requisição não é um JSON válido
  *                 value:
@@ -431,7 +431,7 @@ export async function PUT(request, { params }) {
       return NextResponse.json(
         normalizeApiBody({
           data: null, 
-          mensagens: ['ID da categoria inválido. Deve ser um número positivo.'] 
+          mensagens: ['ID da categoria inválido. Deve ser um número maior que 0.'] 
         }),
         { status: 400 }
       );
@@ -631,7 +631,7 @@ export async function PUT(request, { params }) {
  *                 summary: ID não é um número inteiro positivo
  *                 value:
  *                   data: null
- *                   mensagens: ["ID da categoria inválido. Deve ser um número positivo."]
+ *                   mensagens: ["ID da categoria inválido. Deve ser um número maior que 0."]
  *               EmUso:
  *                 summary: Categoria vinculada a produtos (não pode excluir)
  *                 value:
@@ -726,7 +726,7 @@ export async function PUT(request, { params }) {
  *                 summary: ID não é um número inteiro positivo
  *                 value:
  *                   data: null
- *                   mensagens: ["ID da categoria inválido. Deve ser um número positivo."]
+ *                   mensagens: ["ID da categoria inválido. Deve ser um número maior que 0."]
  *               JsonInvalido:
  *                 summary: Corpo da requisição não é um JSON válido
  *                 value:
@@ -835,7 +835,7 @@ export async function PATCH(request, { params }) {
       return NextResponse.json(
         normalizeApiBody({
           data: null, 
-          mensagens: ['ID da categoria inválido. Deve ser um número positivo.'] 
+          mensagens: ['ID da categoria inválido. Deve ser um número maior que 0.'] 
         }),
         { status: 400 }
       );
@@ -1044,7 +1044,7 @@ export async function DELETE(request, { params }) {
       return NextResponse.json(
         normalizeApiBody({
           data: null, 
-          mensagens: ['ID da categoria inválido. Deve ser um número positivo.'] 
+          mensagens: ['ID da categoria inválido. Deve ser um número maior que 0.'] 
         }),
         { status: 400 }
       );

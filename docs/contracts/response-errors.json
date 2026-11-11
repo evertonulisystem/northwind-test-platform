@@ -415,7 +415,7 @@
         "example": {
           "data": null,
           "mensagens": [
-            "ID da categoria inválido. Deve ser um número positivo."
+            "ID da categoria inválido. Deve ser um número maior que 0."
           ]
         },
         "source": "app/api/v1/categories/[id]/products/route.js:147"
@@ -457,7 +457,7 @@
         "example": {
           "data": null,
           "mensagens": [
-            "ID da categoria inválido. Deve ser um número positivo."
+            "ID da categoria inválido. Deve ser um número maior que 0."
           ]
         },
         "source": "app/api/v1/categories/[id]/route.js:120"
