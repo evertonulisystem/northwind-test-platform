@@ -85,6 +85,7 @@ export default function SuppliersPage() {
       }
 
       const url = new URL("/api/v1/suppliers", window.location.origin);
+      url.searchParams.set("include_product_count", "true");
       if (search) {
         url.searchParams.set("search", search);
       }
@@ -489,12 +490,14 @@ export default function SuppliersPage() {
                           Editar
                         </button>
                         <button data-testid={`unlink-supplier-${supplier.id}`}
+                          disabled={!(supplier.product_count > 0)}
                           onClick={() => {
+                            if (!(supplier.product_count > 0)) return;
                             setUnlinkingSupplier(supplier);
                             setShowUnlinkModal(true);
                           }}
-                          className="border border-slate-600 text-amber-200 hover:bg-amber-500/10 px-3 py-2 rounded-lg transition flex items-center justify-center gap-2 text-xs font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-300"
-                          title="Desvincular produtos deste fornecedor"
+                          className="border border-slate-600 text-amber-200 enabled:hover:bg-amber-500/10 px-3 py-2 rounded-lg transition flex items-center justify-center gap-2 text-xs font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-300 disabled:cursor-not-allowed disabled:opacity-40"
+                          title={supplier.product_count > 0 ? "Desvincular produtos deste fornecedor" : "Este fornecedor n\u00e3o possui produtos vinculados"}
                         >
                           <Unlink className="w-4 h-4" />
                           Desvincular

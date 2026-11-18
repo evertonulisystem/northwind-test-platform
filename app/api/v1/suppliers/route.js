@@ -19,6 +19,10 @@ import { verifyToken, getTokenFromRequest } from '@/lib/jwt';
  *         name: search
  *         schema: { type: string }
  *         description: Busca por razão social, nome do contato ou e-mail
+ *       - in: query
+ *         name: include_product_count
+ *         schema: { type: boolean, default: false }
+ *         description: Inclui product_count com o total de produtos vinculados a cada fornecedor.
  *     responses:
  *       200:
  *         description: Lista de fornecedores
@@ -54,10 +58,11 @@ async function GETHandler(request) {
 
     const { searchParams } = new URL(request.url);
     const search = searchParams.get('search')?.trim();
+    const includeProductCount = searchParams.get('include_product_count') === 'true';
 
     let query = supabase
       .from('suppliers')
-      .select('*')
+      .select(includeProductCount ? '*, products(count)' : '*')
       .order('company_name', { ascending: true });
 
     // Adicionar busca se o parâmetro for fornecido
@@ -85,6 +90,10 @@ async function GETHandler(request) {
       uf: supplier.state
     })).map(supplier => {
       delete supplier.state;
+      if (includeProductCount) {
+        supplier.product_count = supplier.products?.[0]?.count ?? 0;
+        delete supplier.products;
+      }
       return supplier;
     });
 
