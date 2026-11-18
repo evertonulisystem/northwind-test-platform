@@ -2,6 +2,7 @@
 import usePermissions from "@/components/usePermissions";
 
 import ToastMessage from "@/components/ToastMessage";
+import { fetchAllCategories } from "@/lib/fetch-categories";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
@@ -50,20 +51,9 @@ export default function CategoriesPage() {
         headers["Authorization"] = `Bearer ${token}`;
       }
 
-      const res = await fetch("/api/v1/categories?limit=1000", {
-        headers,
-        cache: "no-store",
-      });
-      const result = await res.json();
-
-      if (!res.ok) {
-        toast.error(<ToastMessage testId="categories-fetch-categories-error-toast">{result.mensagens?.[0] || "Erro ao carregar categorias"}</ToastMessage>);
-        return;
-      }
-
-      setCategories(result.data || []);
+      setCategories(await fetchAllCategories(headers));
     } catch (error) {
-      toast.error(<ToastMessage testId="categories-fetch-categories-error-toast-2">{"Erro de conexão"}</ToastMessage>);
+      toast.error(<ToastMessage testId="categories-fetch-categories-error-toast-2">{error.message || "Erro de conexão"}</ToastMessage>);
     } finally {
       setLoading(false);
     }

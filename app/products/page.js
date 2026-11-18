@@ -1,6 +1,7 @@
 "use client";
 
 import ToastMessage from "@/components/ToastMessage";
+import { fetchAllCategories } from "@/lib/fetch-categories";
 import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
@@ -105,15 +106,11 @@ export default function ProductsPage() {
         headers["Authorization"] = `Bearer ${token}`;
       }
 
-      const res = await fetch("/api/v1/categories?limit=1000", {
-        headers,
-        cache: "no-store",
-      });
-      const result = await res.json();
-      setCategories(result.data || []);
+      const data = await fetchAllCategories(headers);
+      setCategories(data);
       console.log(
         "🐛 DEBUG CATEGORIES - Carregadas:",
-        result.data?.length || 0,
+        data.length,
       );
     } catch (error) {
       console.error("🐛 DEBUG CATEGORIES - Erro:", error);
