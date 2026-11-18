@@ -414,12 +414,12 @@ export default function SuppliersPage() {
           <div className="mb-8 flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <div className="mb-3 flex items-center gap-2 text-xs text-blue-200/70"><Building2 className="h-4 w-4" aria-hidden="true" /> Northwind / Fornecedores</div>
-              <h1 className="text-3xl font-semibold tracking-tight text-white sm:text-4xl">Gest?o de Fornecedores</h1>
-              <p className="mt-2 text-sm text-slate-400">Cadastro e administra??o de fornecedores</p>
+              <h1 className="text-3xl font-semibold tracking-tight text-white sm:text-4xl">Gestão de Fornecedores</h1>
+              <p className="mt-2 text-sm text-slate-400">Cadastro e administração de fornecedores</p>
             </div>
             <div className="flex flex-wrap gap-3">
               <button data-testid="suppliers-back-to-products-btn" onClick={() => window.open("/products", "_blank")} className="flex items-center justify-center gap-2 rounded-lg border border-slate-600 px-4 py-3 text-sm text-slate-200 transition hover:bg-slate-800"><Building2 className="h-4 w-4" /> Voltar para Produtos</button>
-              <button disabled={!isAdmin} title={!isAdmin ? "Dispon?vel apenas para administradores" : undefined} data-testid="new-supplier-btn" onClick={() => setShowAddModal(true)} className="flex items-center justify-center gap-2 rounded-lg border border-blue-400/40 bg-blue-600 px-4 py-3 text-sm font-semibold text-white transition hover:bg-blue-500 disabled:cursor-not-allowed disabled:opacity-50"><Plus className="h-4 w-4" /> Novo Fornecedor</button>
+              <button disabled={!isAdmin} title={!isAdmin ? "Disponível apenas para administradores" : undefined} data-testid="new-supplier-btn" onClick={() => setShowAddModal(true)} className="flex items-center justify-center gap-2 rounded-lg border border-blue-400/40 bg-blue-600 px-4 py-3 text-sm font-semibold text-white transition hover:bg-blue-500 disabled:cursor-not-allowed disabled:opacity-50"><Plus className="h-4 w-4" /> Novo Fornecedor</button>
             </div>
           </div>
           <div className="mb-6 flex flex-wrap items-center gap-6 text-sm text-slate-400" aria-label="Resumo dos fornecedores carregados">
@@ -432,7 +432,7 @@ export default function SuppliersPage() {
                 <Search aria-hidden="true" className="absolute left-3 top-3 w-4 h-4 text-slate-400" />
                 <input type="text" aria-label="Buscar fornecedores" value={searchTerm} onChange={(e) => { setSearchTerm(e.target.value); setCurrentPage(1); }} placeholder="Buscar fornecedores..." className="w-full rounded-lg border border-slate-600 bg-slate-950/50 py-2.5 pl-10 pr-4 text-sm text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-400" />
               </div>
-              <span className="text-xs text-slate-400">Dados e a??es sempre vis?veis</span>
+              <span className="text-xs text-slate-400">Dados e ações sempre visíveis</span>
             </div>
             {loading ? (
               <div className="py-12 text-center text-slate-400" role="status"><div className="mx-auto mb-4 h-10 w-10 animate-spin rounded-full border-b-2 border-blue-400" /><p>Carregando fornecedores...</p></div>
@@ -440,7 +440,7 @@ export default function SuppliersPage() {
               <div className="py-12 text-center text-slate-400">
                 <Building2 className="mx-auto mb-4 h-12 w-12 opacity-50" />
                 <p className="mb-4 text-lg">{searchTerm ? "Nenhum fornecedor encontrado" : "Nenhum fornecedor cadastrado"}</p>
-                {!searchTerm && <button disabled={!isAdmin} title={!isAdmin ? "Dispon?vel apenas para administradores" : undefined} data-testid="create-first-supplier-btn" onClick={() => setShowAddModal(true)} className="rounded-lg bg-blue-600 px-6 py-2 text-white transition hover:bg-blue-500 disabled:cursor-not-allowed disabled:opacity-50">Cadastrar primeiro fornecedor</button>}
+                {!searchTerm && <button disabled={!isAdmin} title={!isAdmin ? "Disponível apenas para administradores" : undefined} data-testid="create-first-supplier-btn" onClick={() => setShowAddModal(true)} className="rounded-lg bg-blue-600 px-6 py-2 text-white transition hover:bg-blue-500 disabled:cursor-not-allowed disabled:opacity-50">Cadastrar primeiro fornecedor</button>}
               </div>
             ) : (
               <>
@@ -512,12 +512,12 @@ export default function SuppliersPage() {
                     </article>
                   ))}
                 </div>
-                <nav aria-label="Pagina??o de fornecedores" className="flex flex-col items-center justify-between gap-4 border-t border-slate-700/80 p-5 sm:flex-row">
-                  <p className="text-xs text-slate-400" aria-live="polite">Mostrando <strong className="text-slate-200">{(currentPage - 1) * ITEMS_PER_PAGE + 1}?{Math.min(currentPage * ITEMS_PER_PAGE, suppliers.length)}</strong> de <strong className="text-slate-200">{suppliers.length}</strong> fornecedores</p>
+                <nav aria-label="Paginação de fornecedores" className="flex flex-col items-center justify-between gap-4 border-t border-slate-700/80 p-5 sm:flex-row">
+                  <p className="text-xs text-slate-400" aria-live="polite">Mostrando <strong className="text-slate-200">{(currentPage - 1) * ITEMS_PER_PAGE + 1}–{Math.min(currentPage * ITEMS_PER_PAGE, suppliers.length)}</strong> de <strong className="text-slate-200">{suppliers.length}</strong> fornecedores</p>
                   <div className="flex flex-wrap items-center justify-center gap-3 text-sm">
                     <button data-testid="suppliers-previous-page-btn" onClick={() => setCurrentPage((p) => Math.max(1, p - 1))} disabled={currentPage === 1} className="rounded-lg border border-slate-600 px-3 py-2 text-white transition hover:bg-slate-700 disabled:cursor-not-allowed disabled:opacity-40">Anterior</button>
-                    <span className="text-slate-400">P?gina <strong className="text-white">{currentPage}</strong> de <strong className="text-white">{totalPages}</strong></span>
-                    <button data-testid="suppliers-next-page-btn" onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))} disabled={currentPage === totalPages} className="rounded-lg border border-slate-600 px-3 py-2 text-white transition hover:bg-slate-700 disabled:cursor-not-allowed disabled:opacity-40">Pr?xima</button>
+                    <span className="text-slate-400">Página <strong className="text-white">{currentPage}</strong> de <strong className="text-white">{totalPages}</strong></span>
+                    <button data-testid="suppliers-next-page-btn" onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))} disabled={currentPage === totalPages} className="rounded-lg border border-slate-600 px-3 py-2 text-white transition hover:bg-slate-700 disabled:cursor-not-allowed disabled:opacity-40">Próxima</button>
                   </div>
                 </nav>
               </>
