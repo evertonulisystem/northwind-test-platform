@@ -29,7 +29,6 @@ export const dynamic = "force-dynamic";
  *         schema:
  *           type: integer
  *           minimum: 1
- *           maximum: 100
  *           default: 10
  *         description: "Quantidade de itens por página (padrão: 10, máximo: 100)"
  *     responses:
@@ -76,12 +75,7 @@ export const dynamic = "force-dynamic";
  *                 summary: Limite menor que 1
  *                 value:
  *                   data: null
- *                   mensagens: ["Limite deve estar entre 1 e 1000."]
- *               LimiteExcedido:
- *                 summary: Limite maior que 100
- *                 value:
- *                   data: null
- *                   mensagens: ["O parâmetro limit não pode ser maior que 100."]
+ *                   mensagens: ["Limite deve ser maior que 0."]
  *       401:
  *         description: Token ausente ou inválido
  *         content:
@@ -143,16 +137,9 @@ async function GETHandler(request) {
       );
     }
     
-    if (limit > 100) {
+    if (!Number.isFinite(limit) || limit < 1) {
       return NextResponse.json(
-        normalizeApiBody({ data: null, mensagens: ['O parâmetro limit não pode ser maior que 100.'] }),
-        { status: 400 }
-      );
-    }
-
-    if (limit < 1) {
-      return NextResponse.json(
-        normalizeApiBody({ data: null, mensagens: ['Limite deve estar entre 1 e 1000.'] }),
+        normalizeApiBody({ data: null, mensagens: ['Limite deve ser maior que 0.'] }),
         { status: 400 }
       );
     }
